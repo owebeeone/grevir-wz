@@ -1,10 +1,85 @@
 # Grevir extraction progress
 
-Latest checkpoint: 21 September 2026. The multi-repository migration now includes
-Base, Time and the first Core extraction. The remaining repository plan is not yet
-implemented. All three members remain local, without published remotes. The
-workspace and extracted libraries were committed as the initial development
-baseline on 21 September 2026; subsequent changes are recorded below.
+Latest checkpoint: 21 September 2026. Five local members now exist: Base, Time,
+Core, the first Peripherals increment and development-only Test Support. The rest
+of the repository plan remains unimplemented. The initial three-library baseline
+was committed on 21 September. This checkpoint includes portable GPIO/timing,
+foundation host tests and the resource-claim and time-unit corrections. Hardware
+validation stays on hold.
+
+## Portable GPIO/timing and foundation tests — 21 September 2026
+
+The first `grevir-peripherals` increment extracts pin interfaces, input pins,
+output/open-drain/external pins, and `TimePoller` with cyclic/finite time sequences.
+Pins now take an explicit GPIO backend and logical mode enums. Pollers take an
+explicit clock exposing `TimeType` and `now()`; `Sequence` takes an explicit tick
+type. Class names/namespaces and original polling behavior remain: strict `>`
+expiry, one-step catch-up, `init()` preserving state and `reset()` clearing it.
+Callers must supply the new bindings; no MCU/Arduino adapter has been introduced.
+Pin resource identity remains the logical pin number, independent of backend type.
+
+All seven retained Base/Time test files now build under Catch2. The buffer harness
+now honors requested operation counts and actually selects both buffer variants;
+integer-width checks explicitly instantiate the original boundaries. Five Base
+files contribute four runtime cases and static type-algorithm assertions. Two Time
+files contribute three runtime cases, including unsigned wraparound. The earlier
+PICOS/NANOS enum correction is included in this build; no dedicated regression was
+added for it. The inherited `Period::operator/` multiplication defect was observed
+while reading the time implementation and recorded in Time's README; it remains
+outside this extraction and outside the retained test coverage.
+
+`grevir-test-support` now owns shared Catch2 setup, supporting installed 3.8.1,
+local source and explicit SHA-256-pinned fetching. Test fixtures stay with their
+owning libraries; the legacy test-support source mappings remain planned. Normal
+production builds/exports do not depend on Catch2 or Test Support. Both new members
+were registered through GWZ, without manually editing workspace configuration.
+
+Evidence on Apple Clang 21 / arm64 macOS / C++23:
+
+- 27 CTest cases pass: Base 4, Time 3, Core 10 and Peripherals 10. The new peripheral
+  cases execute actual wrappers and pollers with recorded GPIO operations and a
+  controlled clock, including both open-drain variants, wraparound, cyclic/finite
+  sequences, reset/catch-up and a composed blinking application.
+- Six peripheral public headers compile independently. Production input/output
+  wrappers accept separate pins and reject the same pin with Core's expected
+  resource-conflict diagnostic. Core's 6 valid / 19 invalid application probes and
+  2 valid / 3 invalid parameter-index probes still pass.
+- Separate source copies of all four production libraries build and install using
+  only installed dependencies, before provision of test dependencies. An installed
+  peripheral consumer links and runs without Catch2.
+- All four standalone host suites pass offline with installed Test Support/Catch2.
+  The workspace also passes with installed Catch2, in addition to local-source
+  setup. Package results/logs are under ignored `build/portable-packages/`.
+- A Clang raw-token scope check inspects the extracted C++ files, including disabled
+  branches. Original source inventory hashes remain unchanged; extraction hashes
+  and per-file validation notes are updated in the SQLite ledger.
+
+This validates software GPIO calls and timer logic, not electrical behavior,
+register side effects, interrupts or target toolchains. Debounce/button logic,
+the separate sequencer, PWM, timer selection and MCU bindings remain later work.
+
+## Internal resource-claim validation — 21 September 2026
+
+Gianni selected this policy: repeated exclusive resources and conflicting ranges
+are errors, including within one module's own claim list. Compatible explicit
+shared-use claims remain allowed. `SelfModuleParamsConflictTest<Param>` now runs
+`SelfParamsConflictTest` on the parameter's resources instead of returning false
+unconditionally. This closes the lone-parameter gap without changing conflict
+predicates or dependency-module deduplication.
+
+The new duplicate-resource regression compiled before the fix and now fails with
+the intended diagnostic. Six positive application probes pass and nineteen
+negative probes fail as intended. New cases cover lone-parameter duplicate pins,
+overlapping/contained/identical ranges, whole-resource versus range in both orders,
+incompatible shared settings, nonadjacent duplicate entries and a conflict in a
+dependency module. Positive controls retain compatible sharing, adjacent ranges,
+different resource types/IDs and empty claim lists. The prior unrelated-parameter
+case still fails with the same internal-conflict diagnostic.
+
+The workspace build, parameter indexing probes and all ten Core mock runtime tests
+pass on Apple Clang 21. Original Ardoinus sources remain unchanged. Next: adapt the
+retained Base/Time tests, then extend portable peripheral mock coverage. Hardware
+validation remains on hold.
 
 ## Parameter indexing fix — 21 September 2026
 
@@ -21,8 +96,8 @@ diagnostic. The workspace build, existing application probes and all ten Core
 runtime mock tests still pass on Apple Clang 21. Original Ardoinus sources remain
 unchanged; the Core module destination hash is updated in the ledger.
 
-The lone-parameter duplicate-claim gap remains the next Core correctness fix.
-Hardware validation stays on hold.
+At this checkpoint the lone-parameter duplicate-claim gap was next; the subsequent
+policy decision and fix are recorded above. Hardware validation stays on hold.
 
 ## Core mock validation — 20 September 2026
 

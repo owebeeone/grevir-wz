@@ -4,10 +4,13 @@ Grevir evolves Ardoinus into independently usable embedded C++ libraries.
 GWZ manages the member checkouts; CMake compiles the libraries currently extracted.
 
 The extracted members are [grevir-base](grevir-base/README.md),
-[grevir-time](grevir-time/README.md) and [grevir-core](grevir-core/README.md).
+[grevir-time](grevir-time/README.md), [grevir-core](grevir-core/README.md) and the first
+[grevir-peripherals](grevir-peripherals/README.md) increment.
+[grevir-test-support](grevir-test-support/README.md) supplies shared host-test setup.
 Their root `library.properties` and `src/`
 directories follow Arduino library layout. Target compiler and Arduino sketch
-validation are still pending. Existing `setl` and `ardo` API names are retained.
+validation are still pending. Existing `setl` and `ardo` names remain; extracted pin/poller templates now take
+explicit GPIO backend and clock bindings.
 
 ## Native compile check
 
@@ -26,17 +29,21 @@ installation, target compiler, downloaded dependency or simulator is needed.
 The Makefiles generator uses the tools already installed here; Ninja can also
 execute this CMake build when available.
 
-Core also runs compiler-only checks for two valid applications and ten expected
-failures (eight resource-conflict cases and two dependency cycles). Its
+Core also runs compiler-only checks for six valid applications and nineteen expected
+failures (seventeen resource-conflict cases and two dependency cycles), plus
+parameter-index selection and bounds checks. Its
 installed-package consumer builds and executes independently. Known inherited
 Core defects are recorded in its README. Hardware validation is on hold.
 
 ## Host mock validation
 
-Core has ten Catch2/CTest behavioral tests covering callback phases, dependency
-ordering, deduplication, persistent/independent state, cross-file singleton identity
-and deterministic fixture reset. These run production Core code with mock modules;
-GPIO, virtual-time, interrupt and MCU backend fixtures remain future work.
+The opt-in Catch2/CTest suite has 27 passing cases: four Base, three Time, ten Core
+and ten Peripherals. All seven retained Base/Time test files now compile; the
+type-algorithm file supplies static assertions rather than a runtime case. Core
+covers application lifecycle/state. Peripheral mocks record input/output and
+open-drain operations and control time for expiry, catch-up, wraparound, sequences
+and a blinking application. These execute production code. Interrupts, MCU registers
+and electrical behavior remain outside the current mock coverage.
 
 Explicit first-time setup can download the pinned Catch2 3.8.1 source archive:
 
@@ -45,7 +52,7 @@ cmake -S . -B build/host-mock -G "Unix Makefiles" \
   -DGREVIR_BUILD_HOST_TESTS=ON -DGREVIR_FETCH_TEST_DEPENDENCIES=ON \
   -DCMAKE_BUILD_TYPE=Debug
 cmake --build build/host-mock
-ctest --test-dir build/host-mock --output-on-failure -L mock
+ctest --test-dir build/host-mock --output-on-failure
 ```
 
 Tests do not download dependencies. For offline setup, use an installed Catch2

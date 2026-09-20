@@ -29,3 +29,19 @@ members:
   desired:
     local_only: true
   remotes: []
+- id: mem_grevir_test_support
+  path: grevir-test-support
+  type: git
+  source_id: src_grevir_test_support
+  active: true
+  desired:
+    local_only: true
+  remotes: []
+- id: mem_grevir_peripherals
+  path: grevir-peripherals
+  type: git
+  source_id: src_grevir_peripherals
+  active: true
+  desired:
+    local_only: true
+  remotes: []
