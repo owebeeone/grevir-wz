@@ -1,18 +1,22 @@
 # Grevir build and test framework
 
 Selected 18 September 2026; updated 21 September for the foundation test migration
-and portable GPIO/timing, buttons, PWM, storage and timer requirements. **Hardware validation is on hold.**
+and portable GPIO/timing, buttons, PWM, storage, timer requirements and register access. **Hardware validation is on hold.**
 
 Implemented: opt-in CMake/CTest host tests with pinned Catch2 3.8.1 and shared
-setup in Grevir Test Support. Forty-seven cases pass: Base 4, Time 4, Core 10,
-Peripherals 29. All seven retained Base/Time files build (including static-only
+setup in Grevir Test Support. Sixty-five cases pass: Base 4, Time 4, Core 10,
+Peripherals 29, Registers 18. All seven retained Base/Time files build (including static-only
 type algorithms); their old test framework dependency is removed. GPIO fixtures
 record logical pin operations, and a controlled clock exercises production pollers,
 a blinking application and debounced button events. Period-division and inherited
 debounce/setup defects have reproduced failures and now pass. The fixtures do not
 model electrical or MCU behavior. Five PWM cases validate scaling and pin lifecycle;
 two reproduced an input-narrowing bug, now fixed. Five storage cases validate
-byte representation, offsets, updates and region isolation.
+byte representation, offsets, updates and region isolation. Eighteen register cases
+validate sparse mappings, typed reads/writes, selection, grouped operations and
+explicit barrier scopes against a byte array.
+They reproduce and fix unnecessary full-width reads and writes outside a mask;
+MCU side effects and interrupts remain unmodeled.
 
 Core compiler probes cover six valid applications, seventeen expected resource
 failures, two dependency cycles and parameter-index selection/bounds. Peripheral
@@ -20,21 +24,24 @@ probes accept distinct pins and reject conflicts for raw and debounced inputs.
 PWM adds two valid compositions and six expected pin/timer/range conflicts.
 Storage adds three valid and eight invalid region/type/claim probes; timer
 requirements add twelve static assertions and two valid/twelve invalid backend
-configuration probes. Native packages
+configuration probes. Registers add six accepted and fifteen rejected field/access/selection/applier
+probes plus relocated mapping assertions. Native packages
 and host suites work in isolated checkouts with installed dependencies; an installed
-peripheral consumer builds and runs without Catch2. See
+peripheral consumer and a register consumer build and run without Catch2. See
 [extraction progress](GrevirExtractionProgress.md).
 
 The installed Make executor runs these builds; Ninja remains the selected
-alternative when available. Shared presets, CI, register
-and interrupt fixtures, MCU adapters and hardware validation remain future work.
+alternative when available. Shared presets, CI, shared register/interrupt fixtures,
+MCU adapters and hardware validation remain future work. The current register
+memory fixture is package-local.
 
 ## Selected stack
 
 Use **CMake + Ninja + CTest**, with **Catch2 for host test assertions/reporting** and
 Grevir's own hardware fixtures as those tests become necessary. Core now has a
 behavioral mock fixture; GPIO/clock fixtures now accompany the first peripheral
-increment. Register/interrupt fixtures remain planned.
+increment. Registers now has a local byte-array access fixture; shared register
+fixtures and interrupt models remain planned.
 
 Gianni accepted this recommendation on 18 September 2026. CMake, Ninja, CTest,
 host-only Catch2 and the Grevir fixture approach are selected for the eventual

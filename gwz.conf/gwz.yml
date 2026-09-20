@@ -45,3 +45,11 @@ members:
   desired:
     local_only: true
   remotes: []
+- id: mem_grevir_registers
+  path: grevir-registers
+  type: git
+  source_id: src_grevir_registers
+  active: true
+  desired:
+    local_only: true
+  remotes: []

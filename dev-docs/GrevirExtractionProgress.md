@@ -1,12 +1,112 @@
 # Grevir extraction progress
 
-Latest checkpoint: 21 September 2026. Five local members now exist: Base, Time,
-Core, the first Peripherals increment and development-only Test Support. The rest
-of the repository plan remains unimplemented. The initial three-library baseline
-was committed on 21 September, followed by the portable GPIO/timing checkpoint
-(`569b1b7`), division/debounce/button fixes (`e5bd777`) and PWM/sequencer checkpoint
-(`dedfa39`). The latest increment extracts storage and portable timer
-requirements. Hardware validation stays on hold.
+Latest checkpoint: 21 September 2026. Six local members now exist: Base, Time,
+Core, Peripherals, Registers and development-only Test Support. The initial
+three-library baseline was followed by portable GPIO/timing (`569b1b7`),
+division/debounce/buttons (`e5bd777`), PWM/sequencer (`dedfa39`) and storage/timer
+requirements (`bfaf111`). This checkpoint includes the register fields/access and selection/application increments.
+Hardware validation stays on hold.
+
+## Register selection and multi-register operations — 21 September 2026
+
+The next two planned register groups are now extracted: `selection.hpp` (282 lines)
+and `apply.hpp` (348 lines). They retain the original `setl` APIs and Base-only
+production dependency. `ApplierRunner::applySync<Operations, MemoryBarrier>()`
+requires an explicit RAII barrier type, replacing the implicit `System` policy.
+The mock checks scope entry/exit; no real synchronization guarantee is claimed.
+
+Native checks reproduced and fixed two defects: `FindRegisterForField` returned a
+helper type when the match followed the first entry (and for a missing field in a
+nonempty list); grouped constant writes performed an unnecessary full-register
+read because of integer promotion. The lookup now returns the recursive result's
+actual type, and the full-mask comparison uses the register's width. Empty
+selectors now expose their register tuple and support empty no-op reads/writes;
+nonempty requests against them receive a missing-field diagnostic.
+
+Observable legacy ordering is preserved. Selectors operate in forward tuple order,
+broadcast writes to every matching entry, and leave the last matching read value.
+Tuple-bound individual appliers use the first match. Grouped `ApplierValues` run
+in reverse register order, while explicit `Appliers` retain their operation order.
+No register-alias deduplication or multi-register atomicity is introduced.
+
+Evidence on Apple Clang 21 / arm64 macOS / C++23:
+
+- Full workspace suite: 65/65 cases pass; Registers now has 18 cases and 611
+  assertions in seeded random order. New cases cover mixed register widths,
+  skipped entries, one snapshot per participating entry, broadcast/read precedence,
+  operation order, empty operations, typed readers and explicit barrier scope.
+- Six valid compiler operations and fifteen expected failures pass, covering
+  direct, selected and grouped writes; missing/duplicate/overlapping fields; empty
+  selections; bounds; and tuple-bound applier lookup. Seven public headers compile
+  independently. Before the fixes, lookup compilation failed and one runtime case
+  failed on the extra full-width read.
+- Isolated production/host builds pass. The installed consumer exercises selection,
+  grouped writes, later-entry lookup and explicit barriers with Catch2/Test Support
+  disabled. Logs: `build/register-packages/` and `build/register-selection-*`.
+- Source scope checking covers 106 C++ files, including disabled branches. All
+  736 original hashes are unchanged, and all 62 actual extraction hashes match.
+
+Ledger mappings 66 and 70 are now extracted. The complete legacy test mapping
+(786), shared register fixture, MCU adapters and hardware validation remain
+pending. Both register increments are included in this checkpoint, following
+the storage/timer checkpoint `bfaf111`.
+
+## Portable register fields and explicit access — 21 September 2026
+
+The storage/timer checkpoint was committed through GWZ at workspace `bfaf111`,
+with a clean workspace before this increment. `gwz repo create grevir-registers`
+registered the sixth member. Its four production groups extract bit mappings,
+value types, field formats/evaluation and register access from `setl_bit_fields.h`.
+Each header remains below 500 lines. CMake and Arduino-layout metadata declare
+Base as the only production dependency; existing `setl` names remain.
+
+`McuRegister<T, Address, Access>` now requires an explicit policy supplying typed
+read/write/modify operations. `IoRegister` likewise requires its access binding;
+there is no implicit raw-pointer MMIO backend. The policy owns address meaning,
+barriers, volatile I/O and atomicity. A new local byte-array fixture uses `memcpy`
+for typed accesses, recording their addresses, widths, values and order.
+
+The extraction exposed and corrected these inherited problems:
+
+- A dependent type lacked `typename`; `Evaluate` narrowed a promoted expression
+  during aggregate initialization. Both prevented native template compilation.
+- An 8-bit full-field update read first because integer promotion made `~mask`
+  nonzero. The branch now checks the complement at the register's width.
+- Masked access accepted value bits outside the mask and could overwrite unrelated
+  bits. The access binding now masks the value before calling the policy.
+- Shift storage used the highest bit index as a bit count. It now uses index + 1;
+  indices 8 and 16 select 16- and 32-bit storage respectively.
+
+Field formats also now reject positions outside the register width. Overlapping
+field views may coexist in a format; supplying overlapping or duplicate fields in
+one write is rejected by the existing operation checks. Legacy RO/WO tags are not
+complete hardware permission enforcement.
+
+Evidence on Apple Clang 21 / arm64 macOS / C++23:
+
+- Full suite: 56/56 cases pass (Base 4, Time 4, Core 10, Peripherals 29, Registers 9).
+  The register cases pass 594 assertions together in seeded random order. Two
+  initially failed: unnecessary full-width read and value bits outside a mask.
+- All five register public headers compile independently. Eight embedded header
+  assertions and eighteen pure mapping assertions from the legacy test compile,
+  along with two new bit-width assertions. A separate failing width probe preceded
+  the shift-storage correction.
+- Two compiler probes pass and five expected failures diagnose overlapping writes,
+  duplicate fields, foreign fields, field bounds and zero masks. Existing Core and
+  Peripheral compiler probes remain passing.
+- Isolated production and host builds pass with installed dependencies. An installed
+  consumer executes partial/full writes and unaligned typed reads with Catch2/Test
+  Support discovery disabled. Logs are under ignored `build/register-packages/`.
+- Clang raw-token brace checking covers 101 C++ files, including disabled branches.
+  All 736 original source hashes remain unchanged; all 60 actual extraction hashes
+  match the ledger, with one separately superseded sequencer assignment.
+
+Only register assignments 65, 67, 68 and 69 are marked extracted. Selection (70)
+and multi-register application (66) remain planned. The complete legacy test
+assignment (786) remains planned because only its pure mapping subset was moved
+to `mapping_static_tests.cpp`. Shared `DebugMcuRegister` extraction remains planned;
+the current local fixture is new. Device-specific clear-on-write semantics,
+interrupts, MCU adapters and hardware validation remain outside this increment.
 
 ## Storage and portable timer requirements — 21 September 2026
 

@@ -4,8 +4,9 @@ Grevir evolves Ardoinus into independently usable embedded C++ libraries.
 GWZ manages the member checkouts; CMake compiles the libraries currently extracted.
 
 The extracted members are [grevir-base](grevir-base/README.md),
-[grevir-time](grevir-time/README.md), [grevir-core](grevir-core/README.md) and the first
-[grevir-peripherals](grevir-peripherals/README.md) increment.
+[grevir-time](grevir-time/README.md), [grevir-core](grevir-core/README.md), and the first
+[grevir-peripherals](grevir-peripherals/README.md) and
+[grevir-registers](grevir-registers/README.md) increments.
 [grevir-test-support](grevir-test-support/README.md) supplies shared host-test setup.
 Their root `library.properties` and `src/`
 directories follow Arduino library layout. Target compiler and Arduino sketch
@@ -37,8 +38,8 @@ Core defects are recorded in its README. Hardware validation is on hold.
 
 ## Host mock validation
 
-The opt-in Catch2/CTest suite has 47 passing cases: four Base, four Time, ten Core
-and twenty-nine Peripherals. All seven retained Base/Time test files now compile; the
+The opt-in Catch2/CTest suite has 65 passing cases: four Base, four Time, ten Core,
+twenty-nine Peripherals and eighteen Registers. All seven retained Base/Time test files now compile; the
 type-algorithm file supplies static assertions rather than a runtime case. Core
 covers application lifecycle/state. Peripheral mocks record input/output and
 open-drain operations and control time for expiry, catch-up, wraparound, sequences,
@@ -46,8 +47,11 @@ a blinking application, debounce and single/double/long button clicks. Time also
 checks the corrected period-division operator. PWM tests cover scaling and pin
 lifecycle; storage tests cover byte reads/writes and region offsets. Compile probes
 cover combined claims, storage bounds and explicit-backend timer requirements.
-These execute production code. Interrupts, MCU registers and electrical behavior
-remain outside the current mock coverage.
+Register fixtures cover sparse mappings, typed reads/writes, selection, grouped
+operations and explicit barrier scopes; compiler probes check field collisions,
+bounds and missing-field diagnostics. These execute production code.
+Interrupts, MCU-specific register side effects and electrical behavior remain
+outside the current mock coverage.
 
 Explicit first-time setup can download the pinned Catch2 3.8.1 source archive:
 

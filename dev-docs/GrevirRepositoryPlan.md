@@ -262,6 +262,14 @@ selection and application operations. The ledger names the defining API groups.
 behavior must be supplied explicitly, rather than pulled into portable machinery
 through `setl_system.h`.
 
+On 21 September the first four groups were extracted into `grevir-registers`:
+mapping, typed values, fields and explicit access binding. They pass native
+compilation, memory-backed behavior checks and standalone installation. Selection
+and multi-register application were then extracted with an explicit synchronization
+policy, preserved ordering and missing/colliding-field diagnostics. The complete
+legacy test and shared `DebugMcuRegister` mappings remain planned. The current byte-array fixture is package-local;
+no MCU access/barrier or register side-effect behavior has been validated.
+
 `setl_system.h` currently defines `System` only for a limited macro set, and its
 Xtensa barriers are empty. Separate portable diagnostic/policy contracts from AVR
 and ESP32 behavior. Preserve observable access semantics while extracting; separately
