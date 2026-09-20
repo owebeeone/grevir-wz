@@ -1,6 +1,23 @@
-schema: gwz.lock/v0
+schema: gwz.marker/v0
+gwz_commit_id: 01a0c0ba-5462-7538-9b0d-bc2a14da9946
 workspace_id: ws_default
-manifest_schema: gwz.workspace/v0
+created_at: unix-ms:1789939831950
+created_by:
+  actor_id: unknown
+root:
+  path: .
+  before_commit: dedfa39504426ead29e45eae768795b880a1c89e
+  branch: main
+selected_targets:
+- '@root'
+- mem_grevir_base
+- mem_grevir_time
+- mem_grevir_core
+- mem_grevir_test_support
+- mem_grevir_peripherals
+committed_targets:
+- mem_grevir_peripherals
+- '@root'
 members:
   mem_grevir_base:
     path: grevir-base

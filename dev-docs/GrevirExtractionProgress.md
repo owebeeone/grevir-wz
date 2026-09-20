@@ -4,8 +4,62 @@ Latest checkpoint: 21 September 2026. Five local members now exist: Base, Time,
 Core, the first Peripherals increment and development-only Test Support. The rest
 of the repository plan remains unimplemented. The initial three-library baseline
 was committed on 21 September, followed by the portable GPIO/timing checkpoint
-(`569b1b7`) and the division/debounce/button fixes (`e5bd777`). The latest
-increment resolves the old sequencer mapping and extracts PWM. Hardware validation stays on hold.
+(`569b1b7`), division/debounce/button fixes (`e5bd777`) and PWM/sequencer checkpoint
+(`dedfa39`). The latest increment extracts storage and portable timer
+requirements. Hardware validation stays on hold.
+
+## Storage and portable timer requirements — 21 September 2026
+
+The PWM/sequencer checkpoint is committed through GWZ at workspace `dedfa39`;
+the working tree was clean before this increment. No new member is needed.
+
+`EepromReaderWriter<T, Address, Backend>` now uses an explicit byte store with
+`Resource`, `capacity`, `read` and `update`. It preserves native object bytes and
+claims the region on the backend's physical resource identity. Its inherited
+pointer-valued write was first reproduced as a compiler failure against a strict
+byte backend, then fixed to pass each byte. Negative/out-of-capacity/unrepresentable
+regions and nontrivially-copyable types are diagnosed at compile time. Adjacent
+regions and distinct stores remain legal; aliases of the same store must share the
+resource type and therefore conflict on overlap. The Arduino adapter remains planned.
+
+The portable portion of `ardo_timers.h` is extracted to `timer/requirements.hpp`:
+common parameter categories, frequency/variable-frequency/resolution requests,
+configuration tuples and explicit filtering. AVR enums/options and implicit system
+inventory are absent. The variable-frequency flag now correctly reports true.
+Zero values/dividers and repeated/conflicting frequency or resolution requests are
+rejected. New `CheckedTimerConfig<Backend, Config>` verifies both allowed categories
+and the backend's complete-configuration acceptance predicate. Unlike explicit
+filtering, checked mandatory requests cannot silently disappear.
+
+Only the portable requirements/filter and embedded assertion mappings are marked
+extracted. The planned `timer/selection.hpp` mapping (BaseTimerSelector/TimerSelector
+and inventory binding) remains unimplemented; no replacement allocator or timer
+hardware behavior is claimed. AVR options stay in their original source until their
+backend extraction. The legacy filter assertion is adapted with a synthetic option.
+
+Evidence on Apple Clang 21 / arm64 macOS / C++23:
+
+- Full host suite: 47/47 cases pass (Base 4, Time 4, Core 10, Peripherals 29).
+  Five new storage cases cover round trips, exact byte/address traces, preexisting
+  data, backend update semantics, adjacent/end-of-store regions and no-I/O lifecycle.
+- All 29 peripheral cases pass together in seeded random order: 133 assertions.
+- Storage compiler probes: 3 accepted configurations and 8 expected rejections for
+  type, bounds, overlap and whole-resource conflicts. Timer probes: 2 accepted
+  backend configurations and 12 expected rejections for malformed, unsupported,
+  contradictory or unsatisfied requests. Twelve timer static assertions pass.
+- All 11 peripheral public headers compile independently. Existing pin/PWM/Core
+  probes remain passing. A Clang raw-token brace check covers 90 C++ files,
+  including disabled branches.
+- An isolated Peripherals build and installed consumer pass offline. The consumer
+  exercises storage at the backend's upper bound and instantiates checked timer
+  requirements with Catch2/Test Support discovery disabled. Logs are under
+  ignored `build/storage-timer-packages/`.
+- All 736 original source hashes remain unchanged. All 56 actual extraction hashes
+  match the ledger; the old sequencer remains separately superseded without a copy.
+
+Hardware validation stays on hold.
+Timer inventory selection/allocation, MCU/Arduino adapters and backend-specific
+register/capability behavior remain later work.
 
 ## Sequencer resolution and portable PWM — 21 September 2026
 

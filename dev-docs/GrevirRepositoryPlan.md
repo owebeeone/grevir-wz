@@ -249,8 +249,10 @@ from production paths and make it an explicit host-test choice.
 `ardo_eeprom.h` has two owners: the storage resource/claim contract belongs to
 peripherals, while its current `EEPROM.read/update` implementation belongs to the
 Arduino adapter. Keep EEPROM availability explicit; do not unconditionally include
-an EEPROM provider in all Arduino builds. Audit its existing `EEPROM.update(...,
-&addr)` call in a distinct correctness step before advertising working storage.
+an EEPROM provider in all Arduino builds. On 21 September the portable typed
+wrapper was extracted with explicit byte-storage binding and capacity/resource
+checks. Its `EEPROM.update(..., &addr)` bug was reproduced against a strict byte
+backend and corrected to send the byte value. The Arduino adapter remains planned.
 
 ### 2. Extract actual portable register machinery
 
@@ -287,7 +289,10 @@ core; AVR waveform/top-count options belong to the AVR backend. The present
 Replace the shared enum's fixed AVR-specific entries with an extension mechanism
 without making portable code import AVR. Preserve the current filter behavior in
 extraction tests, then make unsupported mandatory requirements a diagnosed error
-in the separately implemented allocator.
+in the separately implemented allocator. The 21 September requirements increment
+now preserves the explicit filter and adds `CheckedTimerConfig<Backend, Config>`
+for mandatory request validation against a supplied backend. This does not implement
+`TimerSelector`, board inventory binding or global allocation; those remain planned.
 
 ### 4. Split the manual ATmega328P implementation by ownership
 

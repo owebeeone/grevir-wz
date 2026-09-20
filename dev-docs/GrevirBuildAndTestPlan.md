@@ -1,22 +1,26 @@
 # Grevir build and test framework
 
 Selected 18 September 2026; updated 21 September for the foundation test migration
-and portable GPIO/timing, debounce, button-event and PWM extraction. **Hardware validation is on hold.**
+and portable GPIO/timing, buttons, PWM, storage and timer requirements. **Hardware validation is on hold.**
 
 Implemented: opt-in CMake/CTest host tests with pinned Catch2 3.8.1 and shared
-setup in Grevir Test Support. Forty-two cases pass: Base 4, Time 4, Core 10,
-Peripherals 24. All seven retained Base/Time files build (including static-only
+setup in Grevir Test Support. Forty-seven cases pass: Base 4, Time 4, Core 10,
+Peripherals 29. All seven retained Base/Time files build (including static-only
 type algorithms); their old test framework dependency is removed. GPIO fixtures
-record logical pin operations, and a controlled clock exercises production pollers
+record logical pin operations, and a controlled clock exercises production pollers,
 a blinking application and debounced button events. Period-division and inherited
 debounce/setup defects have reproduced failures and now pass. The fixtures do not
 model electrical or MCU behavior. Five PWM cases validate scaling and pin lifecycle;
-two reproduced an input-narrowing bug, now fixed.
+two reproduced an input-narrowing bug, now fixed. Five storage cases validate
+byte representation, offsets, updates and region isolation.
 
 Core compiler probes cover six valid applications, seventeen expected resource
 failures, two dependency cycles and parameter-index selection/bounds. Peripheral
 probes accept distinct pins and reject conflicts for raw and debounced inputs.
-PWM adds two valid compositions and six expected pin/timer/range conflicts. Native packages
+PWM adds two valid compositions and six expected pin/timer/range conflicts.
+Storage adds three valid and eight invalid region/type/claim probes; timer
+requirements add twelve static assertions and two valid/twelve invalid backend
+configuration probes. Native packages
 and host suites work in isolated checkouts with installed dependencies; an installed
 peripheral consumer builds and runs without Catch2. See
 [extraction progress](GrevirExtractionProgress.md).
