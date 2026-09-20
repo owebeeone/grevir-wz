@@ -1,10 +1,28 @@
 # Grevir extraction progress
 
-Latest checkpoint: 20 September 2026. The multi-repository migration now includes
+Latest checkpoint: 21 September 2026. The multi-repository migration now includes
 Base, Time and the first Core extraction. The remaining repository plan is not yet
 implemented. All three members remain local, without published remotes. The
-workspace and extracted libraries are being committed as the initial development
-baseline on 21 September 2026; the validation checkpoints below retain their dates.
+workspace and extracted libraries were committed as the initial development
+baseline on 21 September 2026; subsequent changes are recorded below.
+
+## Parameter indexing fix — 21 September 2026
+
+`Parameters<...>::Param<N>` now returns the Nth type for positive indices as well
+as zero. `ParamByIndex` inherits the next lookup's result and specializes index
+zero to return the selected type. The public alias is unchanged. Empty and
+out-of-range lookups produce `GREVIR_CORE_PARAMETER_INDEX_OUT_OF_RANGE`.
+
+Ten new static assertions reproduced the old bug and now pass, covering first,
+middle and last indices, repeated types, a singleton list, exact type preservation
+and the helper itself. Two valid compiler probes pass; three invalid probes
+(one past the end, a larger index, and an empty list) fail with the intended
+diagnostic. The workspace build, existing application probes and all ten Core
+runtime mock tests still pass on Apple Clang 21. Original Ardoinus sources remain
+unchanged; the Core module destination hash is updated in the ledger.
+
+The lone-parameter duplicate-claim gap remains the next Core correctness fix.
+Hardware validation stays on hold.
 
 ## Core mock validation — 20 September 2026
 
