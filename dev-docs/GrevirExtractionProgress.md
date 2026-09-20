@@ -3,9 +3,54 @@
 Latest checkpoint: 21 September 2026. Five local members now exist: Base, Time,
 Core, the first Peripherals increment and development-only Test Support. The rest
 of the repository plan remains unimplemented. The initial three-library baseline
-was committed on 21 September. This checkpoint includes portable GPIO/timing,
-foundation host tests and the resource-claim and time-unit corrections. Hardware
-validation stays on hold.
+was committed on 21 September, followed by the portable GPIO/timing checkpoint
+(`569b1b7`). The next increment fixes period division and adds
+debounce/button handling. Hardware validation stays on hold.
+
+## Period division, debounce and button events — 21 September 2026
+
+Gianni authorized fixing period division and extracting debounce/button handling.
+`Period::operator/` now divides rather than multiplies, retaining its storage type,
+units and ordinary numeric truncation. The regression first reproduced `12 / 3`
+returning 36; signed/unsigned, fractional and truncation checks now pass.
+
+Two further source mappings are extracted: `DebounceInput` from `ardOinus.h` and
+`ButtonEventModule` from `ardo_button_events.h`. Their new signatures are
+`DebounceInput<InputPin, Clock, debounceTime = 300>` (interval in clock ticks) and
+`ButtonEventModule<InputPin, Clock>`. Pins retain their inherited claims/interfaces.
+Button thresholds retain their physical 300 ms / 400 ms durations across clock
+units. The active-low classifier and its decision order are preserved, including
+second-press priority over a simultaneously observed timeout. Event retrieval still
+consumes one pending slot rather than a queue.
+
+Mock sequences exposed inherited debounce errors: returning to the accepted level
+did not cancel a pending transition, initial high input was reported low, and setup
+retained previous state. Debounce now cancels the pending transition, samples the
+initial level during setup and resets its state. Strict `>` expiry remains.
+Button setup also clears classification state and pending events. Its previously
+undefined static instance now has a template definition in the public header.
+
+Validation on Apple Clang 21 / arm64 macOS / C++23:
+
+- The ten new focused runtime cases initially had eight failures; all now pass.
+  The full suite passes 37/37: Base 4, Time 4, Core 10, Peripherals 19.
+- Button/debounce cases exercise startup, both bouncing edges, strict debounce
+  expiry, repeat setup, delayed single click, double click, long press, event
+  consumption, clock wraparound and native microsecond clock thresholds.
+- All 19 peripheral cases also pass together in seeded random order: 106 assertions.
+- Eight peripheral public headers compile independently. Raw/debounced pin probes
+  pass two valid cases and reject two conflicts with the intended diagnostic.
+  Existing Core application/index probes remain passing.
+- Isolated Time and Peripherals builds pass their host suites offline against
+  installed dependencies. The installed consumer executes output timing, a
+  debounced long click and period division with Catch2/Test Support discovery
+  disabled. Logs are under ignored `build/button-packages/`.
+- The raw-token scope check passes across 80 extracted C++ files, including disabled
+  branches. All 736 original source hashes remain unchanged, and all 52 extracted
+  assignment hashes match the current files in the ledger.
+
+Hardware validation stays on hold. The separate
+sequencer, PWM, timer selection, storage regions and MCU bindings remain later work.
 
 ## Portable GPIO/timing and foundation tests — 21 September 2026
 

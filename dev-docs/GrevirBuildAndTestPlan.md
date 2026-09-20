@@ -1,24 +1,26 @@
 # Grevir build and test framework
 
 Selected 18 September 2026; updated 21 September for the foundation test migration
-and first portable GPIO/timing extraction. **Hardware validation is on hold.**
+and portable GPIO/timing, debounce and button-event extraction. **Hardware validation is on hold.**
 
 Implemented: opt-in CMake/CTest host tests with pinned Catch2 3.8.1 and shared
-setup in Grevir Test Support. Twenty-seven cases pass: Base 4, Time 3, Core 10,
-Peripherals 10. All seven retained Base/Time files build (including static-only
+setup in Grevir Test Support. Thirty-seven cases pass: Base 4, Time 4, Core 10,
+Peripherals 19. All seven retained Base/Time files build (including static-only
 type algorithms); their old test framework dependency is removed. GPIO fixtures
 record logical pin operations, and a controlled clock exercises production pollers
-and a blinking application. They do not model electrical or MCU behavior.
+a blinking application and debounced button events. Period-division and inherited
+debounce/setup defects have reproduced failures and now pass. The fixtures do not
+model electrical or MCU behavior.
 
 Core compiler probes cover six valid applications, seventeen expected resource
 failures, two dependency cycles and parameter-index selection/bounds. Peripheral
-probes accept distinct input/output pins and reject a shared pin. Native packages
+probes accept distinct pins and reject conflicts for raw and debounced inputs. Native packages
 and host suites work in isolated checkouts with installed dependencies; an installed
 peripheral consumer builds and runs without Catch2. See
 [extraction progress](GrevirExtractionProgress.md).
 
 The installed Make executor runs these builds; Ninja remains the selected
-alternative when available. Shared presets, CI, debounce/button coverage, register
+alternative when available. Shared presets, CI, register
 and interrupt fixtures, MCU adapters and hardware validation remain future work.
 
 ## Selected stack
