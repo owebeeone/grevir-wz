@@ -4,8 +4,56 @@ Latest checkpoint: 21 September 2026. Five local members now exist: Base, Time,
 Core, the first Peripherals increment and development-only Test Support. The rest
 of the repository plan remains unimplemented. The initial three-library baseline
 was committed on 21 September, followed by the portable GPIO/timing checkpoint
-(`569b1b7`). The next increment fixes period division and adds
-debounce/button handling. Hardware validation stays on hold.
+(`569b1b7`) and the division/debounce/button fixes (`e5bd777`). The latest
+increment resolves the old sequencer mapping and extracts PWM. Hardware validation stays on hold.
+
+## Sequencer resolution and portable PWM — 21 September 2026
+
+The preceding period-division/debounce/button checkpoint is committed through GWZ
+at workspace `e5bd777`. Its working tree was clean before this increment.
+
+The legacy `ardo_sequencer.h` assignment is now **superseded** by the existing
+`time_poller.hpp`. The old `ardox` poller and sequence types duplicate that path.
+A whole-source search found no C/C++ consumers/includes; old Visual Studio project
+and filter files only list the header. The original remains untouched, and no new
+`sequencer.hpp` is created. The SQLite assignment records the replacement and
+reason. `migration_status` exposes `superseded` with no destination hash/date;
+this is a mapping resolution, not a claimed extraction. Mapping revision is now 3;
+the imported CSV remains the historical snapshot.
+
+`HardwarePwm` is extracted to `pwm_output.hpp` with a concrete `Backend` template
+argument replacing implicit `ardo_system::HardwarePwmResources` selection. A backend
+supplies resolution (`timer_bits`), additional `Claims` and a static write operation.
+The wrapper combines pin/backend claims, applies the selected scaler, retains
+optional virtual-interface support and forwards setup/loop to the pin. Backend
+register configuration and timer selection remain the caller's responsibility.
+
+Two new runtime cases exposed an inherited narrowing bug: the wrapper's public
+input type used the scaler's output width, so 16-bit values were truncated before
+8-bit scaling and 65535 produced zero. `value_type` now uses the selector's
+`in_value_type`; 65535 correctly produces 255. The default selector still accepts
+8-bit inputs. No clamping or automatic allocation is introduced.
+
+Evidence on Apple Clang 21 / arm64 macOS / C++23:
+
+- Full suite: 42/42 cases pass (Base 4, Time 4, Core 10, Peripherals 24).
+  Five PWM cases cover expansion, equal resolution, reduction, virtual calls and
+  actual application pin setup/loop order. Before the type fix, 2 of 5 failed.
+- All 24 peripheral cases pass together in seeded random order: 112 assertions.
+- Nine peripheral public headers compile independently. PWM claim probes pass two
+  valid cases (separate timers; compatible shared timer with adjacent channels)
+  and reject six conflicts: reused pin, exclusive timer, duplicate pin within one
+  combined claim, incompatible timer settings, overlapping channels and an
+  external timer owner. Existing GPIO and Core probes continue to pass.
+- An isolated Peripherals build passes its host suite against installed dependencies.
+  The installed consumer also executes PWM setup, full-scale reduction and virtual
+  output with Catch2/Test Support discovery disabled. Logs: `build/pwm-packages/`.
+- The Clang raw-token brace check passes 83 C++ files, including disabled branches.
+  Original inventory hashes and all actual extraction hashes are verified. The
+  ledger now has 53 extracted assignments and one separately superseded assignment.
+
+Hardware validation is on hold;
+portable timer-selection contracts, storage regions and MCU bindings remain later.
 
 ## Period division, debounce and button events — 21 September 2026
 

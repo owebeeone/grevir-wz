@@ -744,7 +744,7 @@ historical reference alongside its extracted APIs.
 | [ardOinus/src/ardo_button_events.h](../../ardoinus/ardOinus/src/ardo_button_events.h) | `src/grevir/peripherals/button_events.hpp` | adapt |
 | [ardOinus/src/ardo_eeprom.h](../../ardoinus/ardOinus/src/ardo_eeprom.h) | `src/grevir/peripherals/storage_region.hpp` | split |
 | [ardOinus/src/ardo_pwm_output.h](../../ardoinus/ardOinus/src/ardo_pwm_output.h) | `src/grevir/peripherals/pwm_output.hpp` | adapt |
-| [ardOinus/src/ardo_sequencer.h](../../ardoinus/ardOinus/src/ardo_sequencer.h) | `src/grevir/peripherals/sequencer.hpp` | adapt |
+| [ardOinus/src/ardo_sequencer.h](../../ardoinus/ardOinus/src/ardo_sequencer.h) | Superseded by `src/grevir/peripherals/time_poller.hpp`; no `sequencer.hpp` created | superseded |
 | [ardOinus/src/ardo_time_poller.h](../../ardoinus/ardOinus/src/ardo_time_poller.h) | `src/grevir/peripherals/time_poller.hpp` | adapt |
 | [ardOinus/src/ardo_timers.h](../../ardoinus/ardOinus/src/ardo_timers.h) | `src/grevir/peripherals/timer/requirements.hpp` | split |
 | [ardOinus/src/ardo_timers.h](../../ardoinus/ardOinus/src/ardo_timers.h) | `src/grevir/peripherals/timer/selection.hpp` | split |

@@ -37,13 +37,15 @@ Core defects are recorded in its README. Hardware validation is on hold.
 
 ## Host mock validation
 
-The opt-in Catch2/CTest suite has 37 passing cases: four Base, four Time, ten Core
-and nineteen Peripherals. All seven retained Base/Time test files now compile; the
+The opt-in Catch2/CTest suite has 42 passing cases: four Base, four Time, ten Core
+and twenty-four Peripherals. All seven retained Base/Time test files now compile; the
 type-algorithm file supplies static assertions rather than a runtime case. Core
 covers application lifecycle/state. Peripheral mocks record input/output and
 open-drain operations and control time for expiry, catch-up, wraparound, sequences
 a blinking application, debounce and single/double/long button clicks. Time also
-checks the corrected period-division operator. These execute production code. Interrupts, MCU registers
+checks the corrected period-division operator. PWM tests cover scaling and pin
+lifecycle; compile probes cover combined GPIO/timer claims. These execute production
+code. Interrupts, MCU registers
 and electrical behavior remain outside the current mock coverage.
 
 Explicit first-time setup can download the pinned Catch2 3.8.1 source archive:
