@@ -1,0 +1,47 @@
+schema: gwz.marker/v0
+gwz_commit_id: 01a0bf48-7645-784a-81e5-75cfbf625108
+workspace_id: ws_default
+created_at: unix-ms:1789915592366
+created_by:
+  actor_id: unknown
+root:
+  path: .
+  branch: main
+selected_targets:
+- '@root'
+- mem_grevir_base
+- mem_grevir_time
+- mem_grevir_core
+committed_targets:
+- mem_grevir_base
+- mem_grevir_time
+- mem_grevir_core
+- '@root'
+members:
+  mem_grevir_base:
+    path: grevir-base
+    source_id: src_grevir_base
+    source_kind: git
+    commit: 7124f592fed932e3c64cb426ad2cb584c5f66876
+    branch: main
+    detached: false
+    dirty: false
+    materialized: true
+  mem_grevir_core:
+    path: grevir-core
+    source_id: src_grevir_core
+    source_kind: git
+    commit: 37acde88ab1be6cf8a7fc85892ff85c942b1afec
+    branch: main
+    detached: false
+    dirty: false
+    materialized: true
+  mem_grevir_time:
+    path: grevir-time
+    source_id: src_grevir_time
+    source_kind: git
+    commit: db9cd3d1cbd2965776dfd69216775cf69d3ed700
+    branch: main
+    detached: false
+    dirty: false
+    materialized: true

@@ -1,0 +1,31 @@
+# Machine-managed by gwz. Hand edits to gwz.conf/ are detected and refused.
+# Structural changes: `gwz repo <add|clone|create|detach|attach|sync>`.
+# Already edited? Revert it, or `gwz init --update --force` to accept this state.
+schema: gwz.workspace/v0
+workspace:
+  id: ws_default
+members:
+- id: mem_grevir_base
+  path: grevir-base
+  type: git
+  source_id: src_grevir_base
+  active: true
+  desired:
+    local_only: true
+  remotes: []
+- id: mem_grevir_time
+  path: grevir-time
+  type: git
+  source_id: src_grevir_time
+  active: true
+  desired:
+    local_only: true
+  remotes: []
+- id: mem_grevir_core
+  path: grevir-core
+  type: git
+  source_id: src_grevir_core
+  active: true
+  desired:
+    local_only: true
+  remotes: []
