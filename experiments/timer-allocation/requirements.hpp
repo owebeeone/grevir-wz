@@ -1,5 +1,5 @@
 #pragma once
-#include "numeric.hpp"
+#include "frequency_window.hpp"
 #include <array>
 #include <compare>
 #include <cstddef>
@@ -34,11 +34,10 @@ constexpr bool identifier(std::string_view value) {
 enum class Target { avr, atmega328p, esp32 };
 enum class Waveform { any, fast, phase_correct };
 enum class Source { any, icr, apb };
-enum class ConfigError { none, invalid_value, unsupported_option, unsupported_combination, conflict };
+enum class ConfigError { none, invalid_value, unsupported_option, conflict };
 
 struct Config {
-  Ratio frequency{};
-  std::uint32_t ppm = 0;
+  FrequencyWindow frequency{};
   Ratio step{};
   unsigned pin = 0;
   Waveform waveform = Waveform::any;
@@ -118,14 +117,8 @@ struct Apply<Resident, Frequency<Hertz<N, D>, Policy>> {
     if constexpr (!Accuracy<Policy>::supported) { c.fail(ConfigError::unsupported_option); }
     else if constexpr (!raw.valid() || ppm > 1'000'000) { c.fail(ConfigError::invalid_value); }
     else {
-      const auto rate = raw.normalized();
-      // Narrow prototype: identical repeated frequency constraints only. Active
-      // interval intersection is deferred, not misreported as unsatisfiability.
-      if (c.frequency.numerator != 0 && (c.frequency != rate || c.ppm != ppm)) {
-        c.fail(ConfigError::unsupported_combination);
-      }
-      c.frequency = rate;
-      c.ppm = ppm;
+      c.frequency = c.frequency.intersect(FrequencyWindow::around(raw, ppm));
+      if (c.frequency.empty()) { c.fail(ConfigError::conflict); }
     }
   }
 };

@@ -178,6 +178,12 @@ Tolerance filters candidates; it does not by itself request the closest rate.
 Among acceptable candidates, the existing documented allocation ordering applies.
 The result exposes the actual rational rate, so acceptance cannot hide rounding.
 
+The host prototype now supports intersecting these clauses. Common 1000 Hz +/- 1%
+combined with resident-target exact 1000 Hz gives a point interval at 1000 Hz.
+Exact 1020 Hz instead gives a conflict. Two tolerances need not share a center:
+1000 Hz +/- 1% and 1005 Hz +/- 0.5% intersect at inclusive 999.975..1010 Hz.
+Their order does not change the interval or the selected assignment.
+
 ## 6. Duty granularity should have a measurable meaning
 
 Recommend `DutyStepAtMost<N, D>` as the underlying requirement, with positive

@@ -1,4 +1,4 @@
-foreach(case RANGE 0 6)
+foreach(case RANGE 0 7)
   execute_process(
     COMMAND "${COMPILER}" -std=c++23 -fsyntax-only "-DPROTOTYPE_CASE=${case}" "${SOURCE}/compile_probe.cpp"
     RESULT_VARIABLE status OUTPUT_VARIABLE output ERROR_VARIABLE error)
@@ -14,4 +14,4 @@ foreach(case RANGE 0 6)
     endif()
   endif()
 endforeach()
-message(STATUS "Positive control and six expected allocation failures checked")
+message(STATUS "Positive control and seven expected allocation failures checked")

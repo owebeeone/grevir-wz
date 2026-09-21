@@ -32,8 +32,11 @@ constexpr Plan<R> solve(Problem<R, C, H, B> p, std::size_t budget = 100'000) {
       return fail(Status::invalid_request, r.key, static_cast<unsigned>(r.config.error));
     }
     if (!r.config.frequency.valid() || !r.config.step.valid()
-        || !at_most(r.config.step, {1, 1}) || r.config.ppm > 1'000'000
+        || !at_most(r.config.step, {1, 1})
         || r.config.pin == 0) { return fail(Status::invalid_request, r.key); }
+    if (r.config.frequency.empty()) {
+      return fail(Status::invalid_request, r.key, static_cast<unsigned>(ConfigError::conflict));
+    }
   }
   if (!normalize_model(p)) { return fail(Status::model_error); }
   for (const auto& r : p.requests) {
@@ -64,7 +67,7 @@ constexpr Plan<R> solve(Problem<R, C, H, B> p, std::size_t budget = 100'000) {
         const auto& r = p.requests[i];
         const auto& e = c.endpoints[members++];
         if (e.request != r.key || e.pin != r.config.pin
-            || !within(c.frequency, r.config.frequency, r.config.ppm)
+            || !r.config.frequency.contains(c.frequency)
             || !at_most(e.step, r.config.step)
             || (r.config.waveform != Waveform::any && r.config.waveform != c.waveform)
             || (r.config.source != Source::any && r.config.source != c.source)) { return false; }

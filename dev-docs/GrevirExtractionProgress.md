@@ -19,18 +19,23 @@ identities, canonical backtracking, structured failures, shared timer ownership
 and shared-setting compatibility run against synthetic inventories. No production
 header, member repository or source-extraction ledger entry changed.
 
-AppleClang 21 compiles the static checks. Both standalone CTest checks pass with
+AppleClang 21 compiles the static checks. All three standalone CTest checks pass with
 address/undefined sanitizers: 6,144 comparisons against an independent exhaustive
 oracle across all 512 three-request/three-timer graphs, plus a positive compiler
-control and six expected failures. The eight-request constexpr example establishes
+control and seven expected failures. Frequency-window membership additionally
+agrees with 84,672 independently evaluated pairs of relative-error constraints.
+The eight-request constexpr example establishes
 one immediate-solution case, not a worst-case compilation guarantee. Raw-token
-brace checking passes all nine prototype C++ files.
+brace checking passes all eleven prototype C++ files; seven headers and the README
+example compile independently.
 
 The experiment is deliberately narrower than the design: explicit synthetic
-candidates/pins/group IDs, two-component names, one frequency constraint (or
-identical repeats), a simple timer/channel tree and one shared domain per candidate.
-Differing frequency clauses are diagnosed as unsupported rather than falsely
-declared unsatisfiable. No real driver binding, owner setup, Core range-claim
+candidates/pins/group IDs, two-component names, a simple timer/channel tree and one
+shared domain per candidate. Common and active-target frequency clauses now
+intersect as closed exact rational intervals. Touching endpoints remain valid;
+empty intersections report a request conflict, independent of declaration order.
+There is no interval rounding or new firmware arithmetic. No real driver binding,
+owner setup, Core range-claim
 integration or register IO is implemented. The existing 123 production host cases
 are unchanged and were not rerun for this isolated experiment. AVR TOP conversion,
 target compiler validation and hardware validation are not completed by it.

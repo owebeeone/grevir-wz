@@ -58,8 +58,12 @@ using MultipleRates = PwmRequest<"pwm", Frequency<Hertz<1000>, Exact>,
   Frequency<Hertz<1000>, WithinPpm<1000>>, DutyStepAtMost<1, 256>, Pin<101>>;
 using MultipleRatesReversed = PwmRequest<"pwm", Frequency<Hertz<1000>, WithinPpm<1000>>,
   Frequency<Hertz<1000>, Exact>, DutyStepAtMost<1, 256>, Pin<101>>;
-static_assert(request<Target::avr, Instance<"x", MultipleRates>>().config.error == ConfigError::unsupported_combination);
-static_assert(request<Target::avr, Instance<"x", MultipleRatesReversed>>().config.error == ConfigError::unsupported_combination);
+static_assert(request<Target::avr, Instance<"x", MultipleRates>>().config.error == ConfigError::none);
+static_assert(request<Target::avr, Instance<"x", MultipleRatesReversed>>().config.error == ConfigError::none);
+static_assert(request<Target::avr, Instance<"x", MultipleRates>>().config.frequency
+  == FrequencyWindow::around({1000, 1}));
+static_assert(request<Target::avr, Instance<"x", MultipleRatesReversed>>().config.frequency
+  == FrequencyWindow::around({1000, 1}));
 
 constexpr bool duplicate_diagnostics() {
   auto p = greedy;
@@ -96,7 +100,7 @@ constexpr bool ownership_cases() {
   p.candidates[0].endpoints[1].pin = 101;
   if (solve(p).diagnostic.status != Status::model_error) { return false; }
   p = sharing();
-  p.requests[1].config.frequency = {2000, 1};
+  p.requests[1].config.frequency = FrequencyWindow::around({2000, 1});
   return solve(p).diagnostic.status == Status::no_candidate;
 }
 static_assert(ownership_cases());
@@ -164,7 +168,7 @@ constexpr bool envelope() {
   std::array<Resource, 24> hw{};
   constexpr std::array<std::string_view, 8> names{"a", "b", "c", "d", "e", "f", "g", "h"};
   for (unsigned i = 0; i < 8; ++i) {
-    reqs[i] = {{names[i], "pwm"}, {{1000, 1}, 0, {1, 256}, 101 + i}};
+    reqs[i] = {{names[i], "pwm"}, {FrequencyWindow::around({1000, 1}), {1, 256}, 101 + i}};
     choices[i] = choice(i + 1, reqs[i].key, i + 1, 101 + i);
     hw[i * 3] = {i + 1, 0, Kind::timer};
     hw[i * 3 + 1] = {(i + 1) * 10 + 1, i + 1, Kind::channel};

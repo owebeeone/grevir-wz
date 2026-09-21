@@ -176,6 +176,12 @@ must express the selected accuracy contract without incidental runtime floating
 point in integer paths. This revises the earlier exact-only first-scope proposal;
 the user has not yet accepted either the scope or the proposed spelling.
 
+The host prototype now intersects all common/resident frequency clauses as closed
+rational intervals. A point intersection is valid; an empty intersection is a
+request conflict. A nonempty interval with no backend candidate is a separate
+allocation failure. The prototype uses bounded integer metadata and preserves
+declaration-order independence; its representation is not a firmware policy.
+
 Following the worked examples, recommend `DutyStepAtMost<N, D>`: exact 0%/100%
 endpoints and no gap larger than N/D of full scale between consecutive attainable
 steady duty values. Merely counting distinct values does not guarantee spacing or
