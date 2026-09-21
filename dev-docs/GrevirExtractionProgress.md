@@ -1,7 +1,7 @@
 # Grevir extraction progress
 
-Latest checkpoint: 21 September 2026. Seven local members now exist: Base, Time,
-Core, Peripherals, Registers, AVR and development-only Test Support. Workspace
+Latest checkpoint: 21 September 2026. Nine local members now exist: Base, Time,
+Core, Peripherals, Registers, AVR, Pulse Codec, Packet and development-only Test Support. Workspace
 `203a8fc` commits the shared fixture, portable legacy tests, AVR register/GPIO,
 initial timer-clock extraction, arithmetic review and cross-MCU/AVR review policies.
 `654bdf7` commits the three arithmetic corrections and `e453c48` commits the
@@ -9,6 +9,68 @@ waveform-mode extraction. `6592f7e` commits the reusable timer definitions.
 This checkpoint includes the completed timer configuration, output application
 and ATmega328P timer/GPIO bindings below.
 AVR compiler and hardware validation stay on hold.
+
+## Packet extraction — 21 September 2026
+
+The ninth member, `grevir-packet`, supplies the four mapped header/reassembler/
+manager/sender headers, aggregate `GrevirPacket.h`, exported `grevir::packet`
+target, Arduino metadata, license and standalone consumer. It has no Grevir or
+Arduino production dependency. Peer addresses are a caller-selected type (default
+opaque uint32 identity). Standard-library requirements remain explicit; callback
+templates avoid mandatory `std::function` conversion while preserving optional
+aliases. Fixed payload arrays and a bounded reassembler pool retain deterministic
+codec storage.
+
+The extraction repairs inherited bitmap-shift and stream-ID narrowing defects,
+fragment-size/count validation, uint16 length truncation, duplicate overwrites,
+raw-object overlays, reserved-marker collisions and recency comparison across
+counter wrap. Wire marker, header layout, CRC-32C/sequence identity and unmarked
+passthrough remain. CRC checking is not added: the original receiver used CRC only
+as part of an ID, despite its introductory corruption-detection claim.
+
+The broken historical harness is adapted into 12 cases, retaining the original
+payload and shuffled-stream scenarios with deterministic seeds. All 148 workspace
+host cases pass; the 12 packet cases also pass ASan/UBSan. Five independent public
+headers, one valid/six rejected compiler probes and raw-token brace checks on eight
+new C++ files pass. A copied production package installs and its consumer runs with
+no other Grevir dependency and Catch2/Test Support discovery disabled.
+
+Five new extraction records bring the ledger to 98 verified assignments; all 736
+original source hashes remain unchanged. The [package README](../grevir-packet/README.md)
+records capacity, callback lifetime, replay/eviction and integrity limits. MCU
+standard-library availability, AVR compiler validation and hardware behavior remain
+unvalidated under the existing hold. This checkpoint includes both Pulse Codec and Packet extractions.
+
+## Pulse Codec extraction — 21 September 2026
+
+`grevir-pulse-codec` is the eighth GWZ member. The four planned public headers
+extract bit storage, waveform parameters, encoder and decoder from `pwe_serial.h`.
+The aggregate header, CMake export (`grevir::pulse_codec`), Arduino metadata and
+license follow the existing packages. Only Base and Time are production dependencies;
+GPIO scheduling, packet framing and hardware integrations remain separate.
+
+The legacy array read failed compilation. Collector fixes then exposed three
+failing cases for alternate polarity and stale bits after reset/error. Corrections
+cover array sizing/indexing/reset, false-bit replacement, complementary pulse halves,
+partial/unread frame recovery, genuine idle detection, malformed final pulses,
+modular deadlines and saturating wait estimates. Integer waveform ratios now use
+bounded quotient/remainder arithmetic, retaining floor rounding without floating
+point or unnecessary wider intermediates. Existing default wire polarity is retained;
+the inherited polarity flag's actual behavior is documented explicitly.
+
+All 136 workspace host cases pass, including 11 Pulse Codec cases and the original
+32,768-value sweep with deterministic jitter. The same 11 cases pass address/undefined
+sanitizers. Five independent headers, representative template instantiations and an
+isolated production/install/consumer build pass. One valid/seven rejected compiler
+probes and raw-token brace checks on eight new C++ files pass. The installed consumer runs with
+Catch2 and Test Support package discovery disabled. Source-level review includes
+16-bit integer promotions, unsigned shifts, fixed storage and clock bounds; AVR
+compiler/hardware validation remain on hold.
+
+The ledger records all five planned Pulse Codec assignments, bringing actual
+extractions to 93. Original Ardoinus source hashes remain unchanged. See the
+[package contract and limits](../grevir-pulse-codec/README.md). Next recommendation:
+extract Packet Codec as the next bounded migration increment.
 
 ## Installed PWM integration and full-width Registers fix — 21 September 2026
 

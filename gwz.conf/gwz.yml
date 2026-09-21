@@ -61,3 +61,19 @@ members:
   desired:
     local_only: true
   remotes: []
+- id: mem_grevir_pulse_codec
+  path: grevir-pulse-codec
+  type: git
+  source_id: src_grevir_pulse_codec
+  active: true
+  desired:
+    local_only: true
+  remotes: []
+- id: mem_grevir_packet
+  path: grevir-packet
+  type: git
+  source_id: src_grevir_packet
+  active: true
+  desired:
+    local_only: true
+  remotes: []

@@ -7,6 +7,8 @@ The extracted members are [grevir-base](grevir-base/README.md),
 [grevir-time](grevir-time/README.md), [grevir-core](grevir-core/README.md), and the first
 [grevir-peripherals](grevir-peripherals/README.md) and
 [grevir-registers](grevir-registers/README.md) and [grevir-avr](grevir-avr/README.md) increments.
+[grevir-pulse-codec](grevir-pulse-codec/README.md) supplies portable pulse-width serial encoding and decoding.
+[grevir-packet](grevir-packet/README.md) supplies transport-independent fragmentation and reassembly.
 [grevir-test-support](grevir-test-support/README.md) supplies shared host-test setup and register-memory fixtures.
 Their root `library.properties` and `src/`
 directories follow Arduino library layout. Target compiler and Arduino sketch
@@ -38,8 +40,8 @@ Core defects are recorded in its README. Hardware validation is on hold.
 
 ## Host mock validation
 
-The opt-in Catch2/CTest suite has 125 passing cases: Base 5, Time 4, Core 10,
-Peripherals 29, Registers 24, Test Support 3 and AVR 50. All seven retained Base/Time test files now compile; the
+The opt-in Catch2/CTest suite has 148 passing cases: Base 5, Time 4, Core 10,
+Peripherals 29, Registers 24, Test Support 3, AVR 50, Pulse Codec 11 and Packet 12. All seven retained Base/Time test files now compile; the
 type-algorithm file supplies static assertions rather than a runtime case. Core
 covers application lifecycle/state. Peripheral mocks record input/output and
 open-drain operations and control time for expiry, catch-up, wraparound, sequences,
@@ -63,7 +65,12 @@ and rejected dynamic requests without register IO. Timer-output checks cover
 endpoint polarity, integer duty rescaling, channel isolation and composed frequency
 updates. Concrete ATmega328P checks cover Timer0/1/2 pin routes, actual addresses,
 Timer1 byte ordering and interrupt-flag clearing through a byte-access model. These
-execute production code.
+execute production code. Pulse Codec covers the legacy exhaustive message sweep,
+array payloads, both signal senses/bit polarities, clock wraparound, queued sends
+and malformed/unread-frame recovery. Its isolated installed consumer and sanitizer
+checks also pass. Packet tests cover reordering, duplicate and malformed fragments,
+peer identity, bounded pool reuse, bitmap/length boundaries and exact wire bytes.
+Its installed consumer needs no other Grevir package.
 Interrupt execution, waveform timing, asynchronous timer operation and electrical
 behavior remain outside the current mock coverage.
 
@@ -89,7 +96,7 @@ The [portable PWM MVP](dev-docs/GrevirPwmIntegration.md) is installed across Cor
 Peripherals and AVR. Applications collect module requests, account for existing
 resource claims and initialize selected ATmega328P Timer0/1/2 drivers automatically.
 The former prototype forwards to these libraries; its four oracle checks remain
-separate from the 125-case production suite. A real ESP32 backend, board integration
+separate from the 148-case production suite. A real ESP32 backend, board integration
 and additional timer features remain future work.
 
 See the [repository plan](dev-docs/GrevirRepositoryPlan.md) and

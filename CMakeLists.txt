@@ -14,3 +14,6 @@ add_subdirectory(grevir-core)
 add_subdirectory(grevir-peripherals)
 add_subdirectory(grevir-registers)
 add_subdirectory(grevir-avr)
+
+add_subdirectory(grevir-pulse-codec)
+add_subdirectory(grevir-packet)
