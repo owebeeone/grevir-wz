@@ -354,3 +354,21 @@ The immediate native compile check comes first. Introduce the broader checks as
 the corresponding work needs them; they are not part of the current compile-only
 acceptance criterion. Their compiler versions, fixtures and results remain future
 implementation work.
+
+## Experimental portable timer MVP checkpoint — 21 September 2026
+
+The standalone timer-allocation experiment now adds declaration-generated ATmega328P
+Timer0/1/2 fast PWM and typed register setup/duty bindings. Its four sanitizer-backed
+CTest checks include the existing allocator/frequency oracles plus all six PWM
+routes, shared-channel independence, one-tick/endpoints, full 16-bit period,
+invalid writes, reservations/conflicts and 168 exhaustive period-search comparisons.
+The production suite remains 123 cases. All 18 AVR public headers and nine experiment
+headers compile independently; isolated AVR production/host/install/consumer checks
+pass. Raw-token brace checks cover 154 production/test C++ files and 14 experiment
+files, including disabled branches. Native optimized setup/duty probes have no
+floating or 64-bit arithmetic or runtime allocation; AVR cost is unmeasured.
+
+Only the experimental fixed-frequency fast-PWM path is covered end to end. Its
+README records explicit startup preconditions and duty rounding. MCU compiler and
+hardware validation remain on hold; additional devices/timer features and a real
+ESP32 backend remain TBD.

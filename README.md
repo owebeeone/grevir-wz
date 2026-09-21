@@ -85,10 +85,12 @@ The earlier [legacy compile baseline](native-compile-check/README.md) remains
 available separately. It deliberately uses the original Ardoinus checkout; the
 new foundation build does not.
 
-A separate [host-only timer allocation prototype](experiments/timer-allocation/README.md)
+A separate [timer allocation prototype](experiments/timer-allocation/README.md)
 now exercises deterministic allocation and common/resident-target configuration
-using synthetic inventories. It is not part of the installed libraries or the
-123-case production suite.
+using synthetic inventories and an experimental end-to-end ATmega328P Timer0/1/2
+fast-PWM adapter with real register bindings. Its four checks are separate from
+the installed libraries and the 123-case production suite. Other timer features
+and a real ESP32 backend remain TBD.
 
 See the [repository plan](dev-docs/GrevirRepositoryPlan.md) and
 [extraction progress](dev-docs/GrevirExtractionProgress.md). Source ownership and

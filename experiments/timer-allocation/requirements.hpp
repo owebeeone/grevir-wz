@@ -33,7 +33,7 @@ constexpr bool identifier(std::string_view value) {
 
 enum class Target { avr, atmega328p, esp32 };
 enum class Waveform { any, fast, phase_correct };
-enum class Source { any, icr, apb };
+enum class Source { any, icr, apb, built_in, ocra };
 enum class ConfigError { none, invalid_value, unsupported_option, conflict };
 
 struct Config {
@@ -57,7 +57,7 @@ template <typename Rate, typename Accuracy> struct Frequency {};
 template <std::uint32_t N, std::uint32_t D> struct DutyStepAtMost {};
 template <unsigned Physical> struct Pin {};
 template <Target T, typename... Options> struct For {};
-namespace avr { struct FastPwm {}; struct PhaseCorrectPwm {}; struct TopFromIcr {}; }
+namespace avr { struct FastPwm {}; struct PhaseCorrectPwm {}; struct TopFromIcr {}; struct BuiltInTop {}; struct TopFromOcra {}; }
 namespace esp32 { struct ApbClock {}; }
 
 template <Text Name, typename... Options>
@@ -149,12 +149,15 @@ struct AvrWaveform {
 };
 template <Target R> struct Apply<R, avr::FastPwm> : AvrWaveform<R, Waveform::fast> {};
 template <Target R> struct Apply<R, avr::PhaseCorrectPwm> : AvrWaveform<R, Waveform::phase_correct> {};
-template <Target R> struct Apply<R, avr::TopFromIcr> {
+template <Target R, Source S> struct AvrSource {
   static constexpr void run(Config& c) {
     if constexpr (!matches(R, Target::avr)) { c.fail(ConfigError::unsupported_option); }
-    else { constrain(c, c.source, Source::any, Source::icr); }
+    else { constrain(c, c.source, Source::any, S); }
   }
 };
+template <Target R> struct Apply<R, avr::TopFromIcr> : AvrSource<R, Source::icr> {};
+template <Target R> struct Apply<R, avr::BuiltInTop> : AvrSource<R, Source::built_in> {};
+template <Target R> struct Apply<R, avr::TopFromOcra> : AvrSource<R, Source::ocra> {};
 template <Target R> struct Apply<R, esp32::ApbClock> {
   static constexpr void run(Config& c) {
     if constexpr (R != Target::esp32) { c.fail(ConfigError::unsupported_option); }

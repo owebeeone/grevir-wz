@@ -10,6 +10,33 @@ This checkpoint includes the completed timer configuration, output application
 and ATmega328P timer/GPIO bindings below.
 AVR compiler and hardware validation stay on hold.
 
+## ATmega328P portable timer MVP — 21 September 2026
+
+The experimental portable path now generates synchronous fast-PWM candidates from
+all three existing ATmega328P timer declarations and emits typed setup/duty bindings.
+Built-in TOP, OCRA TOP with B output, Timer1 ICR TOP, independent shared channels,
+reservations and declaration-order independence are covered. No new device tables
+were copied. `pwm_clock.hpp` is newly authored waveform conversion, not another
+legacy extraction; the two existing configuration extraction hashes are refreshed.
+Fast PWM programs count−1 and reports clock/(divider*(TOP+1)); dual-slope remains
+clock/(2*divider*TOP). The low-level raw-OCR duty/rescaling convention remains;
+the experimental endpoint handles fast-PWM high ticks explicitly.
+
+All 123 production host cases and the isolated AVR production/host/install/consumer
+checks pass. The four standalone checks pass with address/undefined sanitizers,
+including all six PWM routes, full 16-bit period, endpoint/one-tick writes, invalid
+writes without IO, independent grouped outputs and 168 exhaustive period-oracle
+comparisons. Existing 6,144 allocator and 84,672 frequency comparisons still pass.
+Native optimized setup/duty and configuration probes show no floating or 64-bit
+arithmetic; metadata generation is constant evaluated. This does not establish AVR
+code size, cycle costs or electrical behavior. See the experiment README for the
+supported scope, startup preconditions and duty rounding contract.
+
+The experimental MVP is complete. Installed portable API/Core integration, a named
+ESP32 backend, board policies and additional timer features remain separate work.
+Other AVR variants, asynchronous operation, capture/interrupts and portable runtime
+frequency control stay TBD. AVR compiler and hardware validation remain on hold.
+
 ## Portable timer design prototype — 21 September 2026
 
 The independently reviewed design now has a standalone experiment under

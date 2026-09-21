@@ -9,6 +9,7 @@ namespace timer_prototype {
 struct Ratio {
   std::uint32_t numerator = 0;
   std::uint32_t denominator = 1;
+  constexpr bool positive() const { return numerator > 0 && denominator > 0; }
   constexpr bool valid() const {
     return numerator > 0 && numerator <= 1'000'000
       && denominator > 0 && denominator <= 1'000'000;
@@ -19,6 +20,23 @@ struct Ratio {
   }
   constexpr bool operator==(const Ratio&) const = default;
 };
+
+// Compare arbitrary uint64 ratios without overflowing a cross product.
+// Euclidean quotients reverse the comparison at each reciprocal step.
+constexpr bool fraction_at_most(std::uint64_t an, std::uint64_t ad,
+    std::uint64_t bn, std::uint64_t bd) {
+  bool reversed = false;
+  while (true) {
+    const auto aq = an / ad;
+    const auto bq = bn / bd;
+    if (aq != bq) { return reversed ? aq > bq : aq < bq; }
+    const auto ar = an % ad;
+    const auto br = bn % bd;
+    if (ar == 0 || br == 0) { return reversed ? br == 0 : ar == 0; }
+    an = ad; ad = ar; bn = bd; bd = br;
+    reversed = !reversed;
+  }
+}
 
 constexpr bool at_most(Ratio a, Ratio b) {
   return std::uint64_t{a.numerator} * b.denominator

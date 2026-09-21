@@ -1,9 +1,10 @@
-# Host-only timer allocation prototype
+# Timer allocation prototype and ATmega328P PWM MVP
 
 This standalone C++23 experiment exercises the
 [proposed design](../../dev-docs/GrevirTimerAllocationDesign.md). It is not a
-Grevir library, installed API, MCU backend or migration of working legacy code.
-No member repository or production header is changed by this experiment.
+Grevir installed API. The experimental ATmega328P adapter now connects real
+declarations to the existing driver; ESP32 still uses synthetic fixtures. The AVR
+production configuration layer separately fixes hardware PWM TOP conversion.
 
 ## Run
 
@@ -100,10 +101,10 @@ On AppleClang 21 / arm64 macOS / C++23:
   identity, joint conflict, no candidate, invalid model, budget exhaustion and
   reservation failure, plus conflicting common/target frequency requirements.
   Logs are in `build/timer-prototype/probe-*.log`.
-- All three CTest checks pass with address/undefined-behavior sanitizers enabled.
+- All four CTest checks pass with address/undefined-behavior sanitizers enabled.
   Sanitizers exercise the host allocation/frequency checks; static assertions
-  establish their own constant-evaluation validity. All seven headers compile
-  independently; the README example compiles. All eleven C++ files pass the
+  establish their own constant-evaluation validity. All nine headers compile
+  independently; the README example compiles. All fourteen C++ files pass the
   raw-token control-body brace check.
 
 This is a small verified model, not a complexity guarantee for all applications.
@@ -115,9 +116,9 @@ candidate generation and compiler-internal limits are outside that budget.
 ## Deliberate limits
 
 - Explicit candidate inventories, physical pins and numeric sharing-group IDs
-  stand in for backend generation, logical endpoint/board maps and `SameTimer`
-  composition. Only two-component request identities are implemented; nested
-  module paths, dependency references and setup ownership are not implemented.
+  remain in the synthetic model. The ATmega328P adapter generates candidates and
+  initializes each selected timer once; logical board maps, `SameTimer` composition,
+  nested module paths and dependency references remain deferred.
 - Frequency clauses accumulate into one interval; there is no fixed clause-count
   cap in that representation. Duty-step constraints retain the tighter bound.
   Other active constraints still require agreement; there is no implicit override.
@@ -128,18 +129,85 @@ candidate generation and compiler-internal limits are outside that budget.
 - Frequency/duty numerators and denominators must be positive and at most
   1,000,000; duty ratio is at most one; tolerance is at most 1,000,000 ppm. Frequency
   bounds are exact rational microhertz, not rounded fixed-point values: bound
-  numerators are at most 2*10^12 and denominators at most 10^6. Comparisons therefore
-  fit uint64_t (cross products at most 2*10^18). That arithmetic belongs to this
-  host/compile-time model and does not prescribe firmware arithmetic.
+  numerators are at most 2*10^12 and denominators at most 10^6. Candidate frequencies
+  can use the full positive uint32 numerator/denominator range. An exact Euclidean
+  fraction comparison avoids overflowing cross products against frequency bounds.
+  This is host/compile-time metadata, not firmware duty arithmetic.
 - The prototype reports one canonical primary diagnostic, not the complete
-  ordered error collection proposed in the design. It does not emit typed driver
-  bindings, domain setup owners, register writes, duty updates or waveform models.
+  ordered error collection proposed in the design. Shared-domain setup owners and
+  waveform simulation remain deferred. AVR typed bindings and register/duty updates
+  are described below.
 
-Before promoting anything into Grevir, settle the public spelling and initial
-sharing scope, implement backend candidate generation and the missing binding pieces,
-and define duty rounding/lifecycle behavior. Correct AVR TOP conversion before
-using the AVR implementation to generate real candidates. The standalone evidence
-does not validate an ESP32 device, an AVR driver or a complete portable PWM path.
+## ATmega328P MVP boundary
+
+`atmega328p_candidates.hpp` derives synchronous **fast PWM** candidates from the
+existing Timer0/1/2 mode/divider/width/output declarations. It includes built-in
+TOP, OCRA TOP (B output only), and Timer1 ICR TOP. Timer1's existing 8/9/10-bit
+built-in modes follow directly from its table. Physical pad names are explicit;
+these are not Arduino digital-pin numbers. Supported programmable TOP is 3..255
+or 3..65535. Phase-correct allocation, other devices, asynchronous Timer2, capture,
+interrupts, runtime frequency changes, board mappings and a real ESP32 backend
+remain TBD. No extra AVR timer-feature project is required for this MVP.
+
+The generator intersects grouped requests first. For each mode/prescaler it picks
+the longest period meeting the frequency interval, then checks duty resolution
+and pin routes. Shorter periods within that mode consume the same resources and
+have worse duty granularity, so retaining only the longest loses no solution in
+this fixed-frequency scope. Candidates prefer the smallest prescaler, then numeric
+WGM code; ordinary canonical timer/configuration/endpoint ordering breaks ties.
+Generated keys are stable under declaration reordering of the same request set.
+
+`atmega328p_program.hpp` emits typed endpoints. `setup()` initializes each chosen
+timer once: stop/normal mode, disconnect compares, reset count, write programmable
+TOP, initialize requested outputs LOW, apply PWM mode, start clock. The caller
+must have enabled the peripheral clocks, left Timer2 synchronous (`AS2=0`), disabled
+timer interrupts, and supplied exclusive ownership plus byte access/barrier policies.
+Setup is sequential, with no promise of glitch-free live reconfiguration. Duty
+updates guarantee the eventual steady setting, not cycle-synchronous transitions.
+
+```cpp
+#include "atmega328p_program.hpp"
+using namespace timer_prototype;
+namespace m = timer_prototype::atmega328p;
+
+using Motor = PwmRequest<"pwm",
+  Frequency<Hertz<1000>, WithinPpm<10'000>>, DutyStepAtMost<1,256>,
+  For<Target::avr, Pin<m::PB1>, Frequency<Hertz<1000>,Exact>,
+    avr::FastPwm, avr::TopFromIcr>,
+  For<Target::esp32, Pin<18>, esp32::ApbClock>>;
+// Device = existing TimerBindings<your byte-access policy, your barrier policy>.
+using App = m::Program<Device,16'000'000,Instance<"motor",Motor>>;
+static_assert(App::plan.ok());
+void initialize() { App::setup(); }
+bool quarter_duty() {
+  return App::Pwm<"motor">::write(1,4); // 25%; TOP=15999, OCR=3999.
+}
+```
+
+`write(n,d)` rejects d=0 or n>d without IO; otherwise it rounds the number of high
+ticks downward. `writeTicks(high_ticks)` exposes every realizable duty step,
+including 65535/65536 and full duty on a 16-bit timer. It rejects values above the
+period. Zero/full duty use GPIO endpoints; interior fast-PWM duty writes OCR=ticks−1,
+including OCR=0 for a one-tick pulse. Group members have independent compare values.
+`actual_frequency` and `duty_step` expose the selected exact rational metadata.
+Only 32-bit bounded multiplication/division is needed in the dynamic fraction path;
+allocation and its temporary vectors are evaluated at compilation.
+
+The sanitizer-backed checks cover all three timers, all six output routes,
+independent shared outputs, endpoints/one-tick duty, invalid writes without IO,
+maximum TOP and built-in 9/10-bit selection, reservations, OCRA conflicts and
+reordering. 168 period searches agree with a separate exhaustive period oracle.
+Native optimized setup/duty probes contain no floating or 64-bit arithmetic or
+runtime allocation; these are host observations, not AVR code-size/cycle evidence.
+The production 123-case suite, isolated AVR installation and installed consumer
+pass with the corrected TOP expectations. AVR compiler/hardware validation stays
+on hold. The byte mocks verify register effects, not electrical waveforms.
+
+This is the **experimental end-to-end MVP**. Promotion into installed Grevir APIs,
+application/Core assembly and a named ESP32 backend remain separate integration
+work. The existing low-level raw-OCR duty API and its inherited runtime rescaling
+convention are unchanged; the portable fixed-frequency endpoint uses the explicit
+hardware duty conversion above.
 
 ## File boundaries
 
@@ -147,6 +215,7 @@ does not validate an ESP32 device, an AVR driver or a complete portable PWM path
 owns bounded rational comparisons; `frequency_window.hpp` owns exact frequency
 intervals; `model.hpp` owns inventory/result records;
 `validation.hpp` owns topology/ownership checks; `allocator.hpp` owns canonical
-search. Fixtures, static checks, oracle comparison and compiler rejection probes
+search. `atmega328p_candidates.hpp` owns declaration-driven generation and
+`atmega328p_program.hpp` owns selected-driver setup/duty binding. Fixtures, static checks, oracle comparison and compiler rejection probes
 are separate from that prototype implementation. These boundaries follow the
 split-files guidance; no large legacy source was moved or reformatted.

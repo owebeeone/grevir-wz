@@ -46,7 +46,7 @@ constexpr bool normalize_model(P& p) {
   }
   for (auto& c : p.candidates) {
     if (c.key == 0 || c.configuration == 0 || !is_kind(c.timer, Kind::timer)
-        || !c.frequency.valid() || c.count == 0 || c.count > c.endpoints.size()) { return false; }
+        || !c.frequency.positive() || c.count == 0 || c.count > c.endpoints.size()) { return false; }
     if (c.domain != 0 && (!is_kind(c.domain, Kind::domain) || c.setting == 0)) { return false; }
     if (c.domain == 0 && c.setting != 0) { return false; }
     c.frequency = c.frequency.normalized();

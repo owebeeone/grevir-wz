@@ -355,8 +355,10 @@ consolidated in `avr/timer/output.hpp`: output settings/application, bounded int
 duty adjustment, validated pin composition and the timer facade. Concrete ATmega328P
 clock/mode/field/register bindings, Timer0/1/2 inventory and B/C/D GPIO identities
 now reside in `devices/atmega328p/`, parameterized by byte access and a barrier.
-Timer1 word sequencing and W1C flags have host models. Waveform-specific TOP
-conversion, portable backend integration and board resource policy remain planned.
+Timer1 word sequencing and W1C flags have host models. Waveform-specific PWM TOP
+conversion is implemented; the experimental Timer0/1/2 portable adapter generates
+candidates and applies setup/duty bindings. Installed portable API/Core integration
+and board resource policy remain planned.
 AVR compiler and hardware validation are on hold.
 
 The GPIO base header has a similar overlap. Do not discard either implementation
@@ -507,9 +509,10 @@ records the required deterministic, declaration-order-independent allocation
 contract and common/resident-target selection semantics, and proposes the first
 PWM scope, selection rules and ownership model.
 The [standalone host prototype](../experiments/timer-allocation/README.md) now
-exercises a bounded subset with synthetic inventories. The production allocator
-and portable-to-AVR connection remain unimplemented; the experiment is not an
-installed API or a completion of the extraction assignments.
+exercises a bounded subset with synthetic inventories plus an end-to-end
+ATmega328P Timer0/1/2 fast-PWM adapter. It generates real candidates and typed
+setup/duty bindings. The experiment is not an installed API or a completion of
+Core/application integration or ESP32 backend work. Additional AVR features are TBD.
 
 ## Generators and supporting files
 

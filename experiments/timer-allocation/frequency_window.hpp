@@ -18,7 +18,7 @@ struct FrequencyBound {
     return {numerator / divisor, static_cast<std::uint32_t>(denominator / divisor)};
   }
   constexpr bool at_most(FrequencyBound other) const {
-    return numerator * other.denominator <= other.numerator * denominator;
+    return fraction_at_most(numerator, denominator, other.numerator, other.denominator);
   }
   constexpr bool operator==(const FrequencyBound&) const = default;
 };
@@ -50,7 +50,7 @@ struct FrequencyWindow {
       upper.at_most(other.upper) ? upper : other.upper, true};
   }
   constexpr bool contains(Ratio actual) const {
-    if (!valid() || empty() || !actual.valid()) { return false; }
+    if (!valid() || empty() || !actual.positive()) { return false; }
     const FrequencyBound value{std::uint64_t{actual.numerator} * 1'000'000, actual.denominator};
     return lower.at_most(value) && value.at_most(upper);
   }
