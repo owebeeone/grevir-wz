@@ -4,8 +4,8 @@ Selected 18 September 2026; updated 21 September for the foundation test migrati
 and portable GPIO/timing, buttons, PWM, storage, timer requirements and register access. **Hardware validation is on hold.**
 
 Implemented: opt-in CMake/CTest host tests with pinned Catch2 3.8.1 and shared
-setup in Grevir Test Support. Ninety-seven cases pass: Base 5, Time 4, Core 10,
-Peripherals 29, Registers 23, Test Support 3, AVR 23. All seven retained Base/Time files build (including static-only
+setup in Grevir Test Support. 102 cases pass: Base 5, Time 4, Core 10,
+Peripherals 29, Registers 23, Test Support 3, AVR 28. All seven retained Base/Time files build (including static-only
 type algorithms); their old test framework dependency is removed. GPIO fixtures
 record logical pin operations, and a controlled clock exercises production pollers,
 a blinking application and debounced button events. Period-division and inherited
@@ -42,6 +42,13 @@ The two source groups match after whitespace normalization. ATmega328P tables
 remain fixtures; production algorithms accept caller-provided metadata. Isolated
 AVR packages and a consumer with Catch2/Test Support disabled pass. This does not
 validate waveform timing, generated device facts or a complete timer configuration.
+
+Timer-definition extraction adds five runtime cases and thirteen static assertions,
+including native-width TOP read traces, optional validity, capture-control masks,
+empty/restricted source lists and absent-feature no-ops. Both legacy source groups
+match after whitespace normalization. Independent headers, isolated packages and
+the installed consumer pass with explicit mode traits and register access policies.
+Capture interrupts, physical filtering and target register atomicity are unvalidated.
 
 Core compiler probes cover six valid applications, seventeen expected resource
 failures, two dependency cycles and parameter-index selection/bounds. Peripheral

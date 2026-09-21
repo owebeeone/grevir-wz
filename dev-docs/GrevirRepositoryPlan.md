@@ -341,8 +341,10 @@ checked arithmetic and compile-time mapping diagnostics are included. Eleven
 legacy assertions and computed mock-register writes pass. The matching waveform
 group is also consolidated in `avr/timer/mode.hpp`, with caller-provided tables,
 compile-time filtering/exact TOP selection and runtime optional metadata lookup.
-ATmega328P tables remain host fixtures. Timer definitions, configuration, device
-encodings/inventory and output application remain planned.
+ATmega328P tables remain host fixtures. The matching reusable definition group is
+now in `avr/timer/definition.hpp`: capture/control metadata, TOP source access and
+timer composition with optional explicit mode traits. Configuration, concrete device
+encodings/timer inventory and output application remain planned.
 AVR compiler and hardware validation are on hold.
 
 The GPIO base header has a similar overlap. Do not discard either implementation

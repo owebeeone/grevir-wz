@@ -4,9 +4,46 @@ Latest checkpoint: 21 September 2026. Seven local members now exist: Base, Time,
 Core, Peripherals, Registers, AVR and development-only Test Support. Workspace
 `203a8fc` commits the shared fixture, portable legacy tests, AVR register/GPIO,
 initial timer-clock extraction, arithmetic review and cross-MCU/AVR review policies.
-`654bdf7` commits the three arithmetic corrections. The waveform-mode extraction
-below is now complete in the working tree and uncommitted.
+`654bdf7` commits the three arithmetic corrections and `e453c48` commits the
+waveform-mode extraction. The reusable timer-definition extraction below is now
+complete in the working tree and uncommitted.
 AVR compiler and hardware validation stay on hold.
+
+## Reusable timer-definition extraction — 21 September 2026
+
+The matching 213-line groups in the two legacy timer headers are consolidated
+into `timer/definition.hpp`. It provides capture/noise/edge setting appliers,
+output-compare metadata, TOP getters/register selection and `TimerDefinition`.
+The header remains below 500 lines. Caller-provided register policies and an
+optional explicit mode-traits argument remove any need for concrete device
+globals; omitted traits retain legacy enum specialization.
+
+Host probes reproduced three inherited failures: built-in TOP lookup reported
+present data for unknown or register-based modes; OCRA-only sources could not
+convert their inferred narrow optional to the public 32-bit optional; empty
+source lists had no dispatch implementation. Built-in getters now preserve
+absence and check the mode's TOP source. Timer-local typed dispatch fixes the
+result representation and empty-list behavior without changing Base algorithms.
+Low-level built-in getters now return an optional; OCRA/ICR getters still return
+native-width integers. Public `get_timer_top` retains its optional 32-bit result.
+
+All 102 host cases pass (Base 5, Time 4, Core 10, Peripherals 29, Registers 23,
+Test Support 3, AVR 28). Five new runtime cases cover capture control preservation,
+absent-feature no-ops, exact register-read traces/widths, optional validity, and
+restricted/empty sources. Thirteen static assertions plus compile-only MMIO users
+cover traits, field types and capability composition. Eight public AVR headers
+compile independently. Isolated production/host/install/consumer checks pass;
+the consumer exercises explicit traits and TOP reads without Catch2/Test Support.
+The brace checker covers 135 files including disabled branches. Evidence lives
+under ignored `build/timer-definition-*` and `build/timer-definition-review/`.
+
+Assignments 389 and 774 now share the canonical definition header: 74 actual
+extraction assignments plus one superseded. All 736 original source hashes remain
+unchanged. This is reusable definition logic, not concrete Timer0/1/2 inventories,
+interrupt wiring, register atomicity or validated hardware capture/noise behavior.
+No floating-point or 64-bit arithmetic was introduced. Next is timer configuration,
+then runtime output application and concrete device bindings; AVR compiler and
+hardware validation remain on hold.
 
 ## Timer waveform-mode extraction — 21 September 2026
 
