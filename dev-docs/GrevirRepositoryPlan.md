@@ -338,8 +338,11 @@ The first clock group is now consolidated in `avr/timer/clock.hpp`: both legacy
 copies matched after whitespace normalization. Native checks exposed and corrected
 non-exact selector lookup and truncated divider requirements; explicit traits,
 checked arithmetic and compile-time mapping diagnostics are included. Eleven
-legacy assertions and computed mock-register writes pass. Waveform modes,
-configuration, device encodings/inventory and output application remain planned.
+legacy assertions and computed mock-register writes pass. The matching waveform
+group is also consolidated in `avr/timer/mode.hpp`, with caller-provided tables,
+compile-time filtering/exact TOP selection and runtime optional metadata lookup.
+ATmega328P tables remain host fixtures. Timer definitions, configuration, device
+encodings/inventory and output application remain planned.
 AVR compiler and hardware validation are on hold.
 
 The GPIO base header has a similar overlap. Do not discard either implementation

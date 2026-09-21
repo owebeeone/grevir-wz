@@ -4,8 +4,46 @@ Latest checkpoint: 21 September 2026. Seven local members now exist: Base, Time,
 Core, Peripherals, Registers, AVR and development-only Test Support. Workspace
 `203a8fc` commits the shared fixture, portable legacy tests, AVR register/GPIO,
 initial timer-clock extraction, arithmetic review and cross-MCU/AVR review policies.
-The three arithmetic corrections below are uncommitted.
+`654bdf7` commits the three arithmetic corrections. The waveform-mode extraction
+below is now complete in the working tree and uncommitted.
 AVR compiler and hardware validation stay on hold.
+
+## Timer waveform-mode extraction — 21 September 2026
+
+`timer/mode.hpp` contains one canonical waveform metadata/lookup group from
+`ardo_avr_base_timer.h` and `ardo_supplemental_atmega328p_dev.h`. The 263-line
+legacy groups match after whitespace normalization. A bounded move keeps the
+complete declarations and namespace together; the new header is 284 lines.
+Its direct Base dependency is explicit in CMake exports and Arduino metadata.
+
+Mode filtering returns a tuple in declaration order; built-in TOP lookup returns
+an exact match or `void`. Runtime enum lookup returns optional metadata, with
+first-match behavior retained. Unknown/reserved encodings produce an empty
+optional, and out-parameter misses preserve their caller's previous value.
+Native probes reproduced two inherited interface gaps: `found` existed only on
+empty tables and `built_in_type` only on nonempty tables. Both now work in either
+case. An explicit 32-bit `UnspecifiedTimerTop` marker replaces the unrelated
+native-width `NA` dependency. No floating or 64-bit arithmetic is introduced.
+
+ATmega328P enum encodings and tables are fixture data only, not a production
+device inventory. Unsupported queries return an empty tuple/`void`; mandatory
+request diagnostics belong in the later configuration layer. Caller-supplied
+tables are not newly validated as hardware facts in this increment.
+
+Evidence: all 97 host cases pass (Base 5, Time 4, Core 10, Peripherals 29,
+Registers 23, Test Support 3, AVR 23). Four new runtime cases cover 21 fixture
+entries, reserved/unknown encodings, output preservation and split mock fields.
+Six relocated legacy assertions plus 22 additional assertions cover compile-time
+selection and missing requests. Seven public AVR headers compile independently.
+Isolated AVR production/host builds, installation and the installed consumer pass;
+the consumer uses its own enum/table and disables Catch2/Test Support discovery.
+The brace check covers 131 C++ files, including disabled branches. Logs are under
+ignored `build/timer-mode-*` and `build/timer-mode-review/`.
+
+Ledger assignments 390 and 775 now share the canonical header: 72 actual
+extraction assignments plus one superseded. All 736 original source hashes remain
+unchanged. Timer definitions are next, followed by configuration/output application
+and concrete device bindings; AVR compiler and hardware validation remain on hold.
 
 ## Arithmetic corrections — 21 September 2026
 

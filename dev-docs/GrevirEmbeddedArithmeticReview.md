@@ -20,7 +20,7 @@ defect, and the implied generic no-FPU policy for scaling, are withdrawn below.
 ## Follow-up corrections — 21 September 2026
 
 The user authorized fixes after checkpoint `203a8fc`. Findings 1 and 2 and the
-related integer-promotion defect are now corrected in the working tree:
+related integer-promotion defect were corrected and committed at `654bdf7`:
 
 - Integer AVR timer calls use 32-bit integer calculations, including a safe mask
   and successive ceiling divisions. Explicit floating calls use the selected

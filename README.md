@@ -38,8 +38,8 @@ Core defects are recorded in its README. Hardware validation is on hold.
 
 ## Host mock validation
 
-The opt-in Catch2/CTest suite has 89 passing cases: Base 4, Time 4, Core 10,
-Peripherals 29, Registers 23, Test Support 3 and AVR 16. All seven retained Base/Time test files now compile; the
+The opt-in Catch2/CTest suite has 97 passing cases: Base 5, Time 4, Core 10,
+Peripherals 29, Registers 23, Test Support 3 and AVR 23. All seven retained Base/Time test files now compile; the
 type-algorithm file supplies static assertions rather than a runtime case. Core
 covers application lifecycle/state. Peripheral mocks record input/output and
 open-drain operations and control time for expiry, catch-up, wraparound, sequences,
@@ -53,7 +53,10 @@ bounds and missing-field diagnostics. AVR mocks check address offsets, GPIO
 configuration order, preserved bits and directional/open-drain wrappers; the
 dynamic output configuration now agrees with its typed counterpart. Initial timer
 clock checks cover divider selection, count/frequency arithmetic and applying
-computed settings to mock registers. These execute production code.
+computed settings to mock registers. Waveform checks cover metadata selection,
+unsupported combinations, reserved encodings and split register fields using
+device tables retained as fixtures. Base also checks the corrected unsigned random
+fallback in an isolated executable. These execute production code.
 Interrupts, MCU-specific register side effects and electrical behavior remain
 outside the current mock coverage.
 
