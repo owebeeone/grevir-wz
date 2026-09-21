@@ -262,13 +262,13 @@ selection and application operations. The ledger names the defining API groups.
 behavior must be supplied explicitly, rather than pulled into portable machinery
 through `setl_system.h`.
 
-On 21 September the first four groups were extracted into `grevir-registers`:
-mapping, typed values, fields and explicit access binding. They pass native
-compilation, memory-backed behavior checks and standalone installation. Selection
-and multi-register application were then extracted with an explicit synchronization
-policy, preserved ordering and missing/colliding-field diagnostics. The complete
-legacy test and shared `DebugMcuRegister` mappings remain planned. The current byte-array fixture is package-local;
-no MCU access/barrier or register side-effect behavior has been validated.
+On 21 September mapping, typed values, fields, access, selection and multi-register
+application were extracted into `grevir-registers` with explicit policies and
+preserved operation ordering. Shared memory and the adapted `DebugMcuRegister`
+now live in Test Support. The remaining portable legacy exercises now assert their
+results; the full test mapping stays pending for timer/device-specific exercises.
+The first AVR register/GPIO layer passes native mocked access checks. Target
+compilation, actual barriers and device side effects have not been validated.
 
 `setl_system.h` currently defines `System` only for a limited macro set, and its
 Xtensa barriers are empty. Separate portable diagnostic/policy contracts from AVR
@@ -287,8 +287,13 @@ and consolidate only after equivalence or intentional differences are establishe
 useful resource graph. Move `ResourceType`, `Dependency`, `RootDependencies`,
 `ResourceFinder` and their helpers to `grevir-core/resource_graph.hpp`; keep actual
 AVR access in `grevir-avr/register.hpp`. Device pin/mux/peripheral relationships
-instantiate that generic graph in the device backend. Mock register storage goes
-to test support, selected by an injected access policy.
+instantiate that generic graph in the device backend. Mock register storage now lives
+in Test Support, selected by an injected access policy. The first `grevir-avr`
+increment extracts this register binding, explicit memory/I/O offsets and the
+consolidated GPIO configuration/wrapper code. Core already owns the generic graph.
+Dynamic output configuration now follows the typed PORT-before-DDR ordering;
+host traces reproduce the old mismatch and verify the correction. Concrete device
+inventories and target/Arduino bindings remain planned.
 
 `ardo_timers.h` also needs a real split. Portable frequency/resolution requests and
 timer-selection interfaces belong to peripherals; generic allocation belongs to
@@ -328,6 +333,15 @@ The 2,006-line `ardo_avr_base_timer.h` hardcodes ATmega328P data and overlaps th
 manual header. It is not automatically a clean generic backend. Compare the two
 implementations per API group and establish one canonical implementation with
 explicit MCU traits. Keep historical copies outside `src/` while reconciling.
+
+The first clock group is now consolidated in `avr/timer/clock.hpp`: both legacy
+copies matched after whitespace normalization. Native checks exposed and corrected
+non-exact selector lookup and truncated divider requirements; explicit traits,
+checked arithmetic and compile-time mapping diagnostics are included. Eleven
+legacy assertions and computed mock-register writes pass. Waveform modes,
+configuration, device encodings/inventory and output application remain planned.
+AVR compiler and hardware validation are on hold.
+
 The GPIO base header has a similar overlap. Do not discard either implementation
 merely because names look duplicated.
 

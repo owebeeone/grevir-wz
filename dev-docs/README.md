@@ -23,6 +23,9 @@ on hold; the remaining `grevir-xxx` boundaries are described in the plan.
 
 - [Repository and C++ API extraction plan](GrevirRepositoryPlan.md)
 - [Extraction progress and validation](GrevirExtractionProgress.md)
+- [Embedded arithmetic review](GrevirEmbeddedArithmeticReview.md)
+- [Cross-MCU implementation and review policy](review-policies/CrossMcu.md)
+- [AVR implementation and review policy](review-policies/Avr.md)
 - [Selected build and test framework and implementation plan](GrevirBuildAndTestPlan.md)
 - [First 30 files in each proposed repo — query results](GrevirFirst30Files.md)
 - [Queryable file map (SQLite)](GrevirFileMap.sqlite)

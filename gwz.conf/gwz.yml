@@ -53,3 +53,11 @@ members:
   desired:
     local_only: true
   remotes: []
+- id: mem_grevir_avr
+  path: grevir-avr
+  type: git
+  source_id: src_grevir_avr
+  active: true
+  desired:
+    local_only: true
+  remotes: []

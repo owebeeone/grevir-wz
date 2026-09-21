@@ -4,19 +4,28 @@ Selected 18 September 2026; updated 21 September for the foundation test migrati
 and portable GPIO/timing, buttons, PWM, storage, timer requirements and register access. **Hardware validation is on hold.**
 
 Implemented: opt-in CMake/CTest host tests with pinned Catch2 3.8.1 and shared
-setup in Grevir Test Support. Sixty-five cases pass: Base 4, Time 4, Core 10,
-Peripherals 29, Registers 18. All seven retained Base/Time files build (including static-only
+setup in Grevir Test Support. Eighty-nine cases pass: Base 4, Time 4, Core 10,
+Peripherals 29, Registers 23, Test Support 3, AVR 16. All seven retained Base/Time files build (including static-only
 type algorithms); their old test framework dependency is removed. GPIO fixtures
 record logical pin operations, and a controlled clock exercises production pollers,
 a blinking application and debounced button events. Period-division and inherited
 debounce/setup defects have reproduced failures and now pass. The fixtures do not
 model electrical or MCU behavior. Five PWM cases validate scaling and pin lifecycle;
 two reproduced an input-narrowing bug, now fixed. Five storage cases validate
-byte representation, offsets, updates and region isolation. Eighteen register cases
+byte representation, offsets, updates and region isolation. Twenty-three register cases
 validate sparse mappings, typed reads/writes, selection, grouped operations and
 explicit barrier scopes against a byte array.
 They reproduce and fix unnecessary full-width reads and writes outside a mask;
-MCU side effects and interrupts remain unmodeled.
+Five cases now replace printed output in the legacy portable register exercises
+with assertions. Shared register storage adds three cases and one valid/three
+invalid bounds probes. Nine AVR cases cover explicit offsets, GPIO ordering and
+directional wrappers; dynamic configuration was corrected to match typed output
+ordering. Seven additional AVR timer-clock cases cover prescaler lookup/rounding,
+count/frequency examples, invalid requests, an independent capacity model, explicit
+traits and computed mock-register writes. Eleven legacy static assertions and one
+valid/seven rejected clock-map probes pass. MCU side effects, electrical behavior
+and interrupts remain unmodeled. AVR compiler validation is on hold alongside
+hardware validation.
 
 Core compiler probes cover six valid applications, seventeen expected resource
 failures, two dependency cycles and parameter-index selection/bounds. Peripheral
@@ -31,17 +40,24 @@ peripheral consumer and a register consumer build and run without Catch2. See
 [extraction progress](GrevirExtractionProgress.md).
 
 The installed Make executor runs these builds; Ninja remains the selected
-alternative when available. Shared presets, CI, shared register/interrupt fixtures,
-MCU adapters and hardware validation remain future work. The current register
-memory fixture is package-local.
+alternative when available. Shared presets, CI, interrupt fixtures, concrete MCU
+inventories and hardware validation remain future work. Register memory is now
+shared through the development-only `grevir::test_support` target. A fixture-only
+consumer builds without Catch2; AVR and Registers production consumers build with
+both Catch2 and Test Support discovery disabled.
 
 ## Selected stack
+
+Code reviews follow the [cross-MCU policy](review-policies/CrossMcu.md), with
+the [AVR supplement](review-policies/Avr.md) for AVR code and instantiations.
+Host validation establishes neither AVR costs nor the appropriate numeric
+representation for every target of the shared API.
 
 Use **CMake + Ninja + CTest**, with **Catch2 for host test assertions/reporting** and
 Grevir's own hardware fixtures as those tests become necessary. Core now has a
 behavioral mock fixture; GPIO/clock fixtures now accompany the first peripheral
-increment. Registers now has a local byte-array access fixture; shared register
-fixtures and interrupt models remain planned.
+increment. Registers and AVR use the shared byte-array access fixture; interrupt
+models remain planned.
 
 Gianni accepted this recommendation on 18 September 2026. CMake, Ninja, CTest,
 host-only Catch2 and the Grevir fixture approach are selected for the eventual

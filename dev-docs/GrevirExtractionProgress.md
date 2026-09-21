@@ -1,11 +1,122 @@
 # Grevir extraction progress
 
-Latest checkpoint: 21 September 2026. Six local members now exist: Base, Time,
-Core, Peripherals, Registers and development-only Test Support. The initial
-three-library baseline was followed by portable GPIO/timing (`569b1b7`),
-division/debounce/buttons (`e5bd777`), PWM/sequencer (`dedfa39`) and storage/timer
-requirements (`bfaf111`). This checkpoint includes the register fields/access and selection/application increments.
-Hardware validation stays on hold.
+Latest checkpoint: 21 September 2026. Seven local members now exist: Base, Time,
+Core, Peripherals, Registers, AVR and development-only Test Support. The register
+fields/access/selection checkpoint is committed at workspace `2797924` (Registers
+`7ecd1e2`), following storage/timer `bfaf111`. The current shared-fixture, portable
+legacy-test, first AVR register/GPIO and initial timer-clock increments are uncommitted.
+AVR compiler and hardware validation stay on hold.
+
+## Initial timer clock extraction — 21 September 2026
+
+The user authorized the next timer recommendation while AVR compiler and hardware
+validation remain on hold. Concrete GPIO device bindings/integration are still
+pending; this clock group has no dependency on them. No commit was made.
+
+The divider mappings and five clock helpers were compared between
+`ardo_avr_base_timer.h` and `ardo_supplemental_atmega328p_dev.h`: their source groups
+match after whitespace normalization. One canonical `timer/clock.hpp` now provides
+lookup, divider choice, count and frequency calculations with explicit clock
+frequency and optional explicit traits. Concrete selector enums remain fixture
+inputs; no device timer inventory or waveform configuration is claimed.
+
+Native checks reproduced two inherited defects: lookup used <= instead of equality,
+so stopped clock mapped to divide-by-one, and divider calculation truncated before
+selection, choosing insufficient prescalers at boundaries. Lookup now returns a
+32-bit invalid sentinel for unmapped selectors; required ratios round upward.
+Table validation rejects invalid dividers, order, repeated selectors and mixed
+enums, including faults deeper in the table. Range/finite checks and widened
+arithmetic avoid invalid divisions, shifts and result conversions. The documented
+unit-divider fallback remains explicit in `getClockTimerTop`; frequency queries
+for unmapped selectors return zero.
+
+The count convention is intentionally preserved. Waveform-dependent TOP encoding,
+clock-source hardware behavior, complete configuration, timer inventory and output
+application remain later groups. Target numeric behavior and cost are unvalidated.
+
+Evidence on Apple Clang 21 / arm64 macOS / C++23:
+
+- Full suite: 89/89 pass, with 16 AVR cases and 136 AVR assertions in seeded order.
+  Seven new cases cover exact lookup, rounding boundaries, legacy examples,
+  an independent integer capacity model, invalid arithmetic, sparse selector
+  encodings with explicit traits, and computed settings applied to mock registers.
+- Eleven legacy compile-time assertions pass. One valid and seven invalid mapping
+  probes pass. All six AVR public headers compile independently.
+- Isolated AVR production/host builds and installed consumer pass offline with
+  Catch2/Test Support disabled for the production consumer. It instantiates explicit
+  clock traits and checks divider/count/frequency values. Logs are under ignored
+  `build/timer-clock-*` and `build/timer-clock-packages/`.
+- Scope checks cover 126 C++ files including disabled branches. All 736 original
+  source hashes are unchanged; all 70 actual extraction hashes match the ledger.
+
+Clock mappings 387 and 772 are now extracted into the same canonical header.
+The other timer groups remain planned. This increment and the preceding shared
+fixture/GPIO increment remain uncommitted; the last commit is `2797924`.
+
+## Shared register fixture and first AVR register/GPIO extraction — 21 September 2026
+
+The register checkpoint was clean before this increment. `gwz repo create
+grevir-avr` registered the seventh member. The requested three steps are now
+implemented with the following boundaries.
+
+1. Test Support installs `grevir/test/register_memory.hpp` and exports
+   `grevir::test_support`. The former Registers-local memory implementation is now
+   a reusable capacity/identity-bound store with traces, reset and checked access.
+   The legacy `DebugMcuRegister` binding is adapted to `memcpy`, checked regions and
+   masked input, replacing its packed-object pointer. Its caller-owned storage
+   contract remains; raw `ptr()`/`Wrapper` internals do not. Fixture-only package
+   discovery does not load Catch2. Registers and AVR both use the shared fixture.
+2. `bit_fields_test.cpp` migrates the four remaining portable legacy exercises:
+   `testRegSelector`, `testRegSelector2`, `getTypeWGM1`, `rwTypeWGM1`. Their printed
+   values are now assertions. Local enum/field/address fixture definitions remove
+   the device-header dependency. Three traits assertions and an exhaustive
+   sixteen-value split-enum case supplement the migrated behavior. Original
+   timer calculations, concrete device ports and timer inspection remain pending;
+   therefore the whole historical test assignment (786) is not marked complete.
+3. AVR now provides explicit register bindings, memory/I/O-offset definitions,
+   `GpioPortDefinition`/`GpioPort` and input/output/bidirectional wrappers. The
+   duplicate GPIO bodies are consolidated; the generic resource graph already
+   lives in Core. `legacy_register_definitions.hpp` forwards to the richer canonical
+   definitions instead of duplicating names. No generated device inventory or
+   Arduino dependency is added.
+
+`RegisterSelector<Policy>` replaces the numeric debug-mode switch. Register aliases
+require an access binding, and GPIO requires a RAII barrier type. `VolatileAccess`
+is an explicit raw-MMIO policy adapted from legacy `McuRegister`; it is compiled
+but never executed by host tests. It supplies neither interrupt exclusion nor
+special peripheral/multi-byte behavior. A real AVR barrier and target compiler
+validation remain pending. Mock byte storage does not simulate electrical pads,
+clear-on-write flags, interrupts or target synchronization.
+
+The GPIO trace checks reproduced a legacy mismatch: dynamic output configuration
+wrote DDR before PORT, while typed output configuration wrote PORT before DDR.
+The dynamic path now follows the typed order. Input configuration still disables
+output before updating the latch. Both dynamic output levels failed before this
+fix; all four dynamic/typed combinations now agree.
+
+Evidence on Apple Clang 21 / arm64 macOS / C++23:
+
+- Workspace: 82/82 cases pass (Base 4, Time 4, Core 10, Peripherals 29, Registers 23,
+  Test Support 3, AVR 9). Seeded runs pass 692 register assertions and 45 AVR
+  assertions. New shared-fixture cases cover storage isolation/reset, invalid
+  access before mutation, masked updates and unaligned compatibility access.
+- Shared compatibility bounds accept one valid region and reject three invalid
+  ones. Existing register/Core/Peripheral compiler probes remain passing. Five
+  AVR public headers compile independently with explicit offset/type assertions
+  and a compile-only raw-MMIO user.
+- Isolated Test Support, Registers and AVR production/host builds pass offline.
+  Installed Registers/AVR consumers build and execute with Catch2 and Test Support
+  discovery disabled; a fixture-only consumer passes with Catch2 disabled.
+  Logs: ignored `build/avr-packages/`, `build/avr-*`, `build/shared-registers-*`.
+- Clang raw-token scope checking passes 121 C++ files, including disabled branches.
+  All 736 original source hashes are unchanged; 68 actual extraction assignment
+  hashes match, plus the separately superseded sequencer assignment.
+
+New extracted mappings: 71 (shared debug register access), 32/72 (register
+address definitions), 767 (AVR access binding), and 386/766 (consolidated GPIO).
+The complete legacy test mapping, old global AVR mock adapters, concrete device
+inventory, portable pin-backend binding and timer extraction remain later work.
+All current changes remain uncommitted; hardware validation remains on hold.
 
 ## Register selection and multi-register operations — 21 September 2026
 

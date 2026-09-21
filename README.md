@@ -6,8 +6,8 @@ GWZ manages the member checkouts; CMake compiles the libraries currently extract
 The extracted members are [grevir-base](grevir-base/README.md),
 [grevir-time](grevir-time/README.md), [grevir-core](grevir-core/README.md), and the first
 [grevir-peripherals](grevir-peripherals/README.md) and
-[grevir-registers](grevir-registers/README.md) increments.
-[grevir-test-support](grevir-test-support/README.md) supplies shared host-test setup.
+[grevir-registers](grevir-registers/README.md) and [grevir-avr](grevir-avr/README.md) increments.
+[grevir-test-support](grevir-test-support/README.md) supplies shared host-test setup and register-memory fixtures.
 Their root `library.properties` and `src/`
 directories follow Arduino library layout. Target compiler and Arduino sketch
 validation are still pending. Existing `setl` and `ardo` names remain; extracted pin/poller templates now take
@@ -38,8 +38,8 @@ Core defects are recorded in its README. Hardware validation is on hold.
 
 ## Host mock validation
 
-The opt-in Catch2/CTest suite has 65 passing cases: four Base, four Time, ten Core,
-twenty-nine Peripherals and eighteen Registers. All seven retained Base/Time test files now compile; the
+The opt-in Catch2/CTest suite has 89 passing cases: Base 4, Time 4, Core 10,
+Peripherals 29, Registers 23, Test Support 3 and AVR 16. All seven retained Base/Time test files now compile; the
 type-algorithm file supplies static assertions rather than a runtime case. Core
 covers application lifecycle/state. Peripheral mocks record input/output and
 open-drain operations and control time for expiry, catch-up, wraparound, sequences,
@@ -49,7 +49,11 @@ lifecycle; storage tests cover byte reads/writes and region offsets. Compile pro
 cover combined claims, storage bounds and explicit-backend timer requirements.
 Register fixtures cover sparse mappings, typed reads/writes, selection, grouped
 operations and explicit barrier scopes; compiler probes check field collisions,
-bounds and missing-field diagnostics. These execute production code.
+bounds and missing-field diagnostics. AVR mocks check address offsets, GPIO
+configuration order, preserved bits and directional/open-drain wrappers; the
+dynamic output configuration now agrees with its typed counterpart. Initial timer
+clock checks cover divider selection, count/frequency arithmetic and applying
+computed settings to mock registers. These execute production code.
 Interrupts, MCU-specific register side effects and electrical behavior remain
 outside the current mock coverage.
 
