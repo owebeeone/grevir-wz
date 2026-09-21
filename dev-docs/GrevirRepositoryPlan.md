@@ -300,9 +300,12 @@ timer-selection interfaces belong to peripherals; generic allocation belongs to
 core; AVR waveform/top-count options belong to the AVR backend. The present
 `SelectionResolver` is a **placeholder**, not an implemented global allocator.
 Replace the shared enum's fixed AVR-specific entries with an extension mechanism
-without making portable code import AVR. Preserve the current filter behavior in
-extraction tests, then make unsupported mandatory requirements a diagnosed error
-in the separately implemented allocator. The 21 September requirements increment
+without making portable code import AVR drivers. The new design must allow common
+requirements and multiple target-specific sections to coexist: apply common and
+resident-target requirements and ignore nonresident sections before validation.
+Unsupported active mandatory requirements are errors. No backward compatibility
+with the unused portable API is required; its existing shape provides direction
+only. The 21 September requirements increment
 now preserves the explicit filter and adds `CheckedTimerConfig<Backend, Config>`
 for mandatory request validation against a supplied backend. This does not implement
 `TimerSelector`, board inventory binding or global allocation; those remain planned.
@@ -498,6 +501,15 @@ A library needing a timer declares its requirements and receives an allocated
 binding. The global application assembly sees dependent modules, reservations and
 all resource claims. MCU backends supply candidates. This supports whole-application
 optimization without forcing a single monolithic source repository.
+
+The focused [timer allocation design draft](GrevirTimerAllocationDesign.md)
+records the required deterministic, declaration-order-independent allocation
+contract and common/resident-target selection semantics, and proposes the first
+PWM scope, selection rules and ownership model.
+The [standalone host prototype](../experiments/timer-allocation/README.md) now
+exercises a bounded subset with synthetic inventories. The production allocator
+and portable-to-AVR connection remain unimplemented; the experiment is not an
+installed API or a completion of the extraction assignments.
 
 ## Generators and supporting files
 

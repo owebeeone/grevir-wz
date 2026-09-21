@@ -10,6 +10,31 @@ This checkpoint includes the completed timer configuration, output application
 and ATmega328P timer/GPIO bindings below.
 AVR compiler and hardware validation stay on hold.
 
+## Portable timer design prototype — 21 September 2026
+
+The independently reviewed design now has a standalone experiment under
+[`experiments/timer-allocation`](../experiments/timer-allocation/README.md).
+Common/resident-target configuration, lazy inactive sections, named request
+identities, canonical backtracking, structured failures, shared timer ownership
+and shared-setting compatibility run against synthetic inventories. No production
+header, member repository or source-extraction ledger entry changed.
+
+AppleClang 21 compiles the static checks. Both standalone CTest checks pass with
+address/undefined sanitizers: 6,144 comparisons against an independent exhaustive
+oracle across all 512 three-request/three-timer graphs, plus a positive compiler
+control and six expected failures. The eight-request constexpr example establishes
+one immediate-solution case, not a worst-case compilation guarantee. Raw-token
+brace checking passes all nine prototype C++ files.
+
+The experiment is deliberately narrower than the design: explicit synthetic
+candidates/pins/group IDs, two-component names, one frequency constraint (or
+identical repeats), a simple timer/channel tree and one shared domain per candidate.
+Differing frequency clauses are diagnosed as unsupported rather than falsely
+declared unsatisfiable. No real driver binding, owner setup, Core range-claim
+integration or register IO is implemented. The existing 123 production host cases
+are unchanged and were not rerun for this isolated experiment. AVR TOP conversion,
+target compiler validation and hardware validation are not completed by it.
+
 ## ATmega328P timer/GPIO bindings — 21 September 2026
 
 Concrete clock/mode tables, COM encodings, timer fields/registers, Timer0/1/2

@@ -1,0 +1,15 @@
+cmake_minimum_required(VERSION 3.20)
+project(grevir_timer_prototype LANGUAGES CXX)
+enable_testing()
+add_executable(timer_prototype_checks static_checks.cpp oracle_checks.cpp)
+target_compile_features(timer_prototype_checks PRIVATE cxx_std_23)
+target_compile_options(timer_prototype_checks PRIVATE -Wall -Wextra -Wpedantic -Werror)
+option(TIMER_PROTOTYPE_SANITIZERS "Enable native address/undefined sanitizers" OFF)
+if(TIMER_PROTOTYPE_SANITIZERS)
+  target_compile_options(timer_prototype_checks PRIVATE -fsanitize=address,undefined -fno-omit-frame-pointer)
+  target_link_options(timer_prototype_checks PRIVATE -fsanitize=address,undefined)
+endif()
+add_test(NAME timer_prototype_oracle COMMAND timer_prototype_checks)
+add_test(NAME timer_prototype_rejections COMMAND "${CMAKE_COMMAND}"
+  "-DCOMPILER=${CMAKE_CXX_COMPILER}" "-DSOURCE=${CMAKE_CURRENT_SOURCE_DIR}"
+  "-DOUTPUT=${CMAKE_CURRENT_BINARY_DIR}" -P "${CMAKE_CURRENT_SOURCE_DIR}/check_rejections.cmake")

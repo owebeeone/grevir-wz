@@ -85,6 +85,11 @@ The earlier [legacy compile baseline](native-compile-check/README.md) remains
 available separately. It deliberately uses the original Ardoinus checkout; the
 new foundation build does not.
 
+A separate [host-only timer allocation prototype](experiments/timer-allocation/README.md)
+now exercises deterministic allocation and common/resident-target configuration
+using synthetic inventories. It is not part of the installed libraries or the
+123-case production suite.
+
 See the [repository plan](dev-docs/GrevirRepositoryPlan.md) and
 [extraction progress](dev-docs/GrevirExtractionProgress.md). Source ownership and
 per-file extraction status are queryable in `dev-docs/GrevirFileMap.sqlite`.

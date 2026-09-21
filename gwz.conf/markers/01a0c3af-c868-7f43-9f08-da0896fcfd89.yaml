@@ -1,0 +1,85 @@
+schema: gwz.marker/v0
+gwz_commit_id: 01a0c3af-c868-7f43-9f08-da0896fcfd89
+workspace_id: ws_default
+created_at: unix-ms:1789989472367
+created_by:
+  actor_id: unknown
+root:
+  path: .
+  before_commit: 9997c71aa48d6e1437762cc06f5bfb95a1e77690
+  branch: main
+selected_targets:
+- '@root'
+- mem_grevir_base
+- mem_grevir_time
+- mem_grevir_core
+- mem_grevir_test_support
+- mem_grevir_peripherals
+- mem_grevir_registers
+- mem_grevir_avr
+committed_targets:
+- '@root'
+members:
+  mem_grevir_avr:
+    path: grevir-avr
+    source_id: src_grevir_avr
+    source_kind: git
+    commit: b4a0cd27193f219262399a5cb0db259ce7009c2e
+    branch: main
+    detached: false
+    dirty: false
+    materialized: true
+  mem_grevir_base:
+    path: grevir-base
+    source_id: src_grevir_base
+    source_kind: git
+    commit: c6d1129d8c9b61fbb3ed735cad46a5234b0bf7c8
+    branch: main
+    detached: false
+    dirty: false
+    materialized: true
+  mem_grevir_core:
+    path: grevir-core
+    source_id: src_grevir_core
+    source_kind: git
+    commit: f7593d3979826534377d7645ab8af623587003a9
+    branch: main
+    detached: false
+    dirty: false
+    materialized: true
+  mem_grevir_peripherals:
+    path: grevir-peripherals
+    source_id: src_grevir_peripherals
+    source_kind: git
+    commit: 46badfdb7a3c72bd7078a427ebcb69e071ac50bb
+    branch: main
+    detached: false
+    dirty: false
+    materialized: true
+  mem_grevir_registers:
+    path: grevir-registers
+    source_id: src_grevir_registers
+    source_kind: git
+    commit: 630acf02e4e22eebf3c2cd70576b1974793724aa
+    branch: main
+    detached: false
+    dirty: false
+    materialized: true
+  mem_grevir_test_support:
+    path: grevir-test-support
+    source_id: src_grevir_test_support
+    source_kind: git
+    commit: f9274daccd399615c5f088d52cf03f251fb7044b
+    branch: main
+    detached: false
+    dirty: false
+    materialized: true
+  mem_grevir_time:
+    path: grevir-time
+    source_id: src_grevir_time
+    source_kind: git
+    commit: e52e6bffaa55f650db14d30fa88c6ecce8277364
+    branch: main
+    detached: false
+    dirty: false
+    materialized: true
