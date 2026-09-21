@@ -1,11 +1,40 @@
 # Grevir extraction progress
 
 Latest checkpoint: 21 September 2026. Seven local members now exist: Base, Time,
-Core, Peripherals, Registers, AVR and development-only Test Support. The register
-fields/access/selection checkpoint is committed at workspace `2797924` (Registers
-`7ecd1e2`), following storage/timer `bfaf111`. The current shared-fixture, portable
-legacy-test, first AVR register/GPIO and initial timer-clock increments are uncommitted.
+Core, Peripherals, Registers, AVR and development-only Test Support. Workspace
+`203a8fc` commits the shared fixture, portable legacy tests, AVR register/GPIO,
+initial timer-clock extraction, arithmetic review and cross-MCU/AVR review policies.
+The three arithmetic corrections below are uncommitted.
 AVR compiler and hardware validation stay on hold.
+
+## Arithmetic corrections — 21 September 2026
+
+- AVR clock helpers now branch by the caller's numeric types. Integer paths use
+  32-bit masks and successive divisions, preserving ceiling selection, odd clocks,
+  invalid sentinels, the unit-divider fallback and narrow-result range checks.
+  Explicit floating calls retain their chosen/common floating precision; bounds
+  reject a rounded power-of-two limit before conversion to an integer.
+- Base's compatibility random generator now has an unsigned 32-bit recurrence
+  and masks before conversion to `int`. Its disabled branch is exercised by a
+  standalone host executable; this does not validate every compatibility fallback.
+- The generic integer scaler widens its input before shifting. The correction
+  follows C++ promotion rules for AVR's 16-bit `int`, preserving the generic API.
+  Shared duration literals and fractional interactive scaling are unchanged.
+
+Evidence: 93/93 host cases pass (Base 5, Time 4, Core 10, Peripherals 29,
+Registers 23, Test Support 3, AVR 19), alongside existing compile probes and six
+new timer constant-expression assertions. Optimized native IR contains no
+floating-point or 64-bit arithmetic in the inspected dynamic 32-bit timer calls;
+the explicit `float` result path uses `float`. Native UBSan checks pass for the
+fallback random sequence and all 256 byte-to-32-bit scaler inputs. The brace check
+covers 127 C++ files, including disabled branches. Logs/probes are under ignored
+`build/arithmetic-fixes-*` and `build/embedded-cost-review/`. These are host/source
+checks, not AVR code generation, size, timing or hardware validation.
+
+Extraction hashes for Base scaler/random and both canonical clock assignments
+are updated. Original Ardoinus sources remain unchanged. The earlier extraction
+records below describe their original checkpoints; their uncommitted status was
+superseded by `203a8fc`.
 
 ## Initial timer clock extraction — 21 September 2026
 

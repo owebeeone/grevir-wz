@@ -6,7 +6,7 @@ runtime arithmetic or storage. Compatibility branches were included in the
 source search. Test Support is a host fixture package and was excluded from
 target-cost findings. This review does not cover unextracted Ardoinus drivers.
 
-No production code was changed. No AVR compiler or hardware validation was run.
+No production code was changed during the initial review. No AVR compiler or hardware validation was run.
 Native compiler probes were written under ignored `build/embedded-cost-review/`;
 they are not additions to the project's test suite.
 
@@ -16,6 +16,25 @@ Classification corrected after review feedback: apply the
 32-bit ESP32; a cost concern for one target is not automatically a shared-API
 defect. The earlier classification of wide time literals as a medium-severity
 defect, and the implied generic no-FPU policy for scaling, are withdrawn below.
+
+## Follow-up corrections — 21 September 2026
+
+The user authorized fixes after checkpoint `203a8fc`. Findings 1 and 2 and the
+related integer-promotion defect are now corrected in the working tree:
+
+- Integer AVR timer calls use 32-bit integer calculations, including a safe mask
+  and successive ceiling divisions. Explicit floating calls use the selected
+  floating precision and checked conversion bounds.
+- Fallback `rand()` uses unsigned 32-bit modular arithmetic and masks before the
+  result's conversion to `int`; its reference sequence and UBSan probe pass.
+- Integer scaling casts to its output type before the expansion shift.
+
+All 93 host cases pass. Optimized native IR verifies no floating-point or 64-bit
+arithmetic in the inspected dynamic 32-bit timer calls. All 256 byte-to-32-bit
+scaler values agree with a wide host oracle under UBSan; this does not reproduce
+AVR's 16-bit promotion model. AVR compiler/hardware validation remains on hold.
+The generic API choices in items 3 and 4 are unchanged. The findings below retain
+the original source locations and review evidence for context.
 
 ## Confirmed findings
 

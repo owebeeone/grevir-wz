@@ -4,8 +4,8 @@ Selected 18 September 2026; updated 21 September for the foundation test migrati
 and portable GPIO/timing, buttons, PWM, storage, timer requirements and register access. **Hardware validation is on hold.**
 
 Implemented: opt-in CMake/CTest host tests with pinned Catch2 3.8.1 and shared
-setup in Grevir Test Support. Eighty-nine cases pass: Base 4, Time 4, Core 10,
-Peripherals 29, Registers 23, Test Support 3, AVR 16. All seven retained Base/Time files build (including static-only
+setup in Grevir Test Support. Ninety-three cases pass: Base 5, Time 4, Core 10,
+Peripherals 29, Registers 23, Test Support 3, AVR 19. All seven retained Base/Time files build (including static-only
 type algorithms); their old test framework dependency is removed. GPIO fixtures
 record logical pin operations, and a controlled clock exercises production pollers,
 a blinking application and debounced button events. Period-division and inherited
@@ -26,6 +26,14 @@ traits and computed mock-register writes. Eleven legacy static assertions and on
 valid/seven rejected clock-map probes pass. MCU side effects, electrical behavior
 and interrupts remain unmodeled. AVR compiler validation is on hold alongside
 hardware validation.
+
+Arithmetic corrections add three AVR boundary cases and a standalone Base
+fallback-random case. Integer timer paths use integer arithmetic; native optimized
+IR confirms no floating or 64-bit arithmetic for the inspected dynamic 32-bit
+calls. Explicit floating calls keep their selected precision and checked result
+conversions. Native UBSan checks pass for the unsigned fallback recurrence and all
+256 byte-to-32-bit scaler inputs. These do not establish AVR instruction cost or
+validate the full no-standard-library configuration.
 
 Core compiler probes cover six valid applications, seventeen expected resource
 failures, two dependency cycles and parameter-index selection/bounds. Peripheral
