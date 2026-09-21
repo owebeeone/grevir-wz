@@ -11,85 +11,129 @@ members:
   source_id: src_grevir_base
   active: true
   desired:
-    local_only: true
-  remotes: []
+    branch: main
+  remotes:
+  - name: origin
+    url: git@github.com:owebeeone/grevir-base.git
+    fetch: true
+    push: true
 - id: mem_grevir_time
   path: grevir-time
   type: git
   source_id: src_grevir_time
   active: true
   desired:
-    local_only: true
-  remotes: []
+    branch: main
+  remotes:
+  - name: origin
+    url: git@github.com:owebeeone/grevir-time.git
+    fetch: true
+    push: true
 - id: mem_grevir_core
   path: grevir-core
   type: git
   source_id: src_grevir_core
   active: true
   desired:
-    local_only: true
-  remotes: []
+    branch: main
+  remotes:
+  - name: origin
+    url: git@github.com:owebeeone/grevir-core.git
+    fetch: true
+    push: true
 - id: mem_grevir_test_support
   path: grevir-test-support
   type: git
   source_id: src_grevir_test_support
   active: true
   desired:
-    local_only: true
-  remotes: []
+    branch: main
+  remotes:
+  - name: origin
+    url: git@github.com:owebeeone/grevir-test-support.git
+    fetch: true
+    push: true
 - id: mem_grevir_peripherals
   path: grevir-peripherals
   type: git
   source_id: src_grevir_peripherals
   active: true
   desired:
-    local_only: true
-  remotes: []
+    branch: main
+  remotes:
+  - name: origin
+    url: git@github.com:owebeeone/grevir-peripherals.git
+    fetch: true
+    push: true
 - id: mem_grevir_registers
   path: grevir-registers
   type: git
   source_id: src_grevir_registers
   active: true
   desired:
-    local_only: true
-  remotes: []
+    branch: main
+  remotes:
+  - name: origin
+    url: git@github.com:owebeeone/grevir-registers.git
+    fetch: true
+    push: true
 - id: mem_grevir_avr
   path: grevir-avr
   type: git
   source_id: src_grevir_avr
   active: true
   desired:
-    local_only: true
-  remotes: []
+    branch: main
+  remotes:
+  - name: origin
+    url: git@github.com:owebeeone/grevir-avr.git
+    fetch: true
+    push: true
 - id: mem_grevir_pulse_codec
   path: grevir-pulse-codec
   type: git
   source_id: src_grevir_pulse_codec
   active: true
   desired:
-    local_only: true
-  remotes: []
+    branch: main
+  remotes:
+  - name: origin
+    url: git@github.com:owebeeone/grevir-pulse-codec.git
+    fetch: true
+    push: true
 - id: mem_grevir_packet
   path: grevir-packet
   type: git
   source_id: src_grevir_packet
   active: true
   desired:
-    local_only: true
-  remotes: []
+    branch: main
+  remotes:
+  - name: origin
+    url: git@github.com:owebeeone/grevir-packet.git
+    fetch: true
+    push: true
 - id: mem_grevir_encoder
   path: grevir-encoder
   type: git
   source_id: src_grevir_encoder
   active: true
   desired:
-    local_only: true
-  remotes: []
+    branch: main
+  remotes:
+  - name: origin
+    url: git@github.com:owebeeone/grevir-encoder.git
+    fetch: true
+    push: true
 - id: mem_grevir_stepper
   path: grevir-stepper
   type: git
   source_id: src_grevir_stepper
   active: true
   desired:
-    local_only: true
-  remotes: []
+    branch: main
+  remotes:
+  - name: origin
+    url: git@github.com:owebeeone/grevir-stepper.git
+    fetch: true
+    push: true
