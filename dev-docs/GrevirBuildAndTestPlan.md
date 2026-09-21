@@ -372,3 +372,18 @@ Only the experimental fixed-frequency fast-PWM path is covered end to end. Its
 README records explicit startup preconditions and duty rounding. MCU compiler and
 hardware validation remain on hold; additional devices/timer features and a real
 ESP32 backend remain TBD.
+
+## Installed PWM integration checkpoint — 21 September 2026
+
+The current production suite has 125 cases (Registers 24, AVR 50; other counts
+unchanged). It adds full-width uint32 register behavior and application-level PWM
+lifecycle/ownership. The four standalone sanitizer checks now call the installed
+implementation through forwarding headers. A production compiler control plus six
+expected failures checks existing whole/range/shared timer claims, physical GPIO
+claims, duplicate request identities and late bound claims. Four affected packages
+(Core, Registers, Peripherals, AVR) pass isolated native production/install/consumer
+checks with test-package discovery disabled for consumers. Twenty-one AVR headers
+compile independently. Raw-token checks cover 168 production/test C++ files and
+14 experiment files including disabled branches. Native optimized PWM setup/duty
+probes show no FP, 64-bit arithmetic or dynamic allocation. Target compiler and
+hardware validation remain on hold; no extra timer features were added.

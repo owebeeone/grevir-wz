@@ -357,8 +357,8 @@ clock/mode/field/register bindings, Timer0/1/2 inventory and B/C/D GPIO identiti
 now reside in `devices/atmega328p/`, parameterized by byte access and a barrier.
 Timer1 word sequencing and W1C flags have host models. Waveform-specific PWM TOP
 conversion is implemented; the experimental Timer0/1/2 portable adapter generates
-candidates and applies setup/duty bindings. Installed portable API/Core integration
-and board resource policy remain planned.
+candidates and applies setup/duty bindings. Installed portable API/Core integration is now present; board resource policy
+remains planned.
 AVR compiler and hardware validation are on hold.
 
 The GPIO base header has a similar overlap. Do not discard either implementation
@@ -510,9 +510,11 @@ contract and common/resident-target selection semantics, and proposes the first
 PWM scope, selection rules and ownership model.
 The [standalone host prototype](../experiments/timer-allocation/README.md) now
 exercises a bounded subset with synthetic inventories plus an end-to-end
-ATmega328P Timer0/1/2 fast-PWM adapter. It generates real candidates and typed
-setup/duty bindings. The experiment is not an installed API or a completion of
-Core/application integration or ESP32 backend work. Additional AVR features are TBD.
+ATmega328P Timer0/1/2 fast-PWM adapter. The implementation is now installed across
+Core/Peripherals/AVR, with automatic module request collection, Core claim integration
+and owner setup; experiment headers forward to those packages. See
+[the integration guide](GrevirPwmIntegration.md). ESP32 and board integration remain
+separate work; additional AVR features are TBD.
 
 ## Generators and supporting files
 

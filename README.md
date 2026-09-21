@@ -38,8 +38,8 @@ Core defects are recorded in its README. Hardware validation is on hold.
 
 ## Host mock validation
 
-The opt-in Catch2/CTest suite has 123 passing cases: Base 5, Time 4, Core 10,
-Peripherals 29, Registers 23, Test Support 3 and AVR 49. All seven retained Base/Time test files now compile; the
+The opt-in Catch2/CTest suite has 125 passing cases: Base 5, Time 4, Core 10,
+Peripherals 29, Registers 24, Test Support 3 and AVR 50. All seven retained Base/Time test files now compile; the
 type-algorithm file supplies static assertions rather than a runtime case. Core
 covers application lifecycle/state. Peripheral mocks record input/output and
 open-drain operations and control time for expiry, catch-up, wraparound, sequences,
@@ -85,12 +85,12 @@ The earlier [legacy compile baseline](native-compile-check/README.md) remains
 available separately. It deliberately uses the original Ardoinus checkout; the
 new foundation build does not.
 
-A separate [timer allocation prototype](experiments/timer-allocation/README.md)
-now exercises deterministic allocation and common/resident-target configuration
-using synthetic inventories and an experimental end-to-end ATmega328P Timer0/1/2
-fast-PWM adapter with real register bindings. Its four checks are separate from
-the installed libraries and the 123-case production suite. Other timer features
-and a real ESP32 backend remain TBD.
+The [portable PWM MVP](dev-docs/GrevirPwmIntegration.md) is installed across Core,
+Peripherals and AVR. Applications collect module requests, account for existing
+resource claims and initialize selected ATmega328P Timer0/1/2 drivers automatically.
+The former prototype forwards to these libraries; its four oracle checks remain
+separate from the 125-case production suite. A real ESP32 backend, board integration
+and additional timer features remain future work.
 
 See the [repository plan](dev-docs/GrevirRepositoryPlan.md) and
 [extraction progress](dev-docs/GrevirExtractionProgress.md). Source ownership and

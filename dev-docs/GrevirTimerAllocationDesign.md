@@ -2,8 +2,9 @@
 
 Status: proposal for discussion, 21 September 2026. A
 [prototype](../experiments/timer-allocation/README.md) exercises a bounded subset
-and now has an experimental end-to-end ATmega328P fast-PWM MVP for Timer0/1/2.
-Installed API/application integration and a real ESP32 backend are not implemented.
+and now forwards to the installed ATmega328P fast-PWM MVP for Timer0/1/2.
+[Core/application integration](GrevirPwmIntegration.md) is implemented for this scope;
+a real ESP32 backend and the full design remain incomplete.
 The user has required deterministic allocation independent of module declaration
 order. The user also requires common requirements and configurations for different
 MCU targets to coexist: common requirements and the resident target's options

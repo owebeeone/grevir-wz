@@ -1,16 +1,16 @@
 #pragma once
 #include "allocator.hpp"
 
-namespace timer_prototype {
+namespace grevir::pwm {
 struct MustNotValidate {};
 template <Target R> struct Apply<R, MustNotValidate> {
   static constexpr void run(Config&) {
     static_assert(R != R, "POISON_OPTION_WAS_VALIDATED");
   }
 };
-} // namespace timer_prototype
+} // namespace grevir::pwm
 
-namespace timer_prototype::fixtures {
+namespace grevir::pwm::fixtures {
 
 // Entirely synthetic routing: these are not AVR or ESP32 register descriptions.
 inline constexpr std::array resources{
@@ -81,4 +81,4 @@ using PoisonOnEsp = PwmRequest<"pwm", Frequency<Hertz<1000>, Exact>, DutyStepAtM
 using LazyOnEsp = PwmRequest<"pwm", Frequency<Hertz<1000>, Exact>, DutyStepAtMost<1, 256>, Pin<101>,
   For<Target::esp32, MustNotValidate>>;
 
-} // namespace timer_prototype::fixtures
+} // namespace grevir::pwm::fixtures

@@ -10,6 +10,35 @@ This checkpoint includes the completed timer configuration, output application
 and ATmega328P timer/GPIO bindings below.
 AVR compiler and hardware validation stay on hold.
 
+## Installed PWM integration and full-width Registers fix — 21 September 2026
+
+The full-width uint32 mask identity failure was reproduced before the fix.
+`ApplyMaskShift` now has one single-operation implementation and a multi-operation
+specialization requiring at least two operations. The redundant identity
+specialization is removed. Static checks cover 8/16/32/64-bit identities; a native
+32-bit register check preserves the high bit and performs no read before a full
+write. The installed Registers consumer exercises the same boundary.
+
+The existing PWM MVP now resides in installed Core, Peripherals and AVR packages,
+with experiment forwarding headers retaining the independent checks. Core supplies
+a policy-free bounded search plus RequestedModule/ExistingModule/AllocatedApplication
+assembly; Peripherals owns portable PWM requirements and validation; AVR owns the
+ATmega328P backend and typed drivers. Descriptor dependencies and existing module
+closure claims participate in assembly. Timer/range/shared-use and physical GPIO
+claims become reservations. One owner claims each selected timer and its outputs;
+Core validates the complete bound application. Setup runs once per owner before
+parameter/module callbacks. Whole-resource ownership now also conflicts with shared
+users, closing an inherited Core claim gap exposed by integration.
+
+All 125 production cases and the four sanitizer-backed allocation checks pass.
+The new application compiler control and six expected rejections pass. Isolated
+production/install/consumer checks pass for Core, Registers, Peripherals and AVR,
+including a real portable module declaration in the AVR installed consumer.
+Search budgets use uint32_t to preserve 100,000 on a 16-bit size_t ABI; frequency
+specializations match their uint32_t declaration types. No timer features were
+added. See [the integration guide](GrevirPwmIntegration.md) for the contract and
+remaining limits. AVR compiler/hardware validation remain on hold.
+
 ## ATmega328P portable timer MVP — 21 September 2026
 
 The experimental portable path now generates synchronous fast-PWM candidates from

@@ -1,10 +1,10 @@
 # Timer allocation prototype and ATmega328P PWM MVP
 
-This standalone C++23 experiment exercises the
-[proposed design](../../dev-docs/GrevirTimerAllocationDesign.md). It is not a
-Grevir installed API. The experimental ATmega328P adapter now connects real
-declarations to the existing driver; ESP32 still uses synthetic fixtures. The AVR
-production configuration layer separately fixes hardware PWM TOP conversion.
+The implementation has been promoted into installed Grevir packages. The local
+headers now forward to Core/Peripherals/AVR; fixtures and oracles remain here.
+See [installed application integration](../../dev-docs/GrevirPwmIntegration.md) for
+module declarations, automatic setup and Core resource claims. `timer_prototype`
+is only a local alias for `grevir::pwm` used by the retained checks.
 
 ## Run
 
@@ -18,7 +18,7 @@ ctest --test-dir build/timer-prototype --output-on-failure
 ```
 
 There are no downloaded dependencies, SDKs or Catch2 requirements. This project is
-separate from the production workspace's 123-case host suite. AVR compiler and
+separate from the production workspace's 125-case host suite. AVR compiler and
 hardware validation remain on hold.
 
 ## Concrete API example
@@ -157,7 +157,7 @@ this fixed-frequency scope. Candidates prefer the smallest prescaler, then numer
 WGM code; ordinary canonical timer/configuration/endpoint ordering breaks ties.
 Generated keys are stable under declaration reordering of the same request set.
 
-`atmega328p_program.hpp` emits typed endpoints. `setup()` initializes each chosen
+`atmega328p_program.hpp` forwards to the installed AVR implementation, which emits typed endpoints. `setup()` initializes each chosen
 timer once: stop/normal mode, disconnect compares, reset count, write programmable
 TOP, initialize requested outputs LOW, apply PWM mode, start clock. The caller
 must have enabled the peripheral clocks, left Timer2 synchronous (`AS2=0`), disabled
@@ -199,13 +199,12 @@ maximum TOP and built-in 9/10-bit selection, reservations, OCRA conflicts and
 reordering. 168 period searches agree with a separate exhaustive period oracle.
 Native optimized setup/duty probes contain no floating or 64-bit arithmetic or
 runtime allocation; these are host observations, not AVR code-size/cycle evidence.
-The production 123-case suite, isolated AVR installation and installed consumer
+The production 125-case suite, isolated AVR installation and installed consumer
 pass with the corrected TOP expectations. AVR compiler/hardware validation stays
 on hold. The byte mocks verify register effects, not electrical waveforms.
 
-This is the **experimental end-to-end MVP**. Promotion into installed Grevir APIs,
-application/Core assembly and a named ESP32 backend remain separate integration
-work. The existing low-level raw-OCR duty API and its inherited runtime rescaling
+The MVP is now installed and connected to Core application assembly. A named
+ESP32 backend and board integration remain separate work. The existing low-level raw-OCR duty API and its inherited runtime rescaling
 convention are unchanged; the portable fixed-frequency endpoint uses the explicit
 hardware duty conversion above.
 
