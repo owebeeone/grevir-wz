@@ -1,14 +1,65 @@
 # Grevir extraction progress
 
-Latest checkpoint: 21 September 2026. Nine local members now exist: Base, Time,
-Core, Peripherals, Registers, AVR, Pulse Codec, Packet and development-only Test Support. Workspace
-`203a8fc` commits the shared fixture, portable legacy tests, AVR register/GPIO,
-initial timer-clock extraction, arithmetic review and cross-MCU/AVR review policies.
-`654bdf7` commits the three arithmetic corrections and `e453c48` commits the
-waveform-mode extraction. `6592f7e` commits the reusable timer definitions.
-This checkpoint includes the completed timer configuration, output application
-and ATmega328P timer/GPIO bindings below.
+Latest checkpoint: 22 September 2026. Eleven local members now exist: Base, Time,
+Core, Peripherals, Registers, AVR, Pulse Codec, Packet, Encoder, Stepper and
+development-only Test Support. This checkpoint adds the stepper motor controller.
 AVR compiler and hardware validation stay on hold.
+
+## Stepper extraction — 22 September 2026
+
+The eleventh member, `grevir-stepper`, extracts `ardOStepper.h` into
+`src/grevir/stepper/stepper.hpp` with aggregate `GrevirStepper.h`, CMake export
+`grevir::stepper`, Arduino metadata and license. Production dependencies are Base,
+Time, Core and Peripherals. Pins and clocks are injected; Encoder is not a
+production dependency. Phase tables, bit order, wrap, coil-off and float time
+scale are retained.
+
+`ardo::CoreIF::MillisTime` / `now()` are replaced by `Clock`. Output pins replace
+implicit Arduino pins. The unused cyclic-int include is dropped. The custom-sequence
+constructor takes typed periods because `Period` construction is explicit. The first
+forward step still applies sequence row 1. Coil hold 0 leaves coils on; an unsigned
+maximum never expires. The Arduino `StepperEncoder` example remains planned.
+
+All 170 workspace host cases pass, including 11 stepper cases and one optional
+encoder-follower case linked only when Encoder is present. The same 12 pass
+ASan/UBSan. Two public headers compile independently. Two valid and two rejected
+pin-claim probes pass. Raw-token brace checks pass on the seven new C++ files.
+Isolated production/install/consumer checks pass with Catch2, Test Support and
+Encoder discovery disabled. The ledger now has 102 verified assignments; the
+stepper header and test rows are extracted, the Arduino example stays planned.
+All 736 original source hashes remain unchanged. See the
+[package README](../grevir-stepper/README.md). Next third-party-free driver:
+Pulse IO. FastLED remains held.
+
+AVR compiler and hardware validation remain on hold.
+
+## Quadrature encoder extraction — 22 September 2026
+
+The tenth member, `grevir-encoder`, extracts `ArdoQuadEncoder.h` into
+`src/grevir/encoder/encoder.hpp` with aggregate `GrevirEncoder.h`, CMake export
+`grevir::encoder`, Arduino metadata and license. Production dependencies are Base,
+Time, Core and Peripherals. Pins and clocks are injected; there is no Arduino,
+FastLED or MCU-backend dependency. Decoder polarity, `NUllScaler`/`NonlinerarScaler`
+spellings, virtual `getInput`/`scaleValue` and the module wrapper are retained.
+
+`InputPin<N>` and `ardo::CoreIF::now()` are replaced by pin types with static
+`get()` and `InteractiveScaler<Clock>`. Time's interactive scaler still ignores the
+100/500 constructor periods and uses its 4/100 bounds; unit steps can truncate to
+zero until the float remainder accumulates. The old 16-line Arduino harness is
+adapted into ten host cases.
+
+All 158 workspace host cases pass, including the ten encoder cases. The same ten
+pass ASan/UBSan. Two public headers compile independently. Two valid and two
+rejected pin-claim probes pass. Raw-token brace checks pass on the six new C++
+files. Isolated production/install/consumer checks pass with Catch2 and Test
+Support discovery disabled; the consumer include path is the copied install tree.
+The ledger now has 100 verified assignments; both encoder rows are extracted. All
+736 original source hashes remain unchanged. See the
+[package README](../grevir-encoder/README.md). Next bounded driver without a
+third-party library: stepper. FastLED remains held for the Arduino/FastLED
+dependency.
+
+AVR compiler and hardware validation remain on hold.
 
 ## Packet extraction — 21 September 2026
 

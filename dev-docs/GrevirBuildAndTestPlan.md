@@ -1,15 +1,21 @@
 # Grevir build and test framework
 
-Selected 18 September 2026; updated 21 September for the foundation test migration
-and portable GPIO/timing, buttons, PWM, storage, timer requirements and register access. **Hardware validation is on hold.**
+Selected 18 September 2026; updated 22 September for quadrature encoder and
+stepper extraction.
+**Hardware validation is on hold.**
 
 Implemented: opt-in CMake/CTest host tests with pinned Catch2 3.8.1 and shared
-setup in Grevir Test Support. 123 cases pass: Base 5, Time 4, Core 10,
-Peripherals 29, Registers 23, Test Support 3, AVR 49. All seven retained Base/Time files build (including static-only
-type algorithms); their old test framework dependency is removed. GPIO fixtures
-record logical pin operations, and a controlled clock exercises production pollers,
-a blinking application and debounced button events. Period-division and inherited
-debounce/setup defects have reproduced failures and now pass. The fixtures do not
+setup in Grevir Test Support. 170 cases pass: Base 5, Time 4, Core 10,
+Peripherals 29, Registers 24, Test Support 3, AVR 50, Pulse Codec 11, Packet 12,
+Encoder 10 and Stepper 12. Encoder and stepper mocks drive injected GPIO and a
+controlled clock through the production module wrappers; pin-claim probes accept
+distinct pins and reject reuse. FastLED and Arduino consumer builds remain out of
+this host suite. All seven
+retained Base/Time files build (including static-only type algorithms); their old
+test framework dependency is removed. GPIO fixtures record logical pin operations,
+and a controlled clock exercises production pollers, a blinking application and
+debounced button events. Period-division and inherited debounce/setup defects have
+reproduced failures and now pass. The fixtures do not
 model electrical or MCU behavior. Five PWM cases validate scaling and pin lifecycle;
 two reproduced an input-narrowing bug, now fixed. Five storage cases validate
 byte representation, offsets, updates and region isolation. Twenty-three register cases

@@ -9,6 +9,8 @@ The extracted members are [grevir-base](grevir-base/README.md),
 [grevir-registers](grevir-registers/README.md) and [grevir-avr](grevir-avr/README.md) increments.
 [grevir-pulse-codec](grevir-pulse-codec/README.md) supplies portable pulse-width serial encoding and decoding.
 [grevir-packet](grevir-packet/README.md) supplies transport-independent fragmentation and reassembly.
+[grevir-encoder](grevir-encoder/README.md) supplies a quadrature decoder and Core module wrapper with injected pins and clock.
+[grevir-stepper](grevir-stepper/README.md) supplies stepper phase tables, movement state and a Core module wrapper with injected pins and clock.
 [grevir-test-support](grevir-test-support/README.md) supplies shared host-test setup and register-memory fixtures.
 Their root `library.properties` and `src/`
 directories follow Arduino library layout. Target compiler and Arduino sketch
@@ -40,8 +42,9 @@ Core defects are recorded in its README. Hardware validation is on hold.
 
 ## Host mock validation
 
-The opt-in Catch2/CTest suite has 148 passing cases: Base 5, Time 4, Core 10,
-Peripherals 29, Registers 24, Test Support 3, AVR 50, Pulse Codec 11 and Packet 12. All seven retained Base/Time test files now compile; the
+The opt-in Catch2/CTest suite has 170 passing cases: Base 5, Time 4, Core 10,
+Peripherals 29, Registers 24, Test Support 3, AVR 50, Pulse Codec 11, Packet 12,
+Encoder 10 and Stepper 12. All seven retained Base/Time test files now compile; the
 type-algorithm file supplies static assertions rather than a runtime case. Core
 covers application lifecycle/state. Peripheral mocks record input/output and
 open-drain operations and control time for expiry, catch-up, wraparound, sequences,
@@ -71,6 +74,15 @@ and malformed/unread-frame recovery. Its isolated installed consumer and sanitiz
 checks also pass. Packet tests cover reordering, duplicate and malformed fragments,
 peer identity, bounded pool reuse, bitmap/length boundaries and exact wire bytes.
 Its installed consumer needs no other Grevir package.
+Encoder covers startup latch, clockwise and counter-clockwise Gray-code steps,
+indeterminate doubles, identity and injected-clock scaling, the historical module
+harness, and two independent instances. Its installed consumer uses only injected
+GPIO and Core composition.
+Stepper covers pin-mask order, strict step-period expiry, four-phase wrap, reverse,
+coil hold versus timed off, float time scale, target/remaining arithmetic, custom
+sequences, the historical module loop, two independent instances and an optional
+encoder-follower case. Its installed consumer uses only injected GPIO and Core
+composition; Encoder is not a production dependency.
 Interrupt execution, waveform timing, asynchronous timer operation and electrical
 behavior remain outside the current mock coverage.
 
@@ -96,7 +108,7 @@ The [portable PWM MVP](dev-docs/GrevirPwmIntegration.md) is installed across Cor
 Peripherals and AVR. Applications collect module requests, account for existing
 resource claims and initialize selected ATmega328P Timer0/1/2 drivers automatically.
 The former prototype forwards to these libraries; its four oracle checks remain
-separate from the 148-case production suite. A real ESP32 backend, board integration
+separate from the 170-case production suite. A real ESP32 backend, board integration
 and additional timer features remain future work.
 
 See the [repository plan](dev-docs/GrevirRepositoryPlan.md) and

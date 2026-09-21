@@ -77,3 +77,19 @@ members:
   desired:
     local_only: true
   remotes: []
+- id: mem_grevir_encoder
+  path: grevir-encoder
+  type: git
+  source_id: src_grevir_encoder
+  active: true
+  desired:
+    local_only: true
+  remotes: []
+- id: mem_grevir_stepper
+  path: grevir-stepper
+  type: git
+  source_id: src_grevir_stepper
+  active: true
+  desired:
+    local_only: true
+  remotes: []
