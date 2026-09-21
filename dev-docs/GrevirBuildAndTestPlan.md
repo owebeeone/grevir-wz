@@ -4,8 +4,8 @@ Selected 18 September 2026; updated 21 September for the foundation test migrati
 and portable GPIO/timing, buttons, PWM, storage, timer requirements and register access. **Hardware validation is on hold.**
 
 Implemented: opt-in CMake/CTest host tests with pinned Catch2 3.8.1 and shared
-setup in Grevir Test Support. 102 cases pass: Base 5, Time 4, Core 10,
-Peripherals 29, Registers 23, Test Support 3, AVR 28. All seven retained Base/Time files build (including static-only
+setup in Grevir Test Support. 123 cases pass: Base 5, Time 4, Core 10,
+Peripherals 29, Registers 23, Test Support 3, AVR 49. All seven retained Base/Time files build (including static-only
 type algorithms); their old test framework dependency is removed. GPIO fixtures
 record logical pin operations, and a controlled clock exercises production pollers,
 a blinking application and debounced button events. Period-division and inherited
@@ -49,6 +49,33 @@ empty/restricted source lists and absent-feature no-ops. Both legacy source grou
 match after whitespace normalization. Independent headers, isolated packages and
 the installed consumer pass with explicit mode traits and register access policies.
 Capture interrupts, physical filtering and target register atomicity are unvalidated.
+
+Timer-configuration extraction adds six runtime cases and twelve static assertions
+for programmable and built-in TOP setup, divider/capacity selection, preserved bits,
+native register widths, invalid dynamic requests without IO and live frequency
+reads. One valid and seven rejected standalone probes check mandatory requests.
+Isolated packages and the installed consumer pass; nine AVR headers compile alone.
+Optimized host IR for dynamic integer configuration has no floating or 64-bit
+arithmetic. Hardware PWM count conventions and live-update atomicity remain outside
+this native evidence. AVR compiler and hardware validation remain on hold.
+
+Timer-output extraction adds eight runtime cases and ten static assertions for
+endpoint polarity, COM/OCR/GPIO order, preserved channels, fractional bounds,
+integer rescaling, rejected updates and timer facade reads. One valid/seven rejected
+standalone probes cover channel/GPIO conflicts, TOP sharing, unconfigured writes
+and count capacity. Ten public AVR headers and isolated packages/consumer pass.
+Native sanitizer checks pass for fractional conversion and 16-bit boundary scaling;
+optimized integer output IR has no floating or 64-bit arithmetic. COM encodings and
+8-/16-bit register layouts are synthetic fixtures, not a concrete device backend.
+
+ATmega328P bindings add seven runtime cases and nineteen static assertions. A byte
+fixture models Timer1's shared latch, W1C flags and force-compare strobes. It checks
+all three timers, physical output routes, byte order, barrier scopes, preserved
+fields and concrete frequency/duty updates. 276 raw facts match upstream avr-libc;
+one valid/three rejected native device probes pass. Seventeen AVR headers and the
+isolated production/host/install/consumer checks pass. Device selection and policies
+are explicit. This does not validate hardware waveforms, asynchronous Timer2 clocks,
+interrupt execution, target barrier code or board resource ownership.
 
 Core compiler probes cover six valid applications, seventeen expected resource
 failures, two dependency cycles and parameter-index selection/bounds. Peripheral

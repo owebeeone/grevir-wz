@@ -5,9 +5,140 @@ Core, Peripherals, Registers, AVR and development-only Test Support. Workspace
 `203a8fc` commits the shared fixture, portable legacy tests, AVR register/GPIO,
 initial timer-clock extraction, arithmetic review and cross-MCU/AVR review policies.
 `654bdf7` commits the three arithmetic corrections and `e453c48` commits the
-waveform-mode extraction. The reusable timer-definition extraction below is now
-complete in the working tree and uncommitted.
+waveform-mode extraction. `6592f7e` commits the reusable timer definitions.
+This checkpoint includes the completed timer configuration, output application
+and ATmega328P timer/GPIO bindings below.
 AVR compiler and hardware validation stay on hold.
+
+## ATmega328P timer/GPIO bindings — 21 September 2026
+
+Concrete clock/mode tables, COM encodings, timer fields/registers, Timer0/1/2
+compositions and the 23 real GPIO identities now use the extracted reusable layers.
+The clock/mode/COM/field groups (80/166/40/328 legacy lines) match between both
+source headers. Device headers separate metadata, fields, access, GPIO and timer
+composition; each stays below 500 lines. Raw facts occupy the bounded subset
+`generated/atmega328p/timer_gpio.hpp`; the full generated-device assignment remains
+planned. Consumers explicitly include the device and supply byte-access/barrier
+policies. No global target switch, clock or Arduino reservation is assumed.
+
+All 276 selected raw facts match upstream avr-libc. Microchip's ATmega328P
+7810D datasheet was consulted for pin routes, word access and flag clearing;
+reference links are in the AVR README. The timer adapter now separates synthetic
+TCCR byte pairs from native Timer1 words, reads words low/high and writes high/low,
+and brackets word operations/masked timer updates with the caller's RAII barrier.
+W1C flag updates issue only the requested clear bits. The old Timer0/2 inventories
+omitted native TCCRnB despite exposing force-compare fields; these are now selectable.
+Missing capture IRQ/status fields are included. No fictitious PC7 or board-specific
+frequency/output presets are carried into production bindings.
+
+All 123 host cases pass (Base 5, Time 4, Core 10, Peripherals 29, Registers 23,
+Test Support 3, AVR 49). Seven device cases and nineteen static assertions cover
+address/route data, both timer widths, shared-latch sequencing, flag isolation,
+force-compare access, capture controls and status fields. One valid/three rejected
+native probes pass. Seventeen AVR public headers compile independently. Isolated
+production/host/install/consumer checks pass with Catch2/Test Support disabled for
+the consumer, including concrete Timer1 setup and frequency/duty updates. The brace
+checker passes 153 C++ files including disabled branches. Evidence is under ignored
+`build/atmega328p-*` and `build/atmega328p-review/`.
+
+The ledger now has 88 actual extraction assignments plus one superseded. Mapping
+revision 4 records the supporting mode/register/raw-fact/access headers separately;
+the original CSV import is unchanged. All 736 original source hashes remain intact.
+Timer configuration/output work is included in the same checkpoint as these bindings.
+
+This is native register-effect validation: PWM waveform timing, interrupt execution,
+Timer2 asynchronous operation and electrical behavior remain unmodeled. A target
+barrier implementation, waveform-specific TOP conversion, portable timer/GPIO
+integration, resource inventory/reservations and board mappings remain. The separate
+full-width Registers conversion issue recorded below is still open. AVR compiler
+and hardware validation remain on hold.
+
+## Reusable timer output application — 21 September 2026
+
+Two matching output groups (97 and 178 lines) from both legacy timer headers now
+share `timer/output.hpp`. The cohesive output layer supplies `TimerOutputPin`,
+output settings/selection, `TimerPwmPinConfiguration` and the `Timer` facade.
+COM encodings come from the output field type; GPIO, registers, mode metadata and
+clock traits remain explicit. No concrete device inventory or Arduino binding is
+introduced. The header remains below 500 lines.
+
+Native compilation first reproduced the fractional writer's illegal narrowing
+initializer and the wrapper's call to a nonexistent configuration `pwmWrite`.
+Conversion now follows finite/range checks, and the wrapper routes to the chosen
+output using live TOP. Integer duty rescaling replaces the inherited unconditional
+float ratio with a floor-divided 32-bit product. Both factors are bounded by 65535,
+with widening before multiplication; this output backend supports up to 16 logical
+count bits. Generic cross-MCU numeric defaults are unchanged. Legacy endpoint
+polarity is retained and documented rather than silently inverted.
+
+Output composition rejects repeated channels/GPIO types, OCRA used for both TOP
+and duty, insufficient count capacity, and writes through unconfigured settings.
+Invalid frequency changes skip duty adjustment and perform no writes (the wrapper
+may read previous TOP). Disconnected or unrelated COM modes are preserved. Compare
+and endpoint-latch writes precede connecting/disconnecting timer control; setup
+prepares output settings before DDR. Checked facade TOP reads preserve unavailable
+results as zero. These are host-observed effects, not atomic/glitch-free guarantees.
+
+All 116 host cases pass (Base 5, Time 4, Core 10, Peripherals 29, Registers 23,
+Test Support 3, AVR 42). Eight output cases and ten static assertions cover polarity,
+register order/widths, isolated channels, fractional bounds, exact integer rescaling,
+valid/rejected frequency updates, facade reads and OCRA-TOP/OCRB-output composition.
+One valid/seven rejected standalone probes pass. Ten AVR headers compile alone.
+Isolated production/host/install/consumer checks pass; the installed consumer uses
+custom COM encodings and explicit traits, with Catch2/Test Support discovery disabled.
+Native UBSan/float-cast-overflow checks pass, and optimized dynamic integer duty and
+adjustment IR contains no floating or 64-bit arithmetic. The brace checker passes
+143 C++ files including disabled branches. Evidence is under ignored
+`build/timer-output-*` and `build/timer-output-review/`.
+
+Assignments 391 and 776 share the canonical header: 78 actual extraction assignments
+plus one superseded. Configuration hashes were refreshed for built-in TOP metadata;
+all 736 original source hashes remain unchanged. Next is concrete ATmega328P timer
+field/inventory binding and its host composition, followed by portable pin/backend
+integration. The separate full-width Registers conversion issue recorded below
+remains open. AVR compiler and hardware validation remain on hold.
+
+## Reusable timer configuration — 21 September 2026
+
+The matching 363-line configuration groups in both legacy timer headers now share
+`timer/configuration.hpp`. PWM settings, programmable/built-in TOP calculations,
+setup and dynamic frequency updates use caller-provided definitions and optional
+explicit clock traits. Legacy API spellings are retained. Waveform traits come
+from the timer definition. Output-pin application remains forward-declared.
+
+Native probes first reproduced invalid-frequency register writes and an incorrect
+`actual_divider` (16,000,000 instead of 64). Invalid updates now return zero before
+any IO, and divider reporting uses the selected mapping. Programmable TOP selection
+uses the smaller counter/TOP field capacity and rejects counts below two before
+narrowing. Built-in configurations diagnose invalid frequencies/resolutions and
+missing modes. Frequency reads check optional metadata/TOP presence, retaining the
+legacy -1 sentinel for unavailable results and zero for stopped/unmapped clocks.
+
+All 108 host cases pass (Base 5, Time 4, Core 10, Peripherals 29, Registers 23,
+Test Support 3, AVR 34). Six new cases cover setup/update register effects, preserved
+fields, native widths, narrow TOP selection, rejected updates without IO, and live
+frequency reads. Twelve static assertions plus one valid/seven expected-rejection
+probes pass. Nine public AVR headers compile independently. Isolated production,
+host, install and installed-consumer checks pass with Catch2/Test Support disabled
+for the consumer. Optimized native IR for dynamic integer configuration and
+frequency reads has no floating or 64-bit arithmetic. The brace check passes for
+139 files, including disabled branches. Evidence is under ignored
+`build/timer-configuration-*` and `build/timer-configuration-review/`.
+
+Assignments 388 and 773 share the canonical header: 76 actual extraction
+assignments plus one superseded. All 736 original source hashes remain unchanged.
+The inherited count model and clock/mode-then-TOP application order are retained;
+no claim of waveform-accurate timing, glitch-free live updates or atomic register
+access is made. Next is runtime output application, then concrete device bindings.
+AVR compiler and hardware validation remain on hold.
+
+Separate inherited Registers follow-up: native instantiation of
+`ApplyMaskShift<MaskShift<uint32_t, UINT32_MAX, 0>>` is ambiguous between its
+identity/single/variadic specializations. This surfaced while deriving capacity;
+configuration derives the mask directly from metadata and does not instantiate a
+converter for that query. The 32-bit capacity assertion is metadata coverage;
+runtime configuration checks use 8-/16-bit fields, not full-width 32-bit register IO.
+The generic Registers conversion issue remains to be corrected separately.
 
 ## Reusable timer-definition extraction — 21 September 2026
 

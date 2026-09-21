@@ -341,17 +341,27 @@ checked arithmetic and compile-time mapping diagnostics are included. Eleven
 legacy assertions and computed mock-register writes pass. The matching waveform
 group is also consolidated in `avr/timer/mode.hpp`, with caller-provided tables,
 compile-time filtering/exact TOP selection and runtime optional metadata lookup.
-ATmega328P tables remain host fixtures. The matching reusable definition group is
+ATmega328P tables are now available through the explicit device binding as well
+as the earlier independent host fixtures. The matching reusable definition group is
 now in `avr/timer/definition.hpp`: capture/control metadata, TOP source access and
-timer composition with optional explicit mode traits. Configuration, concrete device
-encodings/timer inventory and output application remain planned.
+timer composition with optional explicit mode traits. The matching configuration
+group now supplies PWM settings, setup and checked runtime frequency updates in
+`avr/timer/configuration.hpp`, with explicit clock traits and native TOP capacity
+checks. Invalid requests perform no register IO. The matching output groups are
+consolidated in `avr/timer/output.hpp`: output settings/application, bounded integer
+duty adjustment, validated pin composition and the timer facade. Concrete ATmega328P
+clock/mode/field/register bindings, Timer0/1/2 inventory and B/C/D GPIO identities
+now reside in `devices/atmega328p/`, parameterized by byte access and a barrier.
+Timer1 word sequencing and W1C flags have host models. Waveform-specific TOP
+conversion, portable backend integration and board resource policy remain planned.
 AVR compiler and hardware validation are on hold.
 
 The GPIO base header has a similar overlap. Do not discard either implementation
 merely because names look duplicated.
 
 Keep raw register addresses and `constexpr` constants in
-`grevir-avr/src/grevir/avr/generated/<mcu>.hpp`; keep manually authored semantics in
+`grevir-avr/src/grevir/avr/generated/<mcu>.hpp` (or cohesive subsets under
+`generated/<mcu>/`); keep manually authored semantics in
 `devices/<mcu>/`. This preserves the original principle: typed symbols usable as
 template arguments, semantic field access and compile-time shift/mask calculation.
 Preprocessor use remains limited to unavoidable include/platform boundaries.

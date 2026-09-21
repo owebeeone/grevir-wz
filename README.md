@@ -38,8 +38,8 @@ Core defects are recorded in its README. Hardware validation is on hold.
 
 ## Host mock validation
 
-The opt-in Catch2/CTest suite has 102 passing cases: Base 5, Time 4, Core 10,
-Peripherals 29, Registers 23, Test Support 3 and AVR 28. All seven retained Base/Time test files now compile; the
+The opt-in Catch2/CTest suite has 123 passing cases: Base 5, Time 4, Core 10,
+Peripherals 29, Registers 23, Test Support 3 and AVR 49. All seven retained Base/Time test files now compile; the
 type-algorithm file supplies static assertions rather than a runtime case. Core
 covers application lifecycle/state. Peripheral mocks record input/output and
 open-drain operations and control time for expiry, catch-up, wraparound, sequences,
@@ -57,9 +57,15 @@ computed settings to mock registers. Waveform checks cover metadata selection,
 unsupported combinations, reserved encodings and split register fields using
 device tables retained as fixtures. Base also checks the corrected unsigned random
 fallback in an isolated executable. Timer-definition checks cover capture control
-masks, native-width TOP reads and absent/invalid source handling. These execute production code.
-Interrupts, MCU-specific register side effects and electrical behavior remain
-outside the current mock coverage.
+masks, native-width TOP reads and absent/invalid source handling. Configuration
+checks cover programmable/built-in TOP setup, narrower fields, live frequency reads
+and rejected dynamic requests without register IO. Timer-output checks cover
+endpoint polarity, integer duty rescaling, channel isolation and composed frequency
+updates. Concrete ATmega328P checks cover Timer0/1/2 pin routes, actual addresses,
+Timer1 byte ordering and interrupt-flag clearing through a byte-access model. These
+execute production code.
+Interrupt execution, waveform timing, asynchronous timer operation and electrical
+behavior remain outside the current mock coverage.
 
 Explicit first-time setup can download the pinned Catch2 3.8.1 source archive:
 
