@@ -8,9 +8,11 @@ It does not impose AVR representation choices on ESP32 or other generic callers.
 
 The current milestone is classic ATmega328P-class AVR: an 8-bit CPU, with the
 conventional AVR C++ ABI using 16-bit `int` and 32-bit `long`, and no hardware
-floating-point unit. These are review assumptions to check against the selected
-compiler/options when target validation resumes, not measurements from host builds.
-Peripheral register widths are separate from CPU and C++ type widths.
+floating-point unit. weftpi `avr-g++` 14.2.0 (`-mmcu=atmega328p`) measured
+`sizeof(int)==2`, `sizeof(long)==4` and `sizeof(void*)==2` on 22 September 2026.
+That compiler provides C++23 as a language and avr-libc C headers; it does not
+install libstdc++. Peripheral register widths are separate from CPU and C++ type
+widths.
 
 Name the device and ABI for target-specific claims. Extend this supplement if
 other AVR devices or ABI options require different assumptions. Do not generalize
@@ -57,7 +59,13 @@ or ESP32 instantiation works.
 
 Host mocks and sanitizers can establish logic errors and some UB. Host optimized
 IR can establish that a particular dynamic call retains floating/wide arithmetic.
-Neither establishes AVR code size, cycle count or hardware behavior. **AVR
-compiler validation and hardware validation remain on hold** until the user
-changes that instruction. Do not add target-compilation prerequisites to a review
-or report held validation as completed.
+Neither establishes AVR code size, cycle count or hardware behavior.
+
+**AVR compiler and simavr validation are authorized on weftpi**
+(`gianni@10.1.1.236`) per [GrevirAvrValidationPlan.md](../GrevirAvrValidationPlan.md).
+Do not treat macOS or Pi native host builds as that evidence. **Silicon hardware
+validation remains on hold** until that plan's Phase 5 is scheduled. simavr is
+not silicon: analog pin filtering, Timer2 asynchronous clock-domain delays,
+oscillator stabilization after sleep, Timer1 16-bit TEMP byte order, and the
+datasheet 4-cycle interrupt entry gap stay unclaimed until a named-board check.
+Do not report held silicon validation as completed.

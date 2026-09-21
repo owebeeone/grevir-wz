@@ -1,6 +1,34 @@
-schema: gwz.lock/v0
+schema: gwz.marker/v0
+gwz_commit_id: 01a0c512-e5d8-75d2-976c-878a927251c8
 workspace_id: ws_default
-manifest_schema: gwz.workspace/v0
+origin_url_hash: sha256:b447322346850c84947a6704a11ee61707db25812f757b3276513c4757dadaad
+created_at: unix-ms:1790012745349
+created_by:
+  actor_id: unknown
+root:
+  path: .
+  before_commit: d78570a8059c2fe2c8a55551c427dbbc0f334444
+  branch: main
+selected_targets:
+- '@root'
+- mem_grevir_base
+- mem_grevir_time
+- mem_grevir_core
+- mem_grevir_test_support
+- mem_grevir_peripherals
+- mem_grevir_registers
+- mem_grevir_avr
+- mem_grevir_pulse_codec
+- mem_grevir_packet
+- mem_grevir_encoder
+- mem_grevir_stepper
+committed_targets:
+- mem_grevir_base
+- mem_grevir_core
+- mem_grevir_peripherals
+- mem_grevir_registers
+- mem_grevir_avr
+- '@root'
 members:
   mem_grevir_avr:
     path: grevir-avr

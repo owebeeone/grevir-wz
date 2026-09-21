@@ -2,7 +2,9 @@
 
 Selected 18 September 2026; updated 22 September for quadrature encoder and
 stepper extraction.
-**Hardware validation is on hold.**
+**Silicon hardware validation remains on hold.** AVR compiler and simavr work is
+planned on weftpi (`gianni@10.1.1.236`); see
+[GrevirAvrValidationPlan.md](GrevirAvrValidationPlan.md).
 
 Implemented: opt-in CMake/CTest host tests with pinned Catch2 3.8.1 and shared
 setup in Grevir Test Support. 170 cases pass: Base 5, Time 4, Core 10,
@@ -30,8 +32,8 @@ ordering. Seven additional AVR timer-clock cases cover prescaler lookup/rounding
 count/frequency examples, invalid requests, an independent capacity model, explicit
 traits and computed mock-register writes. Eleven legacy static assertions and one
 valid/seven rejected clock-map probes pass. MCU side effects, electrical behavior
-and interrupts remain unmodeled. AVR compiler validation is on hold alongside
-hardware validation.
+and interrupts remain unmodeled. AVR compiler and simavr validation are planned
+on weftpi; silicon hardware validation remains on hold.
 
 Arithmetic corrections add three AVR boundary cases and a standalone Base
 fallback-random case. Integer timer paths use integer arithmetic; native optimized

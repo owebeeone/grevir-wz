@@ -27,6 +27,7 @@ on hold; the remaining `grevir-xxx` boundaries are described in the plan.
 - [Cross-MCU implementation and review policy](review-policies/CrossMcu.md)
 - [AVR implementation and review policy](review-policies/Avr.md)
 - [Selected build and test framework and implementation plan](GrevirBuildAndTestPlan.md)
+- [AVR compiler, simavr and Arduino validation plan (weftpi)](GrevirAvrValidationPlan.md)
 - [First 30 files in each proposed repo — query results](GrevirFirst30Files.md)
 - [Queryable file map (SQLite)](GrevirFileMap.sqlite)
 - [Saved first-30-files query](GrevirFirst30Files.sql)

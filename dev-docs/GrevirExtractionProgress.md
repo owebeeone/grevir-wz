@@ -2,10 +2,81 @@
 
 Latest checkpoint: 22 September 2026. Eleven local members now exist: Base, Time,
 Core, Peripherals, Registers, AVR, Pulse Codec, Packet, Encoder, Stepper and
-development-only Test Support. This checkpoint adds the stepper motor controller.
-AVR compiler and hardware validation stay on hold.
+development-only Test Support. AVR compiler and simavr validation is running on
+weftpi (`gianni@10.1.1.236`). Silicon hardware remains on hold.
+
+## AVR Phase 1 on weftpi — 22 September 2026
+
+Debian packages installed: `gcc-avr` 14.2.0, `binutils-avr` 2.43.90, `avr-libc`
+2.2.1, `simavr` 1.6, `libsimavr-dev`, `gdb-avr` 15.1. `avr-g++` is
+`/usr/bin/avr-g++`. Commands and ELFs are under `avr-probe/` with toolchain
+`cmake/toolchains/avr-atmega328p.cmake`. Host-mock builds were not reused.
+
+ABI (`-mmcu=atmega328p -std=c++23`), matching [Avr.md](review-policies/Avr.md):
+`CHAR_BIT` 8, `sizeof(int)` 2, `sizeof(long)` 4, `sizeof(void*)` 2,
+`sizeof(size_t)` 2. Linked `abi.elf` is 150 text bytes; `features.elf` (fold
+expressions, `if constexpr`) is 178. The CMake Ninja tree `build` equivalent is
+`avr-probe/out/cmake` and produces the same sizes.
+
+avr-libc headers pass: `limits.h`, `stdint.h`, `stddef.h`, `assert.h`, `stdlib.h`,
+`string.h`, `avr/io.h`, `avr/interrupt.h`. Every probed C++ standard header
+fails (`climits`, `cstdint`, `array`, `type_traits`, `utility`, `limits`,
+`tuple`, …). Debian gcc-avr looks for
+`/usr/lib/avr/include/c++/14.2.0` and that tree is absent. C++23 as a *language*
+works; libstdc++ is not installed. Host CMake still sets `HAS_STD_LIB=1`; the
+AVR tree leaves it unset and uses Base compat fallbacks. Debian 14.2 stays the
+weftpi compiler; stock Arduino AVR 7.x was not used.
+
+See [GrevirAvrValidationPlan.md](GrevirAvrValidationPlan.md).
+
+## AVR Phase 2 on weftpi — 22 September 2026
+
+The separate CMake tree `build/avr-atmega328p` uses
+`cmake/toolchains/avr-atmega328p.cmake` with `GREVIR_HAS_STD_LIB` OFF. Ninja
+does not pass `HAS_STD_LIB`. Host-mock is unchanged.
+
+Public header TUs compiled with `avr-g++ -mmcu=atmega328p -std=c++23`:
+`GrevirBase.h`, `GrevirTime.h`, `GrevirCore.h`, `GrevirPeripherals.h`,
+`GrevirRegisters.h`, `GrevirAVR.h`. Compat fallbacks added or extended for
+missing libstdc++ pieces, including `compare` / `string_view` used by PWM
+requirements.
+
+`grevir_avr_firmware` links as ELF 32-bit LSB Atmel AVR, statically linked
+against avr-libc `crtatmega328p`. `avr-size --format=avr --mcu=atmega328p`:
+**142 program bytes, 0 data bytes** (0.4% of 32 KiB flash). Map:
+`build/avr-atmega328p/avr.map`. `main` is at 0x80 (`.text.startup.main`, 10
+bytes). Disassembly shows avr-libc vectors/startup calling `main`, then
+`sbi 0x05,7` and `in r24,0x05` for the Register RMW/Read of I/O 0x05 (data
+address 0x25). These sizes are this image only; no cycle claims.
+
+Core claim probes on the same `avr-g++` (no `HAS_STD_LIB`): case 1 compiles;
+case 2 is rejected with `static assertion failed: Application has resource
+conflict.` Logs:
+`build/avr-atmega328p/avr-probe/claim-results/`.
+
+## AVR Phase 3 on weftpi — 22 September 2026
+
+simavr 1.6 / libsimavr on weftpi, MCU `atmega328p` 16 MHz. Native host
+`build/simavr-host/grevir_simavr_host`. Cycles are simavr, not silicon.
+
+Smoke of `grevir_avr_firmware`: 2000 cycles, `PORTB=0x80`, `pc=0x008c`, not
+crashed. CLI `simavr -m atmega328p -f 16000000` loads the ELF (timeout exit 124).
+
+Timer1 Fast PWM (`ICR1` TOP=200, `/8`): OCR1A write 40→120 at `TCNT1=70` does not
+set `OCF1A` before BOTTOM; CPU OCR reads 120. Double-buffer at BOTTOM.
+
+Grevir `ICR1=0xA5C3` high-then-low reads back. simavr 1.6 also commits reversed
+`ICR1` `0x1234`. Stopped `TCNT1` reads 0. TEMP disagreement is silicon.
+
+`TIMER0_OVF` vector 16: pending/vector cycle 440, 3-cycle `jmp` to ISR `0x0090`,
+RETI to `main` at 476 (33-cycle ISR). Datasheet 4-cycle entry was not a gap here.
+
+Probe sizes: ocr 526/14, latch 442/14, irq 356/14 flash/RAM. Limitation list:
+[GrevirAvrValidationPlan.md](GrevirAvrValidationPlan.md). Next: Phase 4 Arduino
+CLI (blocked). Silicon stays on hold.
 
 ## Stepper extraction — 22 September 2026
+
 
 The eleventh member, `grevir-stepper`, extracts `ardOStepper.h` into
 `src/grevir/stepper/stepper.hpp` with aggregate `GrevirStepper.h`, CMake export
