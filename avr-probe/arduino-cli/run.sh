@@ -8,7 +8,7 @@ BUILD_DIR="${BUILD_DIR:-$ROOT/avr-probe/arduino-cli/out}"
 mkdir -p "$BUILD_DIR"
 
 LIBS=""
-for lib in grevir-base grevir-time grevir-core grevir-peripherals grevir-registers grevir-avr grevir-arduino grevir-arduino-avr grevir-pulse-codec grevir-pulse-io; do
+for lib in grevir-base grevir-time grevir-core grevir-peripherals grevir-registers grevir-avr grevir-arduino grevir-arduino-avr grevir-pulse-codec grevir-pulse-io grevir-packet; do
   LIBS="$LIBS --library $ROOT/$lib"
 done
 
@@ -30,6 +30,7 @@ compile_one "$ROOT/grevir-arduino/examples/BareMinimum/BareMinimum.ino" baremini
 compile_one "$ROOT/grevir-arduino/examples/Blink/Blink.ino" blink
 compile_one "$ROOT/grevir-arduino/examples/SerialHello/SerialHello.ino" serialhello
 compile_one "$ROOT/grevir-pulse-io/examples/AvrLoopback/AvrLoopback.ino" pulse-io-loopback
+compile_one "$ROOT/grevir-packet/examples/AvrPacket/AvrPacket.ino" packet-avr
 
 echo "==== reserved Timer0 must fail ===="
 set +e
@@ -41,4 +42,4 @@ if [ "$status" -eq 0 ]; then
   exit 1
 fi
 echo "ReservedTimerFail rejected as expected"
-echo "Arduino CLI sketches: BareMinimum, Blink, SerialHello, AvrLoopback compiled; reserved Timer0 rejected"
+echo "Arduino CLI sketches: BareMinimum, Blink, SerialHello, AvrLoopback, AvrPacket compiled; reserved Timer0 rejected"
