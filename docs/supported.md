@@ -11,7 +11,7 @@ MCU. Physical hardware behavior has not yet been validated.
 | ATmega328P, Arduino Uno/Nano, Debian AVR GCC 14.2 | Selected Uno sketches and selected Nano sketches compile with Arduino AVR 1.8.8 and `-std=c++23` | Arduino, PWM/pin, Pulse IO and Packet compositions; individual package coverage varies |
 | ATmega328P, simavr 1.6 | Selected timer, GPIO/Pulse IO and Packet probes pass | Simulated behavior only |
 | Physical Uno/Nano | Not run | Electrical behavior, real timing and silicon-specific effects remain unvalidated |
-| ESP32 | No Grevir ESP32 backend or board adapter yet | Target-specific options can appear in portable declarations but are ignored on a resident AVR target |
+| Classic ESP32 Dev Module, Arduino-ESP32 3.3.11 | Parklights compiles and links with selected Grevir GPIO, clock and serial adapters | Full ESP32 timer/interrupt/peripheral backend and physical-board behavior are not validated |
 
 "Native tested" means production code ran with host mocks or an installed
 consumer. "AVR compiled" means a named target program compiled and linked with

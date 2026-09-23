@@ -185,3 +185,27 @@ members:
     url: git@github.com:owebeeone/grevir-pulse-io.git
     fetch: true
     push: true
+- id: mem_parklights
+  path: parklights
+  type: git
+  source_id: src_parklights
+  active: true
+  desired:
+    branch: main
+  remotes:
+  - name: origin
+    url: git@github.com:owebeeone/parklights.git
+    fetch: true
+    push: true
+- id: mem_grevir_arduino_esp32
+  path: grevir-arduino-esp32
+  type: git
+  source_id: src_grevir_arduino_esp32
+  active: true
+  desired:
+    branch: main
+  remotes:
+  - name: origin
+    url: git@github.com:owebeeone/grevir-arduino-esp32.git
+    fetch: true
+    push: true

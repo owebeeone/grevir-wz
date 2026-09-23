@@ -118,8 +118,10 @@ compiles with Debian `avr-g++` 14.2 and Grevir `-std=c++23`. Command:
 | StripOn | 3956 | 126 |
 | FastLedQuadEncoder | 5360 | 194 |
 
-ParkLightsV2 is copied under `extras/legacy` and is not compiled. Silicon and
-WS2812 timing remain unvalidated. Next third-party-free driver remains pulse IO.
+At this checkpoint, ParkLightsV2 was copied under `extras/legacy` and was not
+compiled. The later separate `parklights` port now compiles for the selected
+ESP32 target; see [its build record](GrevirEsp32ParklightsBuild.md). Silicon and
+WS2812 timing remain unvalidated. Next third-party-free driver remained pulse IO.
 
 ## Arduino adapters and Phase 4 CLI — 22 September 2026
 

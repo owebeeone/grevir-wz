@@ -14,6 +14,7 @@ declares them for installed libraries. All runtime packages require C++23.
 | AVR | `GrevirAVR.h` | `grevir::avr` | [AVR](avr.md) |
 | Arduino | `GrevirArduino.h` | `grevir::arduino` | [Arduino](arduino.md) |
 | Arduino AVR | `GrevirArduinoAVR.h` | `grevir::arduino_avr` | [Arduino AVR](arduino-avr.md) |
+| Arduino ESP32 | `GrevirArduinoESP32.h` | `grevir::arduino_esp32` | [Arduino ESP32](arduino-esp32.md) |
 | Pulse Codec | `GrevirPulseCodec.h` | `grevir::pulse_codec` | [Pulse Codec](pulse-codec.md) |
 | Pulse IO | `GrevirPulseIO.h` | `grevir::pulse_io` | [Pulse IO](pulse-io.md) |
 | Packet | `GrevirPacket.h` | `grevir::packet` | [Packet](packet.md) |

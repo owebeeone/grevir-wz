@@ -12,7 +12,7 @@ The currently documented platform paths are:
 | --- | --- |
 | Arduino Uno/Nano, ATmega328P | Selected sketches compile with Debian AVR GCC 14.2; selected firmware passes in simavr. Physical-board behavior is unvalidated. |
 | macOS and Windows 11 | Full native test suites pass with Apple Clang and MSVC. |
-| ESP32 | Portable declarations can contain ESP32-specific options; a Grevir ESP32 backend is not implemented. |
+| Classic ESP32 Dev Module | Parklights compiles with Arduino-ESP32 3.3.11 using selected Grevir GPIO, clock and serial adapters. Physical-board behavior is unvalidated; an SDK-level timer/peripheral backend is not implemented. |
 
 See the exact [support and evidence levels](docs/supported.md) before choosing a
 target.
@@ -68,8 +68,8 @@ target's section is applied.
 
 The packages cover foundations and typed time; module composition and resource
 claims; GPIO, registers and ATmega328P timers; pulse encoding and GPIO I/O;
-packet fragmentation; quadrature decoding and stepper control; plus Arduino AVR
-and FastLED adapters. The [package index](docs/api/index.md) gives the exact
+packet fragmentation; quadrature decoding and stepper control; plus Arduino AVR,
+selected Arduino ESP32 and FastLED adapters. The [package index](docs/api/index.md) gives the exact
 header, dependency and target scope of each library.
 
 Start at the [public documentation index](docs/index.md) for installation,

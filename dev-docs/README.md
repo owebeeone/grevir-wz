@@ -26,6 +26,8 @@ on hold; the remaining `grevir-xxx` boundaries are described in the plan.
 - [Embedded arithmetic review](GrevirEmbeddedArithmeticReview.md)
 - [Cross-MCU implementation and review policy](review-policies/CrossMcu.md)
 - [AVR implementation and review policy](review-policies/Avr.md)
+- [Classic ESP32 implementation and review policy](review-policies/Esp32.md)
+- [Parklights ESP32 build checkpoint](GrevirEsp32ParklightsBuild.md)
 - [Selected build and test framework and implementation plan](GrevirBuildAndTestPlan.md)
 - [AVR compiler, simavr and Arduino validation plan (weftpi)](GrevirAvrValidationPlan.md)
 - [First 30 files in each proposed repo — query results](GrevirFirst30Files.md)

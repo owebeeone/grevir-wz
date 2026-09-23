@@ -27,6 +27,7 @@ add_subdirectory(grevir-encoder)
 add_subdirectory(grevir-stepper)
 add_subdirectory(grevir-arduino)
 add_subdirectory(grevir-arduino-avr)
+add_subdirectory(grevir-arduino-esp32)
 add_subdirectory(grevir-fastled)
 
 if(CMAKE_SYSTEM_PROCESSOR STREQUAL "avr")

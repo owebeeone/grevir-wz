@@ -2,8 +2,9 @@ Read and follow `AGENTS_GWZ.md` before doing any work in this workspace.
 
 For implementation and code review, read and follow
 `dev-docs/review-policies/CrossMcu.md`. For AVR-specific code, also read and
-follow `dev-docs/review-policies/Avr.md`. Shared code remains subject to the
-cross-MCU API contract even when reviewing its AVR instantiations.
+follow `dev-docs/review-policies/Avr.md`. For ESP32-specific code, also read
+and follow `dev-docs/review-policies/Esp32.md`. Shared code remains subject to
+the cross-MCU API contract even when reviewing target instantiations.
 
 Use the 1+N policy model: one shared policy plus one supplement per supported
 MCU architecture. Do not apply AVR cost assumptions to all generic Grevir APIs.

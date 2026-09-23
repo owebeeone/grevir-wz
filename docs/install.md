@@ -30,6 +30,15 @@ published in its index. Other guides name their additional packages.
 [Support](supported.md) explains what target builds have been checked. An
 upload or physical-board run is outside the current validation.
 
+## ESP32 Dev Module development setup
+
+Install Arduino-ESP32 3.3.11, FastLED 3.7.8, and Adafruit ST7735 and ST7789
+Library 1.11.0 with its declared dependencies. The `parklights` application
+repository builds from the workspace source packages using
+`parklights/build-esp32.sh`. Its build script sets
+`-std=c++23` and targets `esp32:esp32:esp32`. The application can compile
+without Wi-Fi credentials; see its README before running it on a board.
+
 ## Native CMake consumer
 
 Install the desired packages and their dependencies into one prefix, then use

@@ -11,6 +11,7 @@ contract for every other target.
 | --- | --- |
 | Generic Base, Time, Core, Peripherals and Registers APIs/implementations | This policy; consult relevant architecture supplements for target-dependent behavior |
 | AVR backend (`grevir-avr/src`) | This policy plus [AVR](Avr.md) |
+| ESP32 Arduino adapter (`grevir-arduino-esp32/src`) | This policy plus [ESP32](Esp32.md) |
 | Shared template instantiated for AVR | This policy for its public contract; AVR supplement for that instantiation's correctness and cost |
 | Host tests, mocks and build tooling | This policy's evidence/reporting rules; do not impose firmware runtime budgets |
 | Future MCU backend | This policy plus a dedicated architecture supplement when that backend is introduced |
@@ -20,8 +21,8 @@ not an excuse to ignore AVR portability, and AVR is not a reason to restrict all
 generic operations to 8- or 16-bit arithmetic. The precise ESP32 architecture,
 variant, ABI and floating-point capabilities must be identified when assessing
 backend costs. Do not infer an FPU or its supported precision from “32-bit”.
-No ESP32 backend policy is established by this document; add it when selecting
-the backend. There are currently two policy documents: shared and AVR.
+The selected Arduino ESP32 adapter is governed by [ESP32](Esp32.md). There are
+currently three policy documents: shared, AVR, and ESP32.
 
 ## Numeric correctness and representation
 
