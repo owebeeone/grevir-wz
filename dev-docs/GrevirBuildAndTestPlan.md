@@ -13,7 +13,7 @@ consumer runs, and all 186 CTest cases pass. The selected Pulse IO Uno sketch
 now compiles with the AVR toolchain, and its simavr D5-to-D4 loopback passes; see
 [the target evidence](GrevirPulseIoAvrEvidence.md). Silicon remains on hold.
 The full Win11 MSVC runtime build and 186 CTest cases also pass on dabeest;
-compiler-only rejection probes remain Clang/GNU-only and were disabled there.
+public-header compile targets and all configured expected-rejection probes pass there too.
 See [Win11 evidence](GrevirWindowsValidation.md).
 
 Implemented: opt-in CMake/CTest host tests with pinned Catch2 3.8.1 and shared

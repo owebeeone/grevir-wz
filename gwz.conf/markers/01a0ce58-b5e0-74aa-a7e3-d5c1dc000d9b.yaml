@@ -1,6 +1,40 @@
-schema: gwz.lock/v0
+schema: gwz.marker/v0
+gwz_commit_id: 01a0ce58-b5e0-74aa-a7e3-d5c1dc000d9b
 workspace_id: ws_default
-manifest_schema: gwz.workspace/v0
+origin_url_hash: sha256:b447322346850c84947a6704a11ee61707db25812f757b3276513c4757dadaad
+created_at: unix-ms:1790168315559
+created_by:
+  actor_id: unknown
+root:
+  path: .
+  before_commit: a3abeac9c17e3c4918a37ca7fb889b070c2d6b08
+  branch: main
+selected_targets:
+- '@root'
+- mem_grevir_base
+- mem_grevir_time
+- mem_grevir_core
+- mem_grevir_test_support
+- mem_grevir_peripherals
+- mem_grevir_registers
+- mem_grevir_avr
+- mem_grevir_pulse_codec
+- mem_grevir_packet
+- mem_grevir_encoder
+- mem_grevir_stepper
+- mem_grevir_arduino
+- mem_grevir_arduino_avr
+- mem_grevir_fastled
+- mem_grevir_pulse_io
+committed_targets:
+- mem_grevir_core
+- mem_grevir_peripherals
+- mem_grevir_encoder
+- mem_grevir_stepper
+- mem_grevir_arduino
+- mem_grevir_arduino_avr
+- mem_grevir_fastled
+- '@root'
 members:
   mem_grevir_arduino:
     path: grevir-arduino

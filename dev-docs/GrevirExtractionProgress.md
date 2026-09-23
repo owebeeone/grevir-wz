@@ -9,11 +9,15 @@ hardware remains on hold.
 ## Win11 native validation and AVR recheck — 23 September 2026
 
 On dabeest, Visual Studio 2022 MSVC builds the workspace's host runtime suite
-and all **186** CTest cases pass, including Packet and Pulse IO. The
-compiler-only expected-rejection probes remain Clang/GNU-only and were disabled
-for this MSVC build. The run exposed and led to fixes for a Base type-trait
+and all **186** CTest cases pass, including Packet and Pulse IO. The follow-up
+MSVC build also passes the public-header/compile-only targets and all configured
+positive and expected-rejection probes. Its CMake probe scripts select MSVC
+command-line flags and diagnostic wording; the C++23 cases are shared. The
+run exposed and led to fixes for a Base type-trait
 redeclaration, an MSVC PWM claim-template parse error, and Pulse IO waveform
-static-initialization order. See [Win11 evidence](GrevirWindowsValidation.md).
+static-initialization order. A compile-only encoder test was also corrected to
+compare its protected enum inside the derived helper. See
+[Win11 evidence](GrevirWindowsValidation.md).
 After these changes, the weftpi Uno sketch compiles again at 2,624 flash/78 RAM
 bytes; simavr again decodes the second loopback frame, now at 30,153 cycles.
 The updated [AVR evidence](GrevirPulseIoAvrEvidence.md) records exact provenance.
