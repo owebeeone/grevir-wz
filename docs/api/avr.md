@@ -17,7 +17,7 @@ inventory to access and barrier policies. Requests come from Core and portable
 Peripherals; see the [PWM guide](../guides/pwm.md). The current application
 allocation scope is fixed-frequency synchronous fast PWM. Timer0/1/2 routes,
 TOP sources and resource reservations are represented, but additional timer
-features and other AVR devices are not promised by this v0.1.0 path.
+features and other AVR devices are outside the current target path.
 
 AVR is an 8-bit CPU; the selected ATmega328P ABI has 16-bit `int`, 32-bit
 `long` and no hardware floating-point unit. Integer control paths do not

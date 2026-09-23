@@ -1,6 +1,6 @@
-# Grevir v0.1.0 documentation
+# Grevir documentation
 
-This is the public entry point for the v0.1.0 development snapshot. Read
+This is the public entry point for Grevir. Read
 [supported platforms and evidence](supported.md) before assuming a backend or
 board is available. The API uses C++23 and retains several `ardo`, `setl`,
 `quad` and `step` names. These `/docs` pages are the current API contract;

@@ -6,9 +6,9 @@ Application assembly checks conflicts at compile time. Portable modules receive
 pins, clocks and device bindings from the selected backend rather than importing
 one MCU's registers.
 
-The v0.1.0 code is a development snapshot. Its supported and intended paths are:
+The currently documented platform paths are:
 
-| Platform | v0.1.0 state |
+| Platform | Current state |
 | --- | --- |
 | Arduino Uno/Nano, ATmega328P | Selected sketches compile with Debian AVR GCC 14.2; selected firmware passes in simavr. Physical-board behavior is unvalidated. |
 | macOS and Windows 11 | Full native test suites pass with Apple Clang and MSVC. |

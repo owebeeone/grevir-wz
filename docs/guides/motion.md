@@ -3,7 +3,7 @@
 Encoder and Stepper are separate portable packages. Both receive pin and clock
 types from the application; neither imports Arduino or an MCU backend. Their
 selected host consumers run with injected GPIO. Arduino target compilation for
-these two packages has not been recorded in v0.1.0.
+these two packages has not been recorded in the current target validation.
 
 For a quadrature encoder, the [complete host example](../examples/encoder-host.md)
 supplies pins and checks one transition:
@@ -43,5 +43,5 @@ using App = ardo::Application<Module>;
 `BoardClock` supplies typed time through `now()`. Set a target position on
 `Module::instance.stepper`, then poll `App::runLoop()`. A step is taken only
 when elapsed time is strictly greater than the scaled step period. A combined
-encoder-follower Arduino example remains outside the validated v0.1.0 set.
+encoder-follower Arduino example remains outside the validated target examples.
 See [Stepper](../api/stepper.md) for phase and coil-off behavior.

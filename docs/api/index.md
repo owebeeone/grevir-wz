@@ -1,6 +1,6 @@
 # Package API index
 
-Public entry headers and CMake targets for v0.1.0 are below. CMake package
+Public entry headers and CMake targets are below. CMake package
 configuration carries transitive dependencies; Arduino `library.properties`
 declares them for installed libraries. All runtime packages require C++23.
 

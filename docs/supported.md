@@ -1,8 +1,8 @@
-# v0.1.0 support and validation
+# Support and validation
 
-Grevir v0.1.0 is an AVR-first development snapshot, not a published or
-hardware-qualified release. The portable APIs accept injected backends. That
-design does not by itself establish a working backend for every MCU.
+Grevir's current target path is AVR-first. The portable APIs accept injected
+backends. That design does not by itself establish a working backend for every
+MCU. Physical hardware behavior has not yet been validated.
 
 | Environment | Current evidence | Scope |
 | --- | --- | --- |
@@ -17,7 +17,7 @@ design does not by itself establish a working backend for every MCU.
 consumer. "AVR compiled" means a named target program compiled and linked with
 the AVR toolchain; it does not cover every template instantiation. "Simulated"
 means a named firmware path ran in simavr. "Hardware validated" would require
-a named physical board; no v0.1.0 feature has that evidence.
+a named physical board; no feature has that evidence yet.
 
 The selected ATmega328P toolchain has no AVR libstdc++. Grevir Base provides the
 compatibility subset used by the selected target programs. Standard-library
