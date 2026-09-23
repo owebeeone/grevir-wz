@@ -10,3 +10,4 @@ ARDUINO_AVR="${ROOT}/avr-probe/arduino-cli/out/pulse-io-loopback/AvrLoopback.ino
 "${HOST}" latch "${AVR}/grevir_avr_sim_latch"
 "${HOST}" irq "${AVR}/grevir_avr_sim_irq"
 "${HOST}" pulse-io "${ARDUINO_AVR}"
+"${HOST}" packet "${AVR}/grevir_avr_packet_loopback"

@@ -25,6 +25,12 @@ if(TARGET grevir::avr)
   grevir_avr_sim_firmware(latch latch.cpp)
   grevir_avr_sim_firmware(irq irq.cpp)
 
+  if(TARGET grevir::packet)
+    add_executable(grevir_avr_packet_loopback sim/packet.cpp)
+    target_link_libraries(grevir_avr_packet_loopback PRIVATE grevir::packet)
+    target_compile_features(grevir_avr_packet_loopback PRIVATE cxx_std_23)
+  endif()
+
   function(grevir_avr_header_probe name target)
     add_library(grevir_avr_header_${name} OBJECT headers/${name}.cpp)
     target_link_libraries(grevir_avr_header_${name} PRIVATE ${target})

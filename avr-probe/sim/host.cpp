@@ -155,6 +155,41 @@ int cmd_pulse_io(const char* elf) {
   return 1;
 }
 
+int cmd_packet(const char* elf) {
+  Loaded loaded = load_elf(elf);
+  const uint32_t result_addr = symbol_addr(loaded.firmware, "packet_result");
+  const uint32_t frames_addr = symbol_addr(loaded.firmware, "packet_frames");
+  const uint32_t deliveries_addr = symbol_addr(loaded.firmware, "packet_deliveries");
+  if (result_addr == 0 || frames_addr == 0 || deliveries_addr == 0) {
+    std::fprintf(stderr, "packet simulation symbols missing\n");
+    terminate(loaded);
+    return 1;
+  }
+  while (loaded.avr->cycle < 2000000) {
+    const int state = avr_run(loaded.avr);
+    if (state == cpu_Crashed || state == cpu_Done) {
+      std::fprintf(stderr, "packet simulation stopped at cycle %llu state=%d\n",
+        static_cast<unsigned long long>(loaded.avr->cycle), state);
+      terminate(loaded);
+      return 1;
+    }
+    const auto result = loaded.avr->data[result_addr];
+    if (result != 0) {
+      const auto frames = loaded.avr->data[frames_addr];
+      const auto deliveries = loaded.avr->data[deliveries_addr];
+      const bool ok = result == 0xa5 && frames == 2 && deliveries == 1;
+      std::printf("%s packet AVR loopback: frames=%u deliveries=%u cycles=%llu\n",
+        ok ? "PASS" : "FAIL", frames, deliveries,
+        static_cast<unsigned long long>(loaded.avr->cycle));
+      terminate(loaded);
+      return ok ? 0 : 1;
+    }
+  }
+  std::fprintf(stderr, "packet AVR loopback timed out\n");
+  terminate(loaded);
+  return 1;
+}
+
 int wait_ready(Loaded& loaded, uint64_t max_cycles, ProbeResult* out) {
   const uint32_t addr = symbol_addr(loaded.firmware, "probe_result");
   if (addr == 0) {
@@ -342,7 +377,7 @@ int cmd_irq(const char* elf) {
 
 int main(int argc, char** argv) {
   if (argc != 3) {
-    std::fprintf(stderr, "usage: grevir_simavr_host smoke|ocr|latch|irq|pulse-io <elf>\n");
+    std::fprintf(stderr, "usage: grevir_simavr_host smoke|ocr|latch|irq|pulse-io|packet <elf>\n");
     return 2;
   }
   const std::string cmd = argv[1];
@@ -361,6 +396,9 @@ int main(int argc, char** argv) {
   }
   if (cmd == "pulse-io") {
     return cmd_pulse_io(elf);
+  }
+  if (cmd == "packet") {
+    return cmd_packet(elf);
   }
   std::fprintf(stderr, "unknown command %s\n", cmd.c_str());
   return 2;
