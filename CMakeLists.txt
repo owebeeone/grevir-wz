@@ -21,6 +21,7 @@ add_subdirectory(grevir-registers)
 add_subdirectory(grevir-avr)
 
 add_subdirectory(grevir-pulse-codec)
+add_subdirectory(grevir-pulse-io)
 add_subdirectory(grevir-packet)
 add_subdirectory(grevir-encoder)
 add_subdirectory(grevir-stepper)

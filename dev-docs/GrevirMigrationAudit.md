@@ -4,6 +4,9 @@ This audit reconciles the extraction ledger with the current checkout and the
 Arduino work retained on weftpi. It changes records and documentation, not runtime
 implementations. At the start of this audit, Arduino, Arduino AVR and FastLED
 were uncommitted locally; the subsequent GitHub synchronization includes them.
+The later Pulse IO and full-build checkpoint is in
+[GrevirExtractionProgress.md](GrevirExtractionProgress.md); figures below are this
+audit's historical snapshot.
 
 ## What is recorded
 
@@ -82,18 +85,18 @@ ELF hashes, size output, successful-build options and audit scope. Retained ELFs
 and matching current source are evidence of the recorded work; this is not a fresh
 reproducibility run. Silicon/electrical validation remains on hold.
 
-## Current local validation and next work
+## Local validation at this audit
 
 All runtime targets rebuilt and all **184 CTest cases pass** on the Mac. The
 Arduino, Arduino AVR and FastLED independent-header builds and claim probes pass.
 
-The default all-target build currently fails `grevir_timer_clock_checks`:
+At this audit, the default all-target build failed `grevir_timer_clock_checks`:
 `check_timer_clock.cmake` passes only the AVR include directory, but the migrated
 `clock.hpp` now includes `grevir/base/compat/cstdint.hpp`. The positive probe cannot
 find that header. This is a compiler-probe dependency/configuration problem;
 passing runtime tests do not make the all-target build green. No runtime source
 was changed to conceal or bypass the failure.
 
-Next: repair the standalone probe's dependency/include and configuration handling,
-then rerun the normal build. After that, Pulse IO is the next bounded extraction.
-Neither workspace contains `grevir-pulse-io`; its three mappings remain planned.
+The next planned work at this audit was to repair the standalone probe and
+extract Pulse IO. The later checkpoint in GrevirExtractionProgress.md records
+their completion.

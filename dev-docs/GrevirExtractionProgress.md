@@ -1,10 +1,28 @@
 # Grevir extraction progress
 
-Latest checkpoint: 23 September 2026. Fourteen local members now exist: Base,
-Time, Core, Peripherals, Registers, AVR, Pulse Codec, Packet, Encoder, Stepper,
+Latest checkpoint: 23 September 2026. Fifteen local members now exist: Base,
+Time, Core, Peripherals, Registers, AVR, Pulse Codec, Pulse IO, Packet, Encoder, Stepper,
 Arduino, Arduino AVR, FastLED, and development-only Test Support. AVR compiler,
 simavr and Arduino CLI validation run on weftpi (`gianni@10.1.1.236`). Silicon
 hardware remains on hold.
+
+## Pulse IO and native build repair — 23 September 2026
+
+`grevir-pulse-io` now connects the existing pulse encoder/decoder to injected
+GPIO pins and a clock through Core modules. The receiver's readiness method
+returns the decoder result, correcting the missing return in Ardoinus. Core pin
+claims reject a receiver and transmitter assigned the same GPIO. The original
+Gammil repeater prototype is archived byte-for-byte. Two mock tests transfer
+normal and inverted frames; an installed consumer builds and runs without Catch2.
+The three planned Pulse IO mappings are now recorded: two native-checked adapted
+files and one retained legacy archive.
+
+The standalone timer-clock compiler probe now reads the AVR compile target's
+dependency include directories. Its valid and seven invalid cases pass. The
+full all-target native build passes, as do all **186** CTest cases. The ledger has
+126 extraction/archive records (119 native-checked, three recorded target
+compiles, four archives); original source hashes remain unchanged. Pulse IO
+has native evidence only; MCU compiler and silicon behavior for it are untested.
 
 ## Recordkeeping reconciliation — 23 September 2026
 
@@ -27,11 +45,10 @@ repeated. The remote retained host-test log has 170 passes; today's locally rebu
 runtime suite has 184 passes. See [audit details](GrevirMigrationAudit.md) and
 [the source/artifact manifest](GrevirWeftpiEvidence.json).
 
-The full local all-target build is currently **not green**: the standalone timer
-clock probe omits the Base include directory needed after the compatibility-header
-migration. Arduino/Arduino AVR/FastLED header and claim checks pass independently.
-Fix that compiler-probe wiring next, then continue Pulse IO, which is absent from
-both local and weftpi workspaces. Silicon remains on hold.
+At this earlier reconciliation checkpoint, the full local all-target build was
+not green: the standalone timer-clock probe omitted the Base include directory.
+The Pulse IO package was also absent. The newer checkpoint above records both
+corrections. Silicon remains on hold.
 
 Schema version 2 adds `target_compile_recorded` and `retained_legacy`, keeping
 reported AVR sketch compilation distinct from native checks and archived source.

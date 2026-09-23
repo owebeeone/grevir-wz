@@ -6,16 +6,15 @@ retained weftpi results. See [GrevirMigrationAudit.md](GrevirMigrationAudit.md).
 Arduino CLI work runs on weftpi (`gianni@10.1.1.236`); see
 [GrevirAvrValidationPlan.md](GrevirAvrValidationPlan.md).
 
-**Current build limitation:** the all-target native build fails the timer-clock
-compiler probe because its invocation omits the Base include directory. Dedicated
-runtime targets and all 184 CTest cases pass; Arduino/Arduino AVR/FastLED independent
-header and claim checks also pass. Older successful compiler-check checkpoints
-below do not override this current failure.
+**Current check (23 September):** the full all-target native build passes. The
+timer-clock compiler probe uses the AVR target's dependency include paths and its
+valid/seven-invalid cases pass. Pulse IO builds independently, its installed
+consumer runs, and all 186 CTest cases pass. No Pulse IO target build is claimed.
 
 Implemented: opt-in CMake/CTest host tests with pinned Catch2 3.8.1 and shared
-setup in Grevir Test Support. 184 cases pass: Base 5, Time 4, Core 10,
+setup in Grevir Test Support. 186 cases pass: Base 5, Time 4, Core 10,
 Peripherals 29, Registers 24, Test Support 3, AVR 50, Pulse Codec 11, Packet 12,
-Encoder 10, Stepper 12, Arduino 6, Arduino AVR 4 and FastLED 4. Encoder and
+Pulse IO 2, Encoder 10, Stepper 12, Arduino 6, Arduino AVR 4 and FastLED 4. Encoder and
 stepper mocks drive injected GPIO and a controlled clock through the production
 module wrappers; pin-claim probes accept distinct pins and reject reuse. Arduino
 and FastLED host tests use explicit `GREVIR_ARDUINO_HOST_MOCK` /
