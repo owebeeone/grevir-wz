@@ -1,5 +1,11 @@
 # Win11 native validation — 23 September 2026
 
+At source root `bab54d206ece83c67b7e41ac634a20b3fc53c843`, dabeest pulled
+the Packet AVR portability changes, rebuilt the full Visual Studio native
+workspace with compiler probes enabled, and passed **186/186** CTest cases,
+including all 12 Packet cases. This is a host portability recheck; the target
+result is recorded separately in [Packet AVR evidence](GrevirPacketAvrEvidence.md).
+
 At source root commit `a3abeac9c17e3c4918a37ca7fb889b070c2d6b08`, the
 full Win11 MSVC build passes with both native runtime tests and compiler-only
 checks enabled. All configured positive and expected-rejection probes pass;

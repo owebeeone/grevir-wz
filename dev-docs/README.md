@@ -33,6 +33,7 @@ on hold; the remaining `grevir-xxx` boundaries are described in the plan.
 - [Current migration audit](GrevirMigrationAudit.md)
 - [weftpi source and artifact evidence](GrevirWeftpiEvidence.json)
 - [Pulse IO AVR compiler and simavr evidence](GrevirPulseIoAvrEvidence.md)
+- [Packet AVR compiler and simavr evidence](GrevirPacketAvrEvidence.md)
 - [Win11 MSVC native validation](GrevirWindowsValidation.md)
 - [Saved first-30-files query](GrevirFirst30Files.sql)
 - [Original file-map import snapshot (CSV)](GrevirFileMap.csv)

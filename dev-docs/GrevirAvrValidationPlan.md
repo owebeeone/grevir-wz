@@ -16,6 +16,13 @@ this machine. Do not treat macOS host-mock results, Apple Clang IR or Pi native
 Authoring may happen in the Mac workspace; a step is not done until its command
 and artifacts exist on weftpi.
 
+## Packet target checkpoint — 23 September 2026
+
+The selected Packet sketch compiles for Uno and Nano with Debian AVR C++23 and
+no libstdc++. A one-slot, two-fragment Packet loopback passes in simavr. See
+[Packet AVR evidence](GrevirPacketAvrEvidence.md) for sizes, artifact hashes,
+commands and limits. Silicon validation remains on hold.
+
 ## Pulse IO target checkpoint — 23 September 2026
 
 The selected Pulse IO Uno sketch builds on weftpi with Arduino CLI, Arduino AVR

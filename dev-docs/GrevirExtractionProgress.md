@@ -6,6 +6,17 @@ Arduino, Arduino AVR, FastLED, and development-only Test Support. AVR compiler,
 simavr and Arduino CLI validation run on weftpi (`gianni@10.1.1.236`). Silicon
 hardware remains on hold.
 
+## Packet AVR target checkpoint — 23 September 2026
+
+Packet now builds without AVR libstdc++ through Grevir Base's compatibility
+headers. On weftpi, the checked-in Packet sketch compiles for both Uno and Nano
+at **1,896 program bytes and 85 RAM bytes**. A separate one-slot, two-fragment
+firmware loopback passes under simavr in **6,223 simulated cycles**, with one
+correct delivery. The installed CMake consumer passes with Base discovered as a
+transitive dependency. macOS and Win11 native suites remain at **186/186**.
+[Packet AVR evidence](GrevirPacketAvrEvidence.md) records source revisions,
+artifacts and limits. Physical hardware remains on hold.
+
 ## Win11 native validation and AVR recheck — 23 September 2026
 
 On dabeest, Visual Studio 2022 MSVC builds the workspace's host runtime suite

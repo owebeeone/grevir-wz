@@ -1,5 +1,12 @@
 # Grevir build and test framework
 
+## Packet target update — 23 September 2026
+
+The selected ATmega328P Packet loopback now compiles with Debian AVR C++23
+without libstdc++, passes in simavr, and its Uno/Nano sketches compile through
+Arduino CLI. The [Packet AVR evidence](GrevirPacketAvrEvidence.md) records exact
+sizes and limits. macOS and Win11 full native suites each pass 186 cases.
+
 Selected 18 September 2026; reconciled 23 September against current files and
 retained weftpi results. See [GrevirMigrationAudit.md](GrevirMigrationAudit.md).
 **Silicon hardware validation remains on hold.** AVR compiler, simavr and
