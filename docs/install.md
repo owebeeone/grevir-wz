@@ -23,12 +23,12 @@ arduino-cli compile --fqbn arduino:avr:uno \
   grevir-arduino/examples/Blink
 ```
 
-Change the FQBN to `arduino:avr:nano` for Nano. Arduino's library manager can
-resolve declared dependencies when the packages are installed under the
-sketchbook; explicit paths are useful for a source checkout. Other guides name
-their additional packages. [Support](supported.md) explains what target builds
-have been checked. An upload or physical-board run is outside the current
-validation.
+Change the FQBN to `arduino:avr:nano` for Nano. Install every declared
+dependency when using local checkouts; the explicit `--library` paths above do
+that for Blink. Library Manager can resolve dependencies only for libraries
+published in its index. Other guides name their additional packages.
+[Support](supported.md) explains what target builds have been checked. An
+upload or physical-board run is outside the current validation.
 
 ## Native CMake consumer
 
