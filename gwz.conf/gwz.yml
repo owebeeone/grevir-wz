@@ -179,5 +179,9 @@ members:
   source_id: src_grevir_pulse_io
   active: true
   desired:
-    local_only: true
-  remotes: []
+    branch: main
+  remotes:
+  - name: origin
+    url: git@github.com:owebeeone/grevir-pulse-io.git
+    fetch: true
+    push: true

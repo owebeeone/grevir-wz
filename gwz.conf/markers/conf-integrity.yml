@@ -3,4 +3,4 @@
 schema: gwz.conf-integrity/v0
 files:
   gwz.conf/gwz.lock.yml: sha256:b09e612f1c32344f89dd60056a060a08c90e348604f95708b8198cab88955a9a
-  gwz.conf/gwz.yml: sha256:cd454f01c822dbf2ff168da6161e5aff28b57c10b41672d30957fd271de0a006
+  gwz.conf/gwz.yml: sha256:24e9c6c7b712c06a48ec0abca63a06f760ceb6480f4250a254bda4fa0251efad
