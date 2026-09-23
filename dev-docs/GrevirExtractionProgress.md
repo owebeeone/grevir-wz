@@ -6,6 +6,19 @@ Arduino, Arduino AVR, FastLED, and development-only Test Support. AVR compiler,
 simavr and Arduino CLI validation run on weftpi (`gianni@10.1.1.236`). Silicon
 hardware remains on hold.
 
+## Win11 native validation and AVR recheck — 23 September 2026
+
+On dabeest, Visual Studio 2022 MSVC builds the workspace's host runtime suite
+and all **186** CTest cases pass, including Packet and Pulse IO. The
+compiler-only expected-rejection probes remain Clang/GNU-only and were disabled
+for this MSVC build. The run exposed and led to fixes for a Base type-trait
+redeclaration, an MSVC PWM claim-template parse error, and Pulse IO waveform
+static-initialization order. See [Win11 evidence](GrevirWindowsValidation.md).
+After these changes, the weftpi Uno sketch compiles again at 2,624 flash/78 RAM
+bytes; simavr again decodes the second loopback frame, now at 30,153 cycles.
+The updated [AVR evidence](GrevirPulseIoAvrEvidence.md) records exact provenance.
+Physical hardware validation remains on hold.
+
 ## Pulse IO AVR target validation — 23 September 2026
 
 On weftpi, the selected ATmega328P Pulse IO Arduino sketch compiles and links

@@ -1,0 +1,166 @@
+schema: gwz.marker/v0
+gwz_commit_id: 01a0ce42-118b-7605-bac6-4d5de8a16276
+workspace_id: ws_default
+origin_url_hash: sha256:b447322346850c84947a6704a11ee61707db25812f757b3276513c4757dadaad
+created_at: unix-ms:1790166831513
+created_by:
+  actor_id: unknown
+root:
+  path: .
+  before_commit: aa9b30917bbe0a72d7c1be8c4f4414c13863cc0d
+  branch: main
+selected_targets:
+- '@root'
+- mem_grevir_base
+- mem_grevir_time
+- mem_grevir_core
+- mem_grevir_test_support
+- mem_grevir_peripherals
+- mem_grevir_registers
+- mem_grevir_avr
+- mem_grevir_pulse_codec
+- mem_grevir_packet
+- mem_grevir_encoder
+- mem_grevir_stepper
+- mem_grevir_arduino
+- mem_grevir_arduino_avr
+- mem_grevir_fastled
+- mem_grevir_pulse_io
+committed_targets:
+- '@root'
+members:
+  mem_grevir_arduino:
+    path: grevir-arduino
+    source_id: src_grevir_arduino
+    source_kind: git
+    commit: 5b4f7fc64cd6247caed48e4c96d3f25216aab7ec
+    branch: main
+    detached: false
+    dirty: false
+    materialized: true
+  mem_grevir_arduino_avr:
+    path: grevir-arduino-avr
+    source_id: src_grevir_arduino_avr
+    source_kind: git
+    commit: 305f964e3141e06391ee56604bca2c2b93a6278a
+    branch: main
+    detached: false
+    dirty: false
+    materialized: true
+  mem_grevir_avr:
+    path: grevir-avr
+    source_id: src_grevir_avr
+    source_kind: git
+    commit: 5d48bed4b3dc987939156afcc123c0f6de35e42e
+    branch: main
+    detached: false
+    dirty: false
+    materialized: true
+  mem_grevir_base:
+    path: grevir-base
+    source_id: src_grevir_base
+    source_kind: git
+    commit: d436f7e0009089846357d8e66e9411bd75dc2508
+    branch: main
+    detached: false
+    dirty: false
+    materialized: true
+  mem_grevir_core:
+    path: grevir-core
+    source_id: src_grevir_core
+    source_kind: git
+    commit: 8151a4697bc4aa9f46a345f9a7d1450db8274dcf
+    branch: main
+    detached: false
+    dirty: false
+    materialized: true
+  mem_grevir_encoder:
+    path: grevir-encoder
+    source_id: src_grevir_encoder
+    source_kind: git
+    commit: 1e55a3e1ad1c4d94b0c9139c844fe7598c06c25e
+    branch: main
+    detached: false
+    dirty: false
+    materialized: true
+  mem_grevir_fastled:
+    path: grevir-fastled
+    source_id: src_grevir_fastled
+    source_kind: git
+    commit: 376a9ae804cfa4bed002eaa336710e33e911483d
+    branch: main
+    detached: false
+    dirty: false
+    materialized: true
+  mem_grevir_packet:
+    path: grevir-packet
+    source_id: src_grevir_packet
+    source_kind: git
+    commit: 465ffa0ea0e61def780ed5871f0ea0abbfed0530
+    branch: main
+    detached: false
+    dirty: false
+    materialized: true
+  mem_grevir_peripherals:
+    path: grevir-peripherals
+    source_id: src_grevir_peripherals
+    source_kind: git
+    commit: bffc0ed1daa65932f9696e5cc61bd0ac7c727199
+    branch: main
+    detached: false
+    dirty: false
+    materialized: true
+  mem_grevir_pulse_codec:
+    path: grevir-pulse-codec
+    source_id: src_grevir_pulse_codec
+    source_kind: git
+    commit: f3cb1bc4ca93519cb3a451093660db1e85e0e808
+    branch: main
+    detached: false
+    dirty: false
+    materialized: true
+  mem_grevir_pulse_io:
+    path: grevir-pulse-io
+    source_id: src_grevir_pulse_io
+    source_kind: git
+    commit: 9ae45fe1d625b19e8ae27608bcd04b7b88a10767
+    branch: main
+    detached: false
+    dirty: false
+    materialized: true
+  mem_grevir_registers:
+    path: grevir-registers
+    source_id: src_grevir_registers
+    source_kind: git
+    commit: 3f5a251cfa4425d4a34057a3ef826d66b5043bda
+    branch: main
+    detached: false
+    dirty: false
+    materialized: true
+  mem_grevir_stepper:
+    path: grevir-stepper
+    source_id: src_grevir_stepper
+    source_kind: git
+    commit: 994ca1be8609e0478a2c065e981c6c1eb488928a
+    branch: main
+    detached: false
+    dirty: false
+    materialized: true
+  mem_grevir_test_support:
+    path: grevir-test-support
+    source_id: src_grevir_test_support
+    source_kind: git
+    commit: f9274daccd399615c5f088d52cf03f251fb7044b
+    branch: main
+    detached: false
+    dirty: false
+    materialized: true
+  mem_grevir_time:
+    path: grevir-time
+    source_id: src_grevir_time
+    source_kind: git
+    commit: 5b2fef8fbbf0101216f70aa279b9b02f5b267573
+    branch: main
+    detached: false
+    dirty: false
+    materialized: true

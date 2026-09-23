@@ -21,6 +21,8 @@ weftpi (`gianni@10.1.1.236`, `/home/gianni/git/grevir-wz`); silicon validation r
 on hold. The selected Pulse IO Uno sketch also passes an AVR compiler build and
 [simavr loopback](dev-docs/GrevirPulseIoAvrEvidence.md). See the
 [current audit](dev-docs/GrevirMigrationAudit.md) for scope and evidence.
+The [Win11 MSVC native suite](dev-docs/GrevirWindowsValidation.md) passes 186
+tests on dabeest.
 Existing `setl` and `ardo` names remain; extracted pin/poller templates now take
 explicit GPIO backend and clock bindings.
 
