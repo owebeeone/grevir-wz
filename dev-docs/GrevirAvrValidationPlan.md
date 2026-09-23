@@ -62,8 +62,7 @@ are simavr, not silicon.
   showed a 0-cycle flag-to-vector gap. Labeled simavr, not silicon.
 
 See the limitation list in [GrevirAvrValidationPlan.md](GrevirAvrValidationPlan.md).
-Next: Phase 4 Arduino CLI, blocked on `grevir-arduino` / `grevir-arduino-avr`.
-Silicon stays on hold.
+Phase 4 Arduino CLI is complete on weftpi. Silicon stays on hold.
 
 ## Why a separate plan
 
@@ -73,9 +72,9 @@ register model. That layer is already green (170 cases on weftpi’s host `g++`
 startup/ISR attributes, OCR double-buffering, interrupt entry cost or pin
 synchronizers.
 
-Arduino CLI cannot start until `grevir-arduino` and `grevir-arduino-avr` exist.
-Those members are still planned. This plan therefore puts a real `avr-g++` and
-simavr in front of Arduino.
+Arduino CLI is Phase 4 on weftpi, after `grevir-arduino` and
+`grevir-arduino-avr` exist. Real `avr-g++` and simavr remain in front of
+Arduino as ABI and cycle evidence.
 
 ## Validation layers
 
@@ -209,11 +208,20 @@ dumps are acceptable artifacts.
 Do not add pulse-codec bit-banging or stepper phase-timing simavr cases until
 the corresponding firmware image exists and Phase 3.1 is green.
 
+### Phase 4 results — 22 September 2026
+
+Phase 4 is complete on weftpi. `arduino-cli` 1.5.2-rc.1, `arduino:avr@1.8.8`.
+Members `grevir-arduino` and `grevir-arduino-avr` exist. Stock avr-gcc 7.3 does
+not accept `-std=c++23`. Sketches compile with Debian 14.2
+(`compiler.path=/usr/bin/`, `compiler.cpp.extra_flags=-std=c++23`). Blink,
+BareMinimum and SerialHello link for Uno; Blink also for Nano. Exclusive Timer0
+is rejected with `Application has resource conflict.` Sizes:
+[GrevirExtractionProgress.md](GrevirExtractionProgress.md).
+
 ### Phase 4 — Arduino CLI on weftpi
 
 Milestone: a clean sketchbook on weftpi builds an Uno sketch using only cloned
-`libraries/` directories. **Blocked** on `grevir-arduino` and
-`grevir-arduino-avr` extraction (repository plan 4.5–4.7).
+`libraries/` directories. Done; extraction was repository plan 4.5–4.7.
 
 | Step | Goal | Budget | Evidence |
 | --- | --- | ---: | --- |
@@ -259,9 +267,10 @@ Trusted in this simavr for the probes above: Timer1 Fast PWM OCR double-buffer a
 
 ## Immediate next step
 
-Phase 4 is blocked on `grevir-arduino` and `grevir-arduino-avr`. Silicon Phase 5
-stays on hold and must cover the limitation table, especially TEMP latch and
-the 4-cycle interrupt entry gap.
+Phase 4 Arduino CLI is done on weftpi. FastLED 3.7.8 compiles with Debian 14.2
+and C++23. Silicon Phase 5 stays on hold and must cover the limitation table,
+especially TEMP latch and the 4-cycle interrupt entry gap. The next
+third-party-free driver extraction is pulse IO.
 
 ## Evidence location
 

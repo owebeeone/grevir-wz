@@ -30,6 +30,8 @@ on hold; the remaining `grevir-xxx` boundaries are described in the plan.
 - [AVR compiler, simavr and Arduino validation plan (weftpi)](GrevirAvrValidationPlan.md)
 - [First 30 files in each proposed repo — query results](GrevirFirst30Files.md)
 - [Queryable file map (SQLite)](GrevirFileMap.sqlite)
+- [Current migration audit](GrevirMigrationAudit.md)
+- [weftpi source and artifact evidence](GrevirWeftpiEvidence.json)
 - [Saved first-30-files query](GrevirFirst30Files.sql)
 - [Original file-map import snapshot (CSV)](GrevirFileMap.csv)
 - [Guiding principles](ArdoPrinciples.md)

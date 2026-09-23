@@ -30,7 +30,7 @@ has approved every split. The chosen project name, Grevir, is already settled.
 The source snapshot is `/Users/owebeeone/limbo/ardoinus`, surveyed on the date
 above. [GrevirFileMap.sqlite](GrevirFileMap.sqlite) is the queryable extraction ledger:
 **736 unique C/C++ headers, translation units and Arduino sketches**, represented
-by **796 destination rows** because mixed files have multiple destinations.
+by **802 destination rows** because mixed files have multiple destinations.
 Each row records the original relative path, line count, SHA-256, repository,
 exact destination path, API unit, action and qualification.
 
@@ -40,6 +40,11 @@ The [saved SQL](GrevirFirst30Files.sql) reproduces that query. The database sepa
 source files, repository identities and assignments; its `file_map` view exposes
 the complete mapping. [GrevirFileMap.csv](GrevirFileMap.csv) is retained as the
 original import snapshot; subsequent ownership corrections live in SQLite.
+Current status is reconciled in [GrevirMigrationAudit.md](GrevirMigrationAudit.md).
+Use `migration_status` to distinguish native checks, recorded target compilation,
+legacy archives, superseded mappings and planned work. Schema version 2 records
+those statuses separately; a retained artifact is not a fresh target validation.
+
 Tooling/platform repos with no existing C++ mappings are
 listed explicitly in the database; their non-C++/new work remains in this plan.
 

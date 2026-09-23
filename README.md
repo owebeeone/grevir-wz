@@ -11,10 +11,13 @@ The extracted members are [grevir-base](grevir-base/README.md),
 [grevir-packet](grevir-packet/README.md) supplies transport-independent fragmentation and reassembly.
 [grevir-encoder](grevir-encoder/README.md) supplies a quadrature decoder and Core module wrapper with injected pins and clock.
 [grevir-stepper](grevir-stepper/README.md) supplies stepper phase tables, movement state and a Core module wrapper with injected pins and clock.
+[grevir-arduino](grevir-arduino/README.md) and [grevir-arduino-avr](grevir-arduino-avr/README.md) supply Arduino services and Uno/Nano policies.
+[grevir-fastled](grevir-fastled/README.md) supplies the LED-strip integration.
 [grevir-test-support](grevir-test-support/README.md) supplies shared host-test setup and register-memory fixtures.
 Their root `library.properties` and `src/`
-directories follow Arduino library layout. Target compiler and Arduino sketch
-validation are still pending. Existing `setl` and `ardo` names remain; extracted pin/poller templates now take
+directories follow Arduino library layout. Selected AVR compiler, simavr and Arduino sketch validation is recorded from
+weftpi (`gianni@10.1.1.236`, `/home/gianni/git/grevir-wz`); silicon validation remains
+on hold. See the [current audit](dev-docs/GrevirMigrationAudit.md) for scope and evidence. Existing `setl` and `ardo` names remain; extracted pin/poller templates now take
 explicit GPIO backend and clock bindings.
 
 ## Native compile check
@@ -27,7 +30,11 @@ cmake -S . -B build/native -G "Unix Makefiles" \
 cmake --build build/native
 ```
 
-This compiles the extracted production source, every public header independently,
+**Current check (23 September):** the default all-target build fails the standalone
+timer-clock probe because it does not pass the Grevir Base include directory.
+Dedicated runtime builds pass all 184 tests; this does not make the full build green.
+
+The intended compile-check build compiles the extracted production source, every public header independently,
 tuple static assertions and representative template users in C++23 mode with the
 standard library enabled. It does not run the historical tests. No Arduino
 installation, target compiler, downloaded dependency or simulator is needed.
@@ -42,9 +49,9 @@ Core defects are recorded in its README. Hardware validation is on hold.
 
 ## Host mock validation
 
-The opt-in Catch2/CTest suite has 170 passing cases: Base 5, Time 4, Core 10,
+The opt-in Catch2/CTest suite has 184 passing cases: Base 5, Time 4, Core 10,
 Peripherals 29, Registers 24, Test Support 3, AVR 50, Pulse Codec 11, Packet 12,
-Encoder 10 and Stepper 12. All seven retained Base/Time test files now compile; the
+Encoder 10, Stepper 12, Arduino 6, Arduino AVR 4 and FastLED 4. All seven retained Base/Time test files now compile; the
 type-algorithm file supplies static assertions rather than a runtime case. Core
 covers application lifecycle/state. Peripheral mocks record input/output and
 open-drain operations and control time for expiry, catch-up, wraparound, sequences,
@@ -108,7 +115,7 @@ The [portable PWM MVP](dev-docs/GrevirPwmIntegration.md) is installed across Cor
 Peripherals and AVR. Applications collect module requests, account for existing
 resource claims and initialize selected ATmega328P Timer0/1/2 drivers automatically.
 The former prototype forwards to these libraries; its four oracle checks remain
-separate from the 170-case production suite. A real ESP32 backend, board integration
+separate from the 184-case production suite. Uno/Nano Arduino integration exists in the working tree. A real ESP32 backend
 and additional timer features remain future work.
 
 See the [repository plan](dev-docs/GrevirRepositoryPlan.md) and

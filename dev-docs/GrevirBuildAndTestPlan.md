@@ -1,18 +1,26 @@
 # Grevir build and test framework
 
-Selected 18 September 2026; updated 22 September for quadrature encoder and
-stepper extraction.
-**Silicon hardware validation remains on hold.** AVR compiler and simavr work is
-planned on weftpi (`gianni@10.1.1.236`); see
+Selected 18 September 2026; reconciled 23 September against current files and
+retained weftpi results. See [GrevirMigrationAudit.md](GrevirMigrationAudit.md).
+**Silicon hardware validation remains on hold.** AVR compiler, simavr and
+Arduino CLI work runs on weftpi (`gianni@10.1.1.236`); see
 [GrevirAvrValidationPlan.md](GrevirAvrValidationPlan.md).
 
+**Current build limitation:** the all-target native build fails the timer-clock
+compiler probe because its invocation omits the Base include directory. Dedicated
+runtime targets and all 184 CTest cases pass; Arduino/Arduino AVR/FastLED independent
+header and claim checks also pass. Older successful compiler-check checkpoints
+below do not override this current failure.
+
 Implemented: opt-in CMake/CTest host tests with pinned Catch2 3.8.1 and shared
-setup in Grevir Test Support. 170 cases pass: Base 5, Time 4, Core 10,
+setup in Grevir Test Support. 184 cases pass: Base 5, Time 4, Core 10,
 Peripherals 29, Registers 24, Test Support 3, AVR 50, Pulse Codec 11, Packet 12,
-Encoder 10 and Stepper 12. Encoder and stepper mocks drive injected GPIO and a
-controlled clock through the production module wrappers; pin-claim probes accept
-distinct pins and reject reuse. FastLED and Arduino consumer builds remain out of
-this host suite. All seven
+Encoder 10, Stepper 12, Arduino 6, Arduino AVR 4 and FastLED 4. Encoder and
+stepper mocks drive injected GPIO and a controlled clock through the production
+module wrappers; pin-claim probes accept distinct pins and reject reuse. Arduino
+and FastLED host tests use explicit `GREVIR_ARDUINO_HOST_MOCK` /
+`GREVIR_FASTLED_HOST_MOCK`. Arduino CLI sketch compiles are on weftpi, not in
+this host suite. FastLED 3.7.8 is the weftpi-validated Library Manager version. All seven
 retained Base/Time files build (including static-only type algorithms); their old
 test framework dependency is removed. GPIO fixtures record logical pin operations,
 and a controlled clock exercises production pollers, a blinking application and
@@ -32,7 +40,7 @@ ordering. Seven additional AVR timer-clock cases cover prescaler lookup/rounding
 count/frequency examples, invalid requests, an independent capacity model, explicit
 traits and computed mock-register writes. Eleven legacy static assertions and one
 valid/seven rejected clock-map probes pass. MCU side effects, electrical behavior
-and interrupts remain unmodeled. AVR compiler and simavr validation are planned
+and interrupts remain unmodeled. Selected AVR compiler and simavr checks are recorded as completed
 on weftpi; silicon hardware validation remains on hold.
 
 Arithmetic corrections add three AVR boundary cases and a standalone Base
@@ -65,7 +73,7 @@ reads. One valid and seven rejected standalone probes check mandatory requests.
 Isolated packages and the installed consumer pass; nine AVR headers compile alone.
 Optimized host IR for dynamic integer configuration has no floating or 64-bit
 arithmetic. Hardware PWM count conventions and live-update atomicity remain outside
-this native evidence. AVR compiler and hardware validation remain on hold.
+this native evidence. Those native checks do not establish target behavior; subsequent weftpi compiler/simulator results are recorded in GrevirAvrValidationPlan.md. Silicon remains on hold.
 
 Timer-output extraction adds eight runtime cases and ten static assertions for
 endpoint polarity, COM/OCR/GPIO order, preserved channels, fractional bounds,

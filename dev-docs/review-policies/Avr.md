@@ -61,10 +61,13 @@ Host mocks and sanitizers can establish logic errors and some UB. Host optimized
 IR can establish that a particular dynamic call retains floating/wide arithmetic.
 Neither establishes AVR code size, cycle count or hardware behavior.
 
-**AVR compiler and simavr validation are authorized on weftpi**
+**AVR compiler, simavr and Arduino CLI validation are authorized on weftpi**
 (`gianni@10.1.1.236`) per [GrevirAvrValidationPlan.md](../GrevirAvrValidationPlan.md).
-Do not treat macOS or Pi native host builds as that evidence. **Silicon hardware
-validation remains on hold** until that plan's Phase 5 is scheduled. simavr is
+Arduino sketches use Debian `avr-g++` 14.2 (`compiler.path=/usr/bin/`) because
+stock Arduino AVR 7.3 rejects `-std=c++23`. FastLED sketches on that compiler
+use Library Manager **FastLED 3.7.8**; 3.10.5's AVR clockless templates fail
+on gcc 14. Do not treat macOS or Pi native host builds as that evidence. **Silicon hardware validation remains on hold**
+until that plan's Phase 5 is scheduled. simavr is
 not silicon: analog pin filtering, Timer2 asynchronous clock-domain delays,
 oscillator stabilization after sleep, Timer1 16-bit TEMP byte order, and the
 datasheet 4-cycle interrupt entry gap stay unclaimed until a named-board check.

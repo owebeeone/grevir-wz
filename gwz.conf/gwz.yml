@@ -137,3 +137,39 @@ members:
     url: git@github.com:owebeeone/grevir-stepper.git
     fetch: true
     push: true
+- id: mem_grevir_arduino
+  path: grevir-arduino
+  type: git
+  source_id: src_grevir_arduino
+  active: true
+  desired:
+    branch: main
+  remotes:
+  - name: origin
+    url: git@github.com:owebeeone/grevir-arduino.git
+    fetch: true
+    push: true
+- id: mem_grevir_arduino_avr
+  path: grevir-arduino-avr
+  type: git
+  source_id: src_grevir_arduino_avr
+  active: true
+  desired:
+    branch: main
+  remotes:
+  - name: origin
+    url: git@github.com:owebeeone/grevir-arduino-avr.git
+    fetch: true
+    push: true
+- id: mem_grevir_fastled
+  path: grevir-fastled
+  type: git
+  source_id: src_grevir_fastled
+  active: true
+  desired:
+    branch: main
+  remotes:
+  - name: origin
+    url: git@github.com:owebeeone/grevir-fastled.git
+    fetch: true
+    push: true

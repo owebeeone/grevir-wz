@@ -1,9 +1,102 @@
 # Grevir extraction progress
 
-Latest checkpoint: 22 September 2026. Eleven local members now exist: Base, Time,
-Core, Peripherals, Registers, AVR, Pulse Codec, Packet, Encoder, Stepper and
-development-only Test Support. AVR compiler and simavr validation is running on
-weftpi (`gianni@10.1.1.236`). Silicon hardware remains on hold.
+Latest checkpoint: 23 September 2026. Fourteen local members now exist: Base,
+Time, Core, Peripherals, Registers, AVR, Pulse Codec, Packet, Encoder, Stepper,
+Arduino, Arduino AVR, FastLED, and development-only Test Support. AVR compiler,
+simavr and Arduino CLI validation run on weftpi (`gianni@10.1.1.236`). Silicon
+hardware remains on hold.
+
+## Recordkeeping reconciliation — 23 September 2026
+
+The ledger now matches the existing Arduino, Arduino AVR and FastLED working-tree
+files: 21 previously missing records added, including 15 native-checked header
+assignments, three target-compile records and three byte-identical legacy archives.
+Eighteen stale destination hashes from the committed AVR compatibility work were
+refreshed. All 736 original-source hashes remain unchanged; all 123 recorded
+destination hashes match. Of these records, 117 are native-checked, three have
+recorded target compilation, and three are archives, not compiled runtime code.
+The three newest package implementations were uncommitted at audit and are
+included in the subsequent GitHub synchronization checkpoint.
+
+weftpi is reachable at `gianni@10.1.1.236`; the work is in
+`/home/gianni/git/grevir-wz`. Read-only comparison found 178 matching files and no
+differences within the compared set. Six retained Arduino ELFs and their options
+confirm the sizes recorded below; the Timer0 rejection log is present. The compiler
+is avr-g++ 14.2 and installed FastLED is 3.7.8. No compiler or simulator run was
+repeated. The remote retained host-test log has 170 passes; today's locally rebuilt
+runtime suite has 184 passes. See [audit details](GrevirMigrationAudit.md) and
+[the source/artifact manifest](GrevirWeftpiEvidence.json).
+
+The full local all-target build is currently **not green**: the standalone timer
+clock probe omits the Base include directory needed after the compatibility-header
+migration. Arduino/Arduino AVR/FastLED header and claim checks pass independently.
+Fix that compiler-probe wiring next, then continue Pulse IO, which is absent from
+both local and weftpi workspaces. Silicon remains on hold.
+
+Schema version 2 adds `target_compile_recorded` and `retained_legacy`, keeping
+reported AVR sketch compilation distinct from native checks and archived source.
+The audit date is not the target execution date. Unmapped new smoke sketches and
+fixtures do not complete unrelated legacy assignments: SerialHello does not port
+the legacy timed Serial example, and the two-blinker legacy harness is still pending.
+Earlier sections below retain their historical checkpoint scope.
+
+## FastLED extraction — 22 September 2026
+
+`grevir-fastled` wraps `ardOFastLED` as `LedStrip` plus an exclusive
+`decltype(FastLED)` claim. Production depends are Base, Core and Library
+Manager FastLED; the unused time include is gone. Pins stay injected
+(`ExternalPin`). Host tests define `GREVIR_FASTLED_HOST_MOCK`. `get()` now
+returns the stored colour.
+
+Host-mock: 4 Catch2 cases. Claim probes accept one strip, and a strip plus a
+distinct GPIO; they reject two strips and a reused data pin. Isolated consumer
+passes without Catch2.
+
+Arduino CLI on weftpi installs FastLED via Library Manager. **FastLED 3.10.5**
+links with stock avr-gcc 7.3 (4482/343 for a one-pixel sketch) but its AVR
+clockless `_dc<unsigned>` templates fail on Debian gcc 14. **FastLED 3.7.8**
+compiles with Debian `avr-g++` 14.2 and Grevir `-std=c++23`. Command:
+`arduino-cli lib install FastLED@3.7.8`.
+
+| Sketch (Uno, gcc 14, C++23, FastLED 3.7.8) | Flash | RAM |
+| --- | ---: | ---: |
+| StripOn | 3956 | 126 |
+| FastLedQuadEncoder | 5360 | 194 |
+
+ParkLightsV2 is copied under `extras/legacy` and is not compiled. Silicon and
+WS2812 timing remain unvalidated. Next third-party-free driver remains pulse IO.
+
+## Arduino adapters and Phase 4 CLI — 22 September 2026
+
+`grevir-arduino` and `grevir-arduino-avr` are GWZ members. Shared Arduino
+supplies CoreIF (`OutputPin<CoreIF, N>`), Serial, PWM without timer claims, an
+optional EEPROM header, and an explicit `GREVIR_ARDUINO_HOST_MOCK`. The AVR
+package maps Uno/Nano Arduino 0–19 (pin 13 is PORTB.5), PWM 5/6→Timer0,
+9/10→Timer1, 3/11→Timer2, and `ArduinoAvrApplication` claims `HardwareTimer<0>`.
+
+Host-mock: 10 new Catch2 cases (Arduino 6, Arduino AVR 4). Claim probes accept
+distinct pins/Serial/PWM-on-Timer1 and reject pin reuse, two `SerialIO<0>`, PWM
+on pin 5 with millis, and exclusive Timer0. Isolated installed consumers pass
+without Catch2.
+
+Arduino CLI on weftpi: official `arduino-cli` 1.5.2-rc.1, platform
+`arduino:avr@1.8.8`. Stock bundled avr-gcc 7.3 rejects `-std=c++23`. Compiles
+use Debian `avr-g++` 14.2 via `compiler.path=/usr/bin/` (platforms increment,
+not a language downgrade). Two-library discovery: Blink includes
+`GrevirArduinoAVR.h` and pulls Grevir Arduino plus Base/Time/Core/Peripherals.
+`--library` paths only, no workspace include path.
+
+| Sketch (Uno unless noted) | Flash | RAM |
+| --- | ---: | ---: |
+| BareMinimum | 442 | 9 |
+| Blink | 1146 | 23 |
+| Blink (Nano) | 1146 | 23 |
+| SerialHello | 1458 | 194 |
+| ReservedTimerFail | rejected: `Application has resource conflict.` | |
+
+Arduino.h `min`/`max`/`constrain` macros are undefined in the adapter after
+including `Arduino.h`. FastLED extraction is recorded above. Silicon stays on
+hold. Next third-party-free driver remains pulse IO.
 
 ## AVR Phase 1 on weftpi — 22 September 2026
 
@@ -72,8 +165,8 @@ Grevir `ICR1=0xA5C3` high-then-low reads back. simavr 1.6 also commits reversed
 RETI to `main` at 476 (33-cycle ISR). Datasheet 4-cycle entry was not a gap here.
 
 Probe sizes: ocr 526/14, latch 442/14, irq 356/14 flash/RAM. Limitation list:
-[GrevirAvrValidationPlan.md](GrevirAvrValidationPlan.md). Next: Phase 4 Arduino
-CLI (blocked). Silicon stays on hold.
+[GrevirAvrValidationPlan.md](GrevirAvrValidationPlan.md). Phase 4 Arduino CLI
+is recorded above. Silicon stays on hold.
 
 ## Stepper extraction — 22 September 2026
 
