@@ -1,0 +1,36 @@
+# v0.1.0 support and validation
+
+Grevir v0.1.0 is an AVR-first development snapshot, not a published or
+hardware-qualified release. The portable APIs accept injected backends. That
+design does not by itself establish a working backend for every MCU.
+
+| Environment | Current evidence | Scope |
+| --- | --- | --- |
+| macOS, Apple Clang 21, C++23 | Full native build and 186 CTest cases pass | Host behavior, mock hardware and compiler contracts |
+| Windows 11, MSVC 19.44, C++23 mode | Full native build, compiler probes and 186 CTest cases pass | Host behavior and public-header portability |
+| ATmega328P, Arduino Uno/Nano, Debian AVR GCC 14.2 | Selected Uno sketches and selected Nano sketches compile with Arduino AVR 1.8.8 and `-std=c++23` | Arduino, PWM/pin, Pulse IO and Packet compositions; individual package coverage varies |
+| ATmega328P, simavr 1.6 | Selected timer, GPIO/Pulse IO and Packet probes pass | Simulated behavior only |
+| Physical Uno/Nano | Not run | Electrical behavior, real timing and silicon-specific effects remain unvalidated |
+| ESP32 | No Grevir ESP32 backend or board adapter yet | Target-specific options can appear in portable declarations but are ignored on a resident AVR target |
+
+"Native tested" means production code ran with host mocks or an installed
+consumer. "AVR compiled" means a named target program compiled and linked with
+the AVR toolchain; it does not cover every template instantiation. "Simulated"
+means a named firmware path ran in simavr. "Hardware validated" would require
+a named physical board; no v0.1.0 feature has that evidence.
+
+The selected ATmega328P toolchain has no AVR libstdc++. Grevir Base provides the
+compatibility subset used by the selected target programs. Standard-library
+availability for a new instantiation must still be checked. Arduino's stock
+AVR GCC 7.3 does not accept this project's C++23 flag; the recorded builds use
+Debian AVR GCC 14.2. FastLED target examples use FastLED 3.7.8 with that
+compiler. Package `architectures=*` metadata describes packaging, not a tested
+board list.
+
+The current timer MVP is fixed-frequency synchronous fast PWM on ATmega328P
+Timer0/1/2. Arduino's `millis()` use reserves Timer0 in
+`ArduinoAvrApplication`, so its PWM pins 5 and 6 are unavailable there. Other
+waveforms, device families and broad peripheral allocation are outside this
+scope. Packet's selected target proof uses one receiver slot and two fragments;
+Pulse IO's selected proof uses an 8-bit collector. See each [package
+contract](api/index.md) for additional bounds.
