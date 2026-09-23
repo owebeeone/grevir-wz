@@ -10,6 +10,9 @@ extern "C" {
 #include "sim_avr.h"
 #include "sim_elf.h"
 #include "sim_interrupts.h"
+#include "sim_io.h"
+#include "sim_irq.h"
+#include "avr_ioport.h"
 }
 
 namespace {
@@ -101,6 +104,55 @@ int cmd_smoke(const char* elf) {
   }
   std::printf("PASS smoke\n");
   return 0;
+}
+
+struct PulseTrace {
+  uint32_t edges = 0;
+};
+
+void pulse_output_changed(avr_irq_t*, uint32_t, void* context) {
+  auto* trace = static_cast<PulseTrace*>(context);
+  ++trace->edges;
+}
+
+int cmd_pulse_io(const char* elf) {
+  Loaded loaded = load_elf(elf);
+  auto* output = avr_io_getirq(loaded.avr, AVR_IOCTL_IOPORT_GETIRQ('D'),
+                               IOPORT_IRQ_PIN5);
+  auto* input = avr_io_getirq(loaded.avr, AVR_IOCTL_IOPORT_GETIRQ('D'),
+                              IOPORT_IRQ_PIN4);
+  const uint32_t received_addr = symbol_addr(loaded.firmware, "last_received");
+  const uint32_t next_addr = symbol_addr(loaded.firmware, "next_value");
+  if (output == nullptr || input == nullptr || received_addr == 0 || next_addr == 0) {
+    std::fprintf(stderr, "pulse IO simulation setup failed\n");
+    terminate(loaded);
+    return 1;
+  }
+  PulseTrace trace{};
+  avr_irq_register_notify(output, pulse_output_changed, &trace);
+  avr_connect_irq(output, input);
+  while (loaded.avr->cycle < 4000000) {
+    const int state = avr_run(loaded.avr);
+    if (state == cpu_Crashed || state == cpu_Done) {
+      std::fprintf(stderr, "pulse IO simulation stopped at cycle %llu state=%d\n",
+        static_cast<unsigned long long>(loaded.avr->cycle), state);
+      terminate(loaded);
+      return 1;
+    }
+    if (loaded.avr->data[received_addr] == 1 && loaded.avr->data[next_addr] >= 2) {
+      std::printf("PASS pulse IO AVR loopback: D5->D4, decoded second frame=1, "
+                  "output changes=%u, cycles=%llu\n", trace.edges,
+        static_cast<unsigned long long>(loaded.avr->cycle));
+      const bool valid_trace = trace.edges >= 16;
+      terminate(loaded);
+      return valid_trace ? 0 : 1;
+    }
+  }
+  std::fprintf(stderr, "pulse IO loopback timed out: last_received=%u "
+                       "next_value=%u output changes=%u\n",
+    loaded.avr->data[received_addr], loaded.avr->data[next_addr], trace.edges);
+  terminate(loaded);
+  return 1;
 }
 
 int wait_ready(Loaded& loaded, uint64_t max_cycles, ProbeResult* out) {
@@ -290,7 +342,7 @@ int cmd_irq(const char* elf) {
 
 int main(int argc, char** argv) {
   if (argc != 3) {
-    std::fprintf(stderr, "usage: grevir_simavr_host smoke|ocr|latch|irq <elf>\n");
+    std::fprintf(stderr, "usage: grevir_simavr_host smoke|ocr|latch|irq|pulse-io <elf>\n");
     return 2;
   }
   const std::string cmd = argv[1];
@@ -306,6 +358,9 @@ int main(int argc, char** argv) {
   }
   if (cmd == "irq") {
     return cmd_irq(elf);
+  }
+  if (cmd == "pulse-io") {
+    return cmd_pulse_io(elf);
   }
   std::fprintf(stderr, "unknown command %s\n", cmd.c_str());
   return 2;
