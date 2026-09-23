@@ -18,7 +18,10 @@ The extracted members are [grevir-base](grevir-base/README.md),
 Their root `library.properties` and `src/`
 directories follow Arduino library layout. Selected AVR compiler, simavr and Arduino sketch validation is recorded from
 weftpi (`gianni@10.1.1.236`, `/home/gianni/git/grevir-wz`); silicon validation remains
-on hold. See the [current audit](dev-docs/GrevirMigrationAudit.md) for scope and evidence. Existing `setl` and `ardo` names remain; extracted pin/poller templates now take
+on hold. The selected Pulse IO Uno sketch also passes an AVR compiler build and
+[simavr loopback](dev-docs/GrevirPulseIoAvrEvidence.md). See the
+[current audit](dev-docs/GrevirMigrationAudit.md) for scope and evidence.
+Existing `setl` and `ardo` names remain; extracted pin/poller templates now take
 explicit GPIO backend and clock bindings.
 
 ## Native compile check

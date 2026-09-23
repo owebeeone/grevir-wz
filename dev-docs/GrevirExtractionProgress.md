@@ -6,6 +6,16 @@ Arduino, Arduino AVR, FastLED, and development-only Test Support. AVR compiler,
 simavr and Arduino CLI validation run on weftpi (`gianni@10.1.1.236`). Silicon
 hardware remains on hold.
 
+## Pulse IO AVR target validation — 23 September 2026
+
+On weftpi, the selected ATmega328P Pulse IO Arduino sketch compiles and links
+with Debian `avr-g++` 14.2 in C++23 mode without libstdc++. Arduino CLI reports
+2,854 flash bytes and 86 RAM bytes. The simavr D5-to-D4 loopback decodes its
+second frame as byte `1` after 33 output changes and 30,281 simulated cycles.
+The exact source revision, commands, artifact hash and limits are recorded in
+[Pulse IO AVR evidence](GrevirPulseIoAvrEvidence.md). Physical timing and
+silicon behavior remain unvalidated.
+
 ## Pulse IO and native build repair — 23 September 2026
 
 `grevir-pulse-io` now connects the existing pulse encoder/decoder to injected
@@ -22,7 +32,7 @@ dependency include directories. Its valid and seven invalid cases pass. The
 full all-target native build passes, as do all **186** CTest cases. The ledger has
 126 extraction/archive records (119 native-checked, three recorded target
 compiles, four archives); original source hashes remain unchanged. Pulse IO
-has native evidence only; MCU compiler and silicon behavior for it are untested.
+had native evidence only at this earlier checkpoint; the target result is above.
 
 ## Recordkeeping reconciliation — 23 September 2026
 

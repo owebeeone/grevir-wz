@@ -16,6 +16,16 @@ this machine. Do not treat macOS host-mock results, Apple Clang IR or Pi native
 Authoring may happen in the Mac workspace; a step is not done until its command
 and artifacts exist on weftpi.
 
+## Pulse IO target checkpoint — 23 September 2026
+
+The selected Pulse IO Uno sketch builds on weftpi with Arduino CLI, Arduino AVR
+1.8.8 and Debian `avr-g++` 14.2 in C++23 mode: 2,854 flash bytes and 86 RAM
+bytes. simavr 1.6 links simulated D5 output to D4 input and decodes the second
+frame as byte `1` after 33 output changes and 30,281 cycles. See
+[the Pulse IO AVR evidence](GrevirPulseIoAvrEvidence.md) for the source revision,
+artifact hash, commands and limits. This is simulator evidence; physical
+loopback and silicon timing remain on hold.
+
 ## Phase 1 results — 22 September 2026
 
 Phase 1 is complete on weftpi. Debian `gcc-avr` 14.2.0 / `avr-g++` compiles

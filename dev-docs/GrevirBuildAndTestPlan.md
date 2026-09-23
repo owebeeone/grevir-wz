@@ -9,7 +9,9 @@ Arduino CLI work runs on weftpi (`gianni@10.1.1.236`); see
 **Current check (23 September):** the full all-target native build passes. The
 timer-clock compiler probe uses the AVR target's dependency include paths and its
 valid/seven-invalid cases pass. Pulse IO builds independently, its installed
-consumer runs, and all 186 CTest cases pass. No Pulse IO target build is claimed.
+consumer runs, and all 186 CTest cases pass. The selected Pulse IO Uno sketch
+now compiles with the AVR toolchain, and its simavr D5-to-D4 loopback passes; see
+[the target evidence](GrevirPulseIoAvrEvidence.md). Silicon remains on hold.
 
 Implemented: opt-in CMake/CTest host tests with pinned Catch2 3.8.1 and shared
 setup in Grevir Test Support. 186 cases pass: Base 5, Time 4, Core 10,
