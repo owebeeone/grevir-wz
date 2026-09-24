@@ -499,10 +499,16 @@ legacy tree. Add them only as their corresponding feature is implemented.
 | Initial ESP32 GPIO/timer backend | `grevir-esp32/src/grevir/esp32/{gpio,timer,capabilities}.hpp` | New substantive implementation; the legacy 24-line Arduino header is not this backend |
 | Named ESP32 Arduino board policy | `grevir-arduino-esp32/src/grevir/arduino_esp32/boards/<selected-board>.hpp` | Keep board pin defaults and Arduino/SDK reservations distinct from MCU facts |
 
-The initial ESP32 proof should use a named Xtensa chip/board and exact SDK/core.
-RISC-V can become another backend within the ESP32 repo once the first cross-MCU
-contract is proved. Neither Arduino's `esp32` architecture label nor the family
-name establishes instruction-set or peripheral equivalence.
+The initial ESP32 implementation proof should use a named Xtensa chip/board and
+exact SDK/core. Before freezing the low-level backend contract, evaluate classic
+ESP32, ESP32-S2 and ESP32-S3 capability inventories and sharing constraints;
+they are all intended Xtensa targets, not interchangeable variants of the
+first board. [The ESP32 capability study](GrevirEsp32CapabilityStudy.md) records
+the first comparison. RISC-V can become another backend within the ESP32 repo
+once the first cross-MCU contract is proved. ESP8266 is a separate Tensilica
+platform and needs its own toolchain/SDK feasibility decision. Neither
+Arduino's `esp32` architecture label nor the family name establishes
+instruction-set or peripheral equivalence.
 
 A library needing a timer declares its requirements and receives an allocated
 binding. The global application assembly sees dependent modules, reservations and
@@ -630,7 +636,9 @@ boundaries during moves; inspect disabled branches with a syntax-aware source ch
 
 Milestone: the same portable module example runs on one named AVR board and one
 named ESP32 Xtensa board with only composition-root bindings changed. Useful drivers
-are separately installable.
+are separately installable. This initial build milestone does not close the S2/S3
+design review: the same request/capability model must be checked against both
+before the ESP32-family backend contract is frozen.
 
 | Step | One goal | Approximate authored LOC | Completion evidence |
 | --- | --- | ---: | --- |

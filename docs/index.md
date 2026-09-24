@@ -14,6 +14,7 @@ package READMEs and `dev-docs` retain development checkpoint history.
 | Bind GPIO and clocks without hard-coding an MCU | [Pins and clocks](concepts/pins-and-clocks.md) |
 | Blink an Uno/Nano LED | [Blink example](examples/blink.md) |
 | Request PWM with common and target-specific requirements | [PWM guide](guides/pwm.md) and [complete host example](examples/pwm-host.md) |
+| Bind a timer interrupt handler | [Interrupt guide](guides/interrupts.md), [native mock example](examples/interrupt-mock/CMakeLists.txt), [Uno example](examples/interrupt-avr/interrupt-avr.ino), and [classic ESP32 example](examples/interrupt-esp32/interrupt-esp32.ino) |
 | Transmit and receive pulse-encoded values | [Pulse IO guide](guides/pulse-io.md) and [AVR example](examples/pulse-io-avr.md) |
 | Fragment and reassemble packets | [Packet guide](guides/packet.md) and [AVR example](examples/packet-avr.md) |
 | Read a quadrature encoder or drive a stepper | [Motion guide](guides/motion.md), [encoder host example](examples/encoder-host.md), [stepper host example](examples/stepper-host.md) |

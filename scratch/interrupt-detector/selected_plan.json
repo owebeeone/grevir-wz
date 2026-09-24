@@ -1,0 +1,13 @@
+{
+  "schema": 1,
+  "target": "atmega328p",
+  "bindings": [
+    {
+      "event_id": 1001,
+      "binding_id": 13,
+      "cpp_type": "MotorInstance::Timer::PeriodElapsed",
+      "source": "timer1_overflow",
+      "vector": "TIMER1_OVF_vect"
+    }
+  ]
+}

@@ -29,9 +29,26 @@ The first implementation should support fixed-frequency PWM, explicit pin
 requirements, optional explicit timer/channel constraints, and explicit groups
 of outputs sharing one timer configuration. A backend may offer several legal
 routes for a pin. Automatic choice among unrelated application pins is deferred.
-Runtime allocation, interrupt/capture scheduling, a general peripheral optimizer,
-and an ESP32 backend are outside this first scope. A synthetic non-AVR inventory
-should still demonstrate that the solver does not depend on AVR register concepts.
+Runtime allocation, interrupt/capture **implementation**, a general peripheral
+optimizer, and an ESP32 backend are outside this first scope. The public
+capability and candidate model must accommodate interrupt-bearing timer modes;
+its proposed [binding architecture](GrevirInterruptBindingArchitecture.md) is part of
+the design now. A synthetic non-AVR inventory should still demonstrate that
+the solver does not depend on AVR register concepts.
+
+The later multi-function timer model must not treat PWM outputs, counter use,
+compare/overflow interrupts and input capture as independent resources merely
+because they have different names. A timer's waveform/counting mode, prescaler,
+TOP source and shared registers determine which functions can coexist. For
+example, an AVR configuration using an input-capture register as PWM TOP cannot
+simultaneously offer that register for independent input capture. Some interrupt
+events may coexist with PWM under a compatible configuration, whereas using a
+compare register for TOP or duty can remove another independent use of that
+channel. Each backend must enumerate **complete legal configurations and their
+offered functions**; the allocator chooses one configuration owner and binds
+consumer endpoints only to functions that configuration actually provides.
+This is a future design requirement, not a claim that the fixed-PWM MVP already
+models all timer modes.
 
 Variable-frequency requests already exist as metadata, without constraining the
 new API. Until their operational contract is designed, the first allocator must

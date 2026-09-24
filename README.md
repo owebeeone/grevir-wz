@@ -11,8 +11,8 @@ The currently documented platform paths are:
 | Platform | Current state |
 | --- | --- |
 | Arduino Uno/Nano, ATmega328P | Selected sketches compile with Debian AVR GCC 14.2; selected firmware passes in simavr. Physical-board behavior is unvalidated. |
-| macOS and Windows 11 | Full native test suites pass with Apple Clang and MSVC. |
-| Classic ESP32 Dev Module | Parklights compiles with Arduino-ESP32 3.3.11 using selected Grevir GPIO, clock and serial adapters. Physical-board behavior is unvalidated; an SDK-level timer/peripheral backend is not implemented. |
+| macOS, Raspberry Pi and Windows 11 | Full native test suites and generated mock interrupt examples pass with Apple Clang, GCC and MSVC. |
+| Classic ESP32 Dev Module | Parklights compiles with Arduino-ESP32 3.3.11 using selected Grevir GPIO, clock and serial adapters. A generated Timer Group 0 / Timer 0 interrupt example also compiles and links; physical-board behavior remains unvalidated. |
 
 See the exact [support and evidence levels](docs/supported.md) before choosing a
 target.
@@ -63,6 +63,8 @@ The [annotated example](docs/examples/blink.md) explains the timing and Arduino
 Timer0 reservation. A [portable PWM declaration](docs/guides/pwm.md) shows how
 common requirements and target-specific sections coexist; only the resident
 target's section is applied.
+The [interrupt guide](docs/guides/interrupts.md) shows the first generated
+Timer1, classic ESP32 timer and native mock event bindings.
 
 ## Libraries
 

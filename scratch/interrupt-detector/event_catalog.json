@@ -1,0 +1,14 @@
+{
+  "schema": 1,
+  "target": "atmega328p",
+  "events": [
+    {
+      "event_id": 1001,
+      "cpp_type": "MotorInstance::Timer::PeriodElapsed"
+    },
+    {
+      "event_id": 1002,
+      "cpp_type": "MappedButNoHandler"
+    }
+  ]
+}

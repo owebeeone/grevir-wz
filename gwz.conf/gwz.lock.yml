@@ -24,7 +24,7 @@ members:
     path: grevir-arduino-esp32
     source_id: src_grevir_arduino_esp32
     source_kind: git
-    commit: c5e65e3780011bdd408192b105e944c88aad031c
+    commit: 69dff90ef0f00bec7932d74d52bcd118b9795ef8
     branch: main
     detached: false
     dirty: false
@@ -33,7 +33,7 @@ members:
     path: grevir-avr
     source_id: src_grevir_avr
     source_kind: git
-    commit: b54eaa62bbf075861614095c51b0b63b535e8b16
+    commit: c6d7d5a05066763038dee3581badaaa4847eaa90
     branch: main
     detached: false
     dirty: false
@@ -51,7 +51,7 @@ members:
     path: grevir-core
     source_id: src_grevir_core
     source_kind: git
-    commit: 73e1f2464cb2e0dcdb5ad2e28c66f03c3330dec5
+    commit: f76cd6473baf5c28ce08eb7b2552a566b25ce726
     branch: main
     detached: false
     dirty: false
@@ -87,7 +87,7 @@ members:
     path: grevir-peripherals
     source_id: src_grevir_peripherals
     source_kind: git
-    commit: bf5b90ee37dc48e07c3c20922c4330a533b163f9
+    commit: caa9235f4267580174d30fde7b1e75d6d7712155
     branch: main
     detached: false
     dirty: false
@@ -132,7 +132,7 @@ members:
     path: grevir-test-support
     source_id: src_grevir_test_support
     source_kind: git
-    commit: a03bb23b4cb2ec6a9eeb2273fe189e407c88ae69
+    commit: 468ce73de33bc641d0e8bc60ecdaa43655ce9de4
     branch: main
     detached: false
     dirty: false
@@ -150,7 +150,7 @@ members:
     path: parklights
     source_id: src_parklights
     source_kind: git
-    commit: 2758fecfa575dfa0ba5099ff42fe96aa4b2fe143
+    commit: 01f07ad7cb0900961658fa884b84b5ccab29da42
     branch: main
     detached: false
     dirty: false

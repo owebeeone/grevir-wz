@@ -27,6 +27,17 @@ The macOS native workspace build and 186 CTest cases passed; an independently
 installed `grevir-arduino-esp32` CMake consumer also compiled and ran after
 package sources were removed.
 
+## Published checkout reproduction
+
+On 24 September 2026, a separate `gwz clone` on weftpi materialized all 17
+members from GitHub at workspace commit `6e561be` (Parklights `2758fec`,
+Arduino ESP32 adapter `c5e65e3`). Running `parklights/build-esp32.sh` with the
+installed Arduino CLI against this cold checkout compiled and linked without a
+private credentials header. The result matched the initial build: 1,021,475
+bytes of flash (77%) and 79,384 bytes of global RAM (24%). This verifies the
+published workspace and package dependencies for the named target; it does not
+exercise the device.
+
 This is compile/link evidence only. Wi-Fi, UDP, FastLED output, display,
 OTA, task interactions, boot behavior and physical GPIO wiring have not been
 exercised on silicon. The empty credentials fallback exists so a clean

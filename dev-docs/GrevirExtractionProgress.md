@@ -1,10 +1,11 @@
 # Grevir extraction progress
 
-Latest checkpoint: 23 September 2026. Fifteen local members now exist: Base,
-Time, Core, Peripherals, Registers, AVR, Pulse Codec, Pulse IO, Packet, Encoder, Stepper,
-Arduino, Arduino AVR, FastLED, and development-only Test Support. AVR compiler,
-simavr and Arduino CLI validation run on weftpi (`gianni@10.1.1.236`). Silicon
-hardware remains on hold.
+Latest checkpoint: 24 September 2026. Seventeen workspace members now exist:
+Base, Time, Core, Peripherals, Registers, AVR, Pulse Codec, Pulse IO, Packet,
+Encoder, Stepper, Arduino, Arduino AVR, Arduino ESP32, FastLED, development-only
+Test Support, and the Parklights application. AVR compiler, simavr and Arduino
+CLI validation run on weftpi (`gianni@10.1.1.236`). Parklights compiles and
+links for the classic ESP32 Dev Module. Silicon hardware remains on hold.
 
 ## Packet AVR target checkpoint — 23 September 2026
 
