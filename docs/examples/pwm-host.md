@@ -1,8 +1,9 @@
 # Portable PWM declaration with an ATmega328P host memory policy
 
-This complete C++23 program binds a portable 1 kHz PWM request to the
-ATmega328P inventory using a byte-array register policy. It runs on a native
-host, where it checks Timer1 TOP and compare values. It does not access
+This complete C++23 program binds two 1 kHz PWM uses owned by one module to
+the ATmega328P Timer1 inventory using a byte-array register policy. It runs on
+a native host, where it checks TOP 15999 and both compare values (3999 and
+11999). It does not access
 physical AVR registers or establish silicon timing. The ESP32-specific request
 section is present but inert under the selected AVR backend.
 

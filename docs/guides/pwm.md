@@ -6,11 +6,11 @@ binding and gives it to the module. The installed implementation covers
 fixed-frequency synchronous fast PWM on ATmega328P Timer0, Timer1 and Timer2.
 See [support](../supported.md) before selecting another target or waveform.
 
-This request asks for 1 kHz with a duty step no larger than 1/256. It adds an
-AVR-specific PB1 pin and ICR TOP constraint and requires at least a 16-bit
-counter. Its ATmega328P section pins Timer1. Its ESP32 section documents an
-alternative pin and clock source, but is ignored when the resident backend is
-AVR; it is not an ESP32 driver:
+This owner requests two 1 kHz PWM outputs with duty steps no larger than
+1/256. The AVR sections select PB1 and PB2 with ICR TOP and require at least
+a 16-bit counter. Its ATmega328P section pins Timer1. The ESP32 sections
+document alternative pins and a clock source, but are ignored when the
+resident backend is AVR; they do not provide an ESP32 driver:
 
 ```cpp
 #include <grevir/avr/devices/atmega328p/pwm_backend.hpp>
@@ -19,13 +19,19 @@ AVR; it is not an ESP32 driver:
 namespace p = grevir::pwm;
 namespace avr_pwm = p::atmega328p;
 
-using MotorTimer = grevir::timer::Own<p::PwmRequest<"pwm",
+using MotorTimer = grevir::timer::Own<p::PwmRequest<"left",
   p::Frequency<p::Hertz<1000>, p::Exact>,
   p::DutyStepAtMost<1, 256>,
   p::For<p::Target::avr,
     p::Pin<avr_pwm::physical_pin<ardo::sys::avr::arch_atmega328p::rrPORTB,
       ardo::sys::avr::arch_atmega328p::ccPORTB1>()>, p::avr::TopFromIcr>,
   p::For<p::Target::esp32, p::Pin<18>, p::esp32::ApbClock>>,
+  p::PwmRequest<"right",p::Frequency<p::Hertz<1000>,p::Exact>,
+    p::DutyStepAtMost<1,256>,
+    p::For<p::Target::avr,
+      p::Pin<avr_pwm::physical_pin<ardo::sys::avr::arch_atmega328p::rrPORTB,
+        ardo::sys::avr::arch_atmega328p::ccPORTB2>()>,p::avr::TopFromIcr>,
+    p::For<p::Target::esp32,p::Pin<19>,p::esp32::ApbClock>>,
   grevir::timer::For<p::Target::avr, grevir::timer::CounterBitsAtLeast<16>>,
   grevir::timer::For<p::Target::atmega328p,
     grevir::timer::RequireTimer<grevir::timer::atmega328p::Timer1>>>;
@@ -47,10 +53,13 @@ endpoint through `RequestedModule` and
 ```cpp
 template <typename Allocation>
 struct Motor : ardo::ModuleBase<
-    ardo::Parameters<typename Allocation::template Pwm<"motor">>> {
-  using Output = typename Allocation::template Pwm<"motor">;
+    ardo::Parameters<typename Allocation::template Pwm<"left">,
+      typename Allocation::template Pwm<"right">>> {
+  using Left = typename Allocation::template Pwm<"left">;
+  using Right = typename Allocation::template Pwm<"right">;
   static void runSetup() {
-    Output::write(1, 4); // quarter duty
+    Left::write(1, 4);  // quarter duty
+    Right::write(3, 4); // three-quarter duty
   }
 };
 
@@ -62,16 +71,18 @@ using App = grevir::AllocatedApplication<
 `Device` is an explicit ATmega328P timer binding over the application's register
 access and interrupt-barrier policies. It must be supplied by the target
 integration; the declaration above intentionally does not invent one. At setup,
-the selected timers are initialized once before ordinary module setup. `runLoop()`
+each selected timer is initialized after its module's dependencies and before
+that module's setup. `runLoop()`
 does not reconfigure timers. For this request, Timer1 with ICR TOP is a valid
-binding, with TOP 15999 and a quarter-duty compare value of 3999. The selected
+binding, with TOP 15999 and compare values 3999 and 11999. Each selected
 output accepts a numerator and denominator rather than requiring floating-point
 arithmetic on the MCU.
 
 Arduino's `millis()` reservation excludes Timer0 from an
 `ArduinoAvrApplication`; pins 5 and 6 therefore cannot be allocated there.
 Pin identities in the AVR PWM backend derive from the device's extracted port
-register and bit definitions, not Arduino digital pin numbers. Board pin-alias
-normalization and non-AVR timer backends remain future
-work. For request semantics and limitations, see [Core](../api/core.md),
+register and bit definitions, not Arduino digital pin numbers. The Arduino AVR
+adapter normalizes Uno/Nano digital pin claims to those device identities when
+composing `GrevirArduinoAVR.h`. Non-AVR timer backends remain future work.
+For request semantics and limitations, see [Core](../api/core.md),
 [Peripherals](../api/peripherals.md) and [AVR](../api/avr.md).

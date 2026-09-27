@@ -35,11 +35,15 @@ using Device = ardo::sys::avr::arch_atmega328p::TimerBindings<Memory, Barrier>;
 namespace p = grevir::pwm;
 namespace avr_pwm = p::atmega328p;
 
-using MotorTimer = grevir::timer::Own<p::PwmRequest<"pwm",
+using MotorTimer = grevir::timer::Own<p::PwmRequest<"left",
   p::Frequency<p::Hertz<1000>, p::Exact>,
   p::DutyStepAtMost<1, 256>,
   p::For<p::Target::avr, p::Pin<avr_pwm::physical_pin<typename Device::Gpio::ppPB1>()>, p::avr::TopFromIcr>,
   p::For<p::Target::esp32, p::Pin<18>, p::esp32::ApbClock>>,
+  p::PwmRequest<"right",p::Frequency<p::Hertz<1000>, p::Exact>,
+    p::DutyStepAtMost<1,256>,
+    p::For<p::Target::avr,p::Pin<avr_pwm::physical_pin<typename Device::Gpio::ppPB2>()>,p::avr::TopFromIcr>,
+    p::For<p::Target::esp32,p::Pin<19>,p::esp32::ApbClock>>,
   grevir::timer::For<p::Target::avr, grevir::timer::CounterBitsAtLeast<16>>,
   grevir::timer::For<p::Target::atmega328p,
     grevir::timer::RequireTimer<grevir::timer::atmega328p::Timer1>>>;
@@ -47,10 +51,13 @@ using MotorPwm = grevir::timer::Instance<"motor", MotorTimer>;
 
 template <typename Allocation>
 struct Motor : ardo::ModuleBase<
-    ardo::Parameters<typename Allocation::template Pwm<"motor">>> {
-  using Output = typename Allocation::template Pwm<"motor">;
+    ardo::Parameters<typename Allocation::template Pwm<"left">,
+      typename Allocation::template Pwm<"right">>> {
+  using Left = typename Allocation::template Pwm<"left">;
+  using Right = typename Allocation::template Pwm<"right">;
   static void runSetup() {
-    Output::write(1, 4);
+    Left::write(1, 4);
+    Right::write(3, 4);
   }
 };
 
@@ -61,5 +68,6 @@ using App = grevir::AllocatedApplication<
 int main() {
   App::runSetup();
   return Memory::read<std::uint16_t>(0x86) == 15999
-    && Memory::read<std::uint16_t>(0x88) == 3999 ? 0 : 1;
+    && Memory::read<std::uint16_t>(0x88) == 3999
+    && Memory::read<std::uint16_t>(0x8a) == 11999 ? 0 : 1;
 }

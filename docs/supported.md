@@ -35,3 +35,7 @@ waveforms, device families and broad peripheral allocation are outside this
 scope. Packet's selected target proof uses one receiver slot and two fragments;
 Pulse IO's selected proof uses an 8-bit collector. See each [package
 contract](api/index.md) for additional bounds.
+
+The [two-output owner example](examples/pwm-host.md) and its dependency-order
+checks currently have native host-mock evidence. This checkpoint has not yet
+been recompiled with an AVR target toolchain or run in simavr or on silicon.
