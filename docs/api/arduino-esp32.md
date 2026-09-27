@@ -21,7 +21,11 @@ using App = ardo::Application<ardo::ArduinoParamModule<Led, Console>>;
 
 The GPIO checks exclude flash pins 6–11 and reject output use of input-only
 pins 34–39. They do not prove that a chosen pin is safe for attached hardware,
-boot strapping or a particular Dev Module clone. The adapter does not implement
-an ESP32 timer, interrupt, DMA or general peripheral allocator. The selected
+boot strapping or a particular Dev Module clone. The
+[classic ESP32 TG0/T0 direct-interrupt example](../examples/interrupt-esp32/interrupt-esp32.ino)
+compiles and links through the staged interrupt generator. The adapter does not
+provide a general ESP32 timer or peripheral allocator, deferred interrupt
+dispatch, or DMA support; the direct example has not run on physical hardware.
+The selected
 `parklights` application repository compiles for `esp32:esp32:esp32`; no
 physical board has been run.

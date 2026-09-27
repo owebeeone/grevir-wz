@@ -76,6 +76,10 @@ board rather than chosen by the generator. Strict compilation
 must compare those values against the visible route policy. Changing
 an `Elide` main-loop handler to an `IsrLevel` handler after the probe must fail
 as stale output rather than silently retaining the old binding.
+Strict compilation also re-enumerates the current catalogued handler demand
+after all application-header specializations are visible and compares it with
+the generated demand set. A newly added handler must not disappear merely
+because the generated dispatcher has no entry for it.
 
 The emitter calls `dispatch_bound_interrupt<Event>()` in each target entry.
 The dispatcher calls `on_event<Event>()` directly for `IsrLevel`/`Direct`.

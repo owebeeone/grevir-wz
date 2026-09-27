@@ -107,3 +107,10 @@ struct Board {
 using GrevirApplication = grevir::ApplicationSpec<mock_app::Board, mock_app::Motor>;
 
 #include <grevir/interrupt/handler.hpp>
+
+#if defined(GREVIR_TEST_STRICT_ADDED_EVENT) && !defined(GREVIR_IRQ_PROBE)
+template <>
+inline void grevir::on_event<mock_app::PeriodElapsed>() noexcept {
+  ++mock_app::ticks;
+}
+#endif

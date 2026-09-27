@@ -64,11 +64,26 @@ loop code may call `event::post<Application, Event>()`, and an ISR may call
 `event::post_from_isr<Application, Event>()`; each returns `queued`,
 `coalesced`, `full`, or `not_ready`. The queue is prepared during application
 startup before interrupt sources are enabled and stopped if startup fails.
+Capacity is the number of records the board selects, not a preallocated maximum;
+this queue permits selections from 1 through 2048. The selected value is
+checked at compile time before it is converted to an index or plan field.
 `overrun<Application>()` reads the flag without clearing it;
 `clear_overrun<Application>()` clears only the flag, leaving queued callbacks
 intact. Preparing the queue during startup resets the flag. A nested or
 competing `dispatch()` call returns zero while another dispatch is active;
 callbacks for one application do not run concurrently through this queue.
+
+A loop publisher can inspect the exact result, including a full queue or a
+queue that has not been prepared (or has been stopped after startup failure):
+
+```cpp
+const auto posted = grevir::event::post<GrevirApplication, PeriodElapsed>();
+if (posted == grevir::event::PostResult::full) {
+  // The firing was dropped; decide whether to retry later.
+} else if (posted == grevir::event::PostResult::not_ready) {
+  // The application has not started successfully.
+}
+```
 
 An explicit direct route invokes the handler in interrupt context:
 

@@ -37,7 +37,9 @@ struct Board {
 #else
   using EventLock = grevir::test::EventLock;
 #endif
-#if defined(GREVIR_TEST_STALE_CAPACITY)
+#if defined(GREVIR_TEST_CAPACITY_VALUE)
+  inline static constexpr auto event_queue_capacity = GREVIR_TEST_CAPACITY_VALUE;
+#elif defined(GREVIR_TEST_STALE_CAPACITY)
   inline static constexpr unsigned event_queue_capacity = 1;
 #else
   inline static constexpr unsigned event_queue_capacity = 2;
@@ -129,7 +131,9 @@ inline void grevir::on_event<mock_deferred_two::A>() noexcept {
   ++mock_deferred_two::calls_a;
 }
 
+#if !defined(GREVIR_IRQ_PROBE) || !defined(GREVIR_TEST_PROBE_ONE_EVENT)
 template <>
 inline void grevir::on_event<mock_deferred_two::B>() noexcept {
   ++mock_deferred_two::calls_b;
 }
+#endif

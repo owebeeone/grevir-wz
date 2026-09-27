@@ -11,6 +11,7 @@ extern "C" {
 volatile unsigned char grevir_irq_test_ticks = 0;
 }
 volatile unsigned char grevir_irq_start_failure = 0;
+volatile unsigned char grevir_irq_event_overrun = 0;
 }
 
 void setup() {
@@ -23,4 +24,8 @@ void setup() {
 
 void loop() {
   grevir::event::dispatch<GrevirApplication>(4);
+  if (grevir::event::overrun<GrevirApplication>()) {
+    avr_app::grevir_irq_event_overrun = 1;
+    grevir::event::clear_overrun<GrevirApplication>();
+  }
 }

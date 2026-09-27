@@ -45,4 +45,22 @@ if not errorlevel 1 exit /b 19
 cl %CXX_FLAGS% /Zs /Ibuild\irq-msvc\event /DGREVIR_TEST_STALE_ROUTE=1 /DGREVIR_GENERATED_IRQ_HEADER=\"grevir_generated_irq_bindings_mock.hpp\" build\irq-msvc\event\grevir_generated_irq_bindings_mock.cpp >build\irq-msvc\event\stale.log 2>&1
 if not errorlevel 1 exit /b 20
 echo PASS native MSVC on_event activation, dispatch and negative checks
+if not exist build\irq-msvc\zero mkdir build\irq-msvc\zero
+cl %CXX_FLAGS% /c /DGREVIR_IRQ_PROBE=1 /Fobuild\irq-msvc\zero\mock_zero_record.obj scratch\interrupt-implementation-gates\mock_zero_record.cpp
+if errorlevel 1 exit /b 21
+"C:\Users\gianni\AppData\Local\Programs\Python\Python313\python.exe" -B grevir-core\tools\grevir_irqgen\__main__.py plan --object build\irq-msvc\zero\mock_zero_record.obj --out-dir build\irq-msvc\zero --attempt native-msvc-zero --backend mock --target mock_mcu --board mock_board --compiler scratch_compiler
+if errorlevel 1 exit /b 22
+"C:\Users\gianni\AppData\Local\Programs\Python\Python313\python.exe" -B grevir-core\tools\grevir_irqgen\__main__.py emit --out-dir build\irq-msvc\zero --attempt native-msvc-zero --backend mock --compiler scratch_compiler --application-header scratch/interrupt-implementation-gates/mock_app_base.hpp
+if errorlevel 1 exit /b 23
+cl %CXX_FLAGS% /Zs /Ibuild\irq-msvc\zero /DGREVIR_TEST_STRICT_ADDED_EVENT=1 /DGREVIR_GENERATED_IRQ_HEADER=\"grevir_generated_irq_bindings_mock.hpp\" build\irq-msvc\zero\grevir_generated_irq_bindings_mock.cpp >build\irq-msvc\zero\stale_demand.log 2>&1
+if not errorlevel 1 exit /b 24
+findstr /C:"GREVIR_IRQ_STALE_DEMAND_SET" build\irq-msvc\zero\stale_demand.log >nul
+if errorlevel 1 exit /b 25
+cl %CXX_FLAGS% /Zs /DGREVIR_IRQ_PROBE=1 /DGREVIR_TEST_CAPACITY_VALUE=2048 scratch\interrupt-implementation-gates\mock_deferred_two_record.cpp
+if errorlevel 1 exit /b 26
+cl %CXX_FLAGS% /Zs /DGREVIR_IRQ_PROBE=1 /DGREVIR_TEST_CAPACITY_VALUE=65537UL scratch\interrupt-implementation-gates\mock_deferred_two_record.cpp >build\irq-msvc\zero\invalid_capacity.log 2>&1
+if not errorlevel 1 exit /b 27
+findstr /C:"GREVIR_EVENT_CAPACITY_OUT_OF_RANGE" build\irq-msvc\zero\invalid_capacity.log >nul
+if errorlevel 1 exit /b 28
+echo PASS native MSVC strict-demand and capacity bounds
 exit /b 0

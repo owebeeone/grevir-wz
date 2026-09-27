@@ -81,7 +81,7 @@ def one_case(directory: Path, stem: str, header: str) -> None:
         marker["emitter"] = "stale_emitter"
         ready.write_text(json.dumps(marker, sort_keys=True, indent=2) + "\n")
         run(*verification, success=False)
-        marker["emitter"] = "grevir_irqgen_3"
+        marker["emitter"] = "grevir_irqgen_4"
         ready.write_text(json.dumps(marker, sort_keys=True, indent=2) + "\n")
         run(*verification)
     executable = output / "firmware"
@@ -119,6 +119,13 @@ def one_case(directory: Path, stem: str, header: str) -> None:
             '-DGREVIR_GENERATED_IRQ_HEADER="grevir_generated_irq_bindings_mock.hpp"',
             *INCLUDES, f"-I{output}", "-fsyntax-only", str(generated),
             success=False)
+    if stem == "mock_zero":
+        result = run(CXX, "-std=c++23", "-DHAS_STD_LIB=1",
+            "-DGREVIR_TEST_STRICT_ADDED_EVENT=1",
+            '-DGREVIR_GENERATED_IRQ_HEADER="grevir_generated_irq_bindings_mock.hpp"',
+            *INCLUDES, f"-I{output}", "-fsyntax-only", str(generated),
+            success=False)
+        assert "GREVIR_IRQ_STALE_DEMAND_SET" in result.stderr, result.stderr
     if stem == "mock_deferred_two":
         strict = [CXX, "-std=c++23", "-DHAS_STD_LIB=1",
                   '-DGREVIR_GENERATED_IRQ_HEADER="grevir_generated_irq_bindings_mock.hpp"',
@@ -142,6 +149,52 @@ def one_case(directory: Path, stem: str, header: str) -> None:
         changed_plan = json.loads((changed / plan_path.name).read_text())
         assert changed_plan["deferred_context"]["capacity"] == 1
         assert changed_plan["fingerprint"] != plan["fingerprint"]
+
+        for value in ("0", "-1", "2049", "65537UL"):
+            result = run(CXX, "-std=c++23", "-DHAS_STD_LIB=1",
+                "-DGREVIR_IRQ_PROBE=1", f"-DGREVIR_TEST_CAPACITY_VALUE={value}",
+                *INCLUDES, "-c", str(HERE / "mock_deferred_two_record.cpp"),
+                "-o", str(output / "invalid_capacity.o"), success=False)
+            assert "GREVIR_EVENT_CAPACITY_OUT_OF_RANGE" in result.stderr, result.stderr
+        for value in ("1", "255", "256", "2048"):
+            large = output / f"capacity_{value}"
+            large.mkdir()
+            large_object = large / "probe.o"
+            run(CXX, "-std=c++23", "-DHAS_STD_LIB=1", "-DGREVIR_IRQ_PROBE=1",
+                f"-DGREVIR_TEST_CAPACITY_VALUE={value}", *INCLUDES, "-c",
+                str(HERE / "mock_deferred_two_record.cpp"), "-o", str(large_object))
+            run(sys.executable, "-B", str(TOOL), "plan", "--object", str(large_object),
+                "--out-dir", str(large), "--attempt", "large", "--backend", "mock",
+                "--target", "mock_mcu", "--board", "mock_board",
+                "--compiler", "scratch_compiler")
+            large_plan = json.loads((large / plan_path.name).read_text())
+            assert large_plan["deferred_context"]["capacity"] == int(value)
+            run(sys.executable, "-B", str(TOOL), "emit", "--out-dir", str(large),
+                "--attempt", "large", "--backend", "mock", "--compiler",
+                "scratch_compiler", "--application-header", header)
+            run(CXX, "-std=c++23", "-DHAS_STD_LIB=1",
+                f"-DGREVIR_TEST_CAPACITY_VALUE={value}",
+                '-DGREVIR_GENERATED_IRQ_HEADER="grevir_generated_irq_bindings_mock.hpp"',
+                *INCLUDES, f"-I{large}", "-fsyntax-only",
+                str(large / generated.name))
+        one_demand = output / "one_demand"
+        one_demand.mkdir()
+        one_object = one_demand / "probe.o"
+        run(CXX, "-std=c++23", "-DHAS_STD_LIB=1", "-DGREVIR_IRQ_PROBE=1",
+            "-DGREVIR_TEST_PROBE_ONE_EVENT=1", *INCLUDES, "-c",
+            str(HERE / "mock_deferred_two_record.cpp"), "-o", str(one_object))
+        run(sys.executable, "-B", str(TOOL), "plan", "--object", str(one_object),
+            "--out-dir", str(one_demand), "--attempt", "one", "--backend", "mock",
+            "--target", "mock_mcu", "--board", "mock_board",
+            "--compiler", "scratch_compiler")
+        run(sys.executable, "-B", str(TOOL), "emit", "--out-dir", str(one_demand),
+            "--attempt", "one", "--backend", "mock", "--compiler",
+            "scratch_compiler", "--application-header", header)
+        result = run(CXX, "-std=c++23", "-DHAS_STD_LIB=1",
+            '-DGREVIR_GENERATED_IRQ_HEADER="grevir_generated_irq_bindings_mock.hpp"',
+            *INCLUDES, f"-I{one_demand}", "-fsyntax-only",
+            str(one_demand / generated.name), success=False)
+        assert "GREVIR_IRQ_STALE_DEMAND_SET" in result.stderr, result.stderr
 
     # The new attempt removes the old marker before doing any work. All four
     # failure points must leave the directory unready, even with old C++ files.
@@ -201,7 +254,7 @@ def main() -> None:
         print("PASS on_event activation, direct dispatch, dual rejection and stale route")
         one_case(directory, "mock_deferred_two",
                  "scratch/interrupt-implementation-gates/mock_deferred_two_app.hpp")
-        print("PASS two-event deferred plan, capacity fingerprint and strict context gates")
+        print("PASS two-event deferred plan, capacity bounds and strict demand/context gates")
 
 
 if __name__ == "__main__":
