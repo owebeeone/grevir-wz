@@ -6,6 +6,7 @@
 #include <grevir/interrupt/install.hpp>
 #include <grevir/peripherals/timer/interrupt_allocator.hpp>
 #include <grevir/test/interrupt_controller.hpp>
+#include <grevir/test/event_lock.hpp>
 
 namespace mock_app {
 namespace irq = grevir::interrupt;
@@ -26,6 +27,8 @@ inline bool cleanup_ok = true;
 inline void (*configure_hook)() noexcept = nullptr;
 
 struct Board {
+  using EventLock = grevir::test::EventLock;
+  inline static constexpr unsigned event_queue_capacity = 0;
   template <class Spec>
   using StartPolicy = grevir::test::HostStartPolicy<Spec>;
   inline static constexpr auto backend = irq::literal("mock");

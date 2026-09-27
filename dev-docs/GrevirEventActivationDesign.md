@@ -82,7 +82,10 @@ The dispatcher calls `on_event<Event>()` directly for `IsrLevel`/`Direct`.
 Deferred `MainLoop`/`Elide` delivery uses a fixed-capacity application queue
 on mock and AVR. The target entry posts one record; main-loop dispatch clears
 the pending mark before invoking the handler. The queue is prepared during
-startup before source enablement and stopped on startup failure. Its critical
+startup before source enablement and stopped on startup failure only when the
+compiled demand set selects deferred delivery. Direct-only and zero-demand
+applications may declare an inactive queue capability without allocating or
+preparing queue storage. Its critical
 section is supplied by the board's target policy. `Stream` and ESP32 deferred
 dispatch still require target implementations.
 Only one consumer may dispatch an application's queue at a time. A nested or

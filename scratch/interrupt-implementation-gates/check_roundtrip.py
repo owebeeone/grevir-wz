@@ -48,6 +48,8 @@ def one_case(directory: Path, stem: str, header: str) -> None:
     if stem == "mock_deferred_two":
         assert plan["deferred_context"] == {
             "capacity": 2, "policy": "host_mutex_v1"}
+    if stem in ("mock", "mock_zero", "mock_event"):
+        assert plan["deferred_context"] == {"capacity": 0, "policy": ""}
     run(sys.executable, "-B", str(TOOL), "emit", "--out-dir", str(output),
         "--attempt", "first", "--backend", "mock", "--compiler",
         "scratch_compiler", "--application-header", header)
