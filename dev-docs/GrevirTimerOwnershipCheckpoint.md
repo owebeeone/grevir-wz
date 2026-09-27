@@ -1,6 +1,11 @@
 # Timer ownership implementation checkpoint
 
-Status: **focused closure of known review roots ready for re-verdict**. The controlling design is
+Status: **accepted at root `e364345c0e0465007ba607bc2c6a4d8c4c078ef6`, Core
+`852a38aedf9bc7bc7569e971b91d4a8d08821b11`, Peripherals
+`0cf6a7d7d3358dcb3df9474c8e190d5217029e69`, AVR
+`9f6bc02cc232d8a60a7b16a1ecdf16bfc8c42e0a` after Code and State
+review-5 reported GO; this accepts the fixed-PWM module-owned timer slice
+only**. The controlling design is
 [Module-owned timer configuration](GrevirTimerModuleDesign.md). This checkpoint
 records the supported implementation slice, not completion of that design.
 
@@ -31,9 +36,15 @@ still uses the existing typed register path rather than a new general
 not properties established by the passing host tests. No silicon validation
 was run.
 
-Review question: does this corrected slice establish module ownership and a
-use-neutral allocation boundary without silently accepting unsupported uses,
-losing dependency ordering, or permitting board/device pin aliases? A reviewer
-should treat any structural obstruction as blocking, even if the host tests
-pass. The peer-blind review reports, the State classification erratum, and
-their remediation dispositions are filed beside this checkpoint.
+The final host build and all 187 CTests passed. Compiler probes included 17
+expected portable-PWM rejections and the Uno/Nano board alias conflicts; the
+installed two-output CMake consumer built and exited successfully. A host
+compile with conflicting AVR-style macro definitions also passed. These checks
+do not establish target-compiler or silicon behavior for this checkpoint.
+
+The peer-blind [Code](GrevirTimerOwnershipCheckpoint-ReviewCode-5.md) and
+[State](GrevirTimerOwnershipCheckpoint-ReviewState-5.md) final re-verdicts are
+GO on the same tuple. The prior reports, State classification erratum, and
+remediation dispositions remain filed beside this checkpoint. The public
+[PWM guide](../docs/guides/pwm.md) and [two-output example](../docs/examples/pwm-host.md)
+describe the accepted usage and support limits.
