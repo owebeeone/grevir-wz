@@ -32,6 +32,8 @@ on hold; the remaining `grevir-xxx` boundaries are described in the plan.
 - [Interrupt binding architecture](GrevirInterruptBindingArchitecture.md)
 - [Interrupt binding implementation plan](GrevirInterruptBindingImplementationPlan.md)
 - [Interrupt binding implementation progress](GrevirInterruptBindingImplementationProgress.md)
+- [Event contexts and deferred dispatch design](GrevirEventContextsAndDispatchDesign.md)
+- [Event handler activation design](GrevirEventActivationDesign.md)
 - [Interrupt binding adversarial review outcome](GrevirInterruptBindingArchitecture-ReviewOutcome.md)
 - [Interrupt binding architecture review](GrevirInterruptBindingReview.md)
 - [Interrupt binding investigation and scratch evidence](GrevirInterruptBindingDesign.md)

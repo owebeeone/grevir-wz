@@ -18,7 +18,5 @@ provides candidates; the allocated binding reaches the module as a type.
 Declaration order does not change an allocation for the same requests and
 inventory. [PWM](../guides/pwm.md) describes the supported ATmega328P scope.
 
-The older `SelectionResolver` remains a pass-through placeholder. New
-applications should use the installed allocation path for its supported PWM
-scope. Core's default sequential lifecycle does not imply interrupt safety or
+Core's default sequential lifecycle does not imply interrupt safety or
 ownership of physical device registers.

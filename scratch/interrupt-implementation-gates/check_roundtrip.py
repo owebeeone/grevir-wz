@@ -73,7 +73,7 @@ def one_case(directory: Path, stem: str, header: str) -> None:
         marker["emitter"] = "stale_emitter"
         ready.write_text(json.dumps(marker, sort_keys=True, indent=2) + "\n")
         run(*verification, success=False)
-        marker["emitter"] = "grevir_irqgen_1"
+        marker["emitter"] = "grevir_irqgen_2"
         ready.write_text(json.dumps(marker, sort_keys=True, indent=2) + "\n")
         run(*verification)
     executable = output / "firmware"
@@ -99,6 +99,18 @@ def one_case(directory: Path, stem: str, header: str) -> None:
             "scratch/interrupt-implementation-gates/mock_decl_only.hpp")
         run(*strict, str(HERE / "mock_decl_main.cpp"), str(generated),
             "-o", str(output / "undefined"), success=False)
+    if stem == "mock_event":
+        assert plan["demands"][0]["handler"] == "event"
+        assert plan["demands"][0]["context"] == "isr"
+        assert plan["demands"][0]["delivery"] == "direct"
+        assert "dispatch_bound_interrupt" in generated.read_text()
+        run(CXX, "-std=c++23", "-DHAS_STD_LIB=1", "-DGREVIR_IRQ_PROBE=1",
+            *INCLUDES, "-fsyntax-only",
+            str(HERE / "mock_event_dual_record.cpp"), success=False)
+        run(CXX, "-std=c++23", "-DHAS_STD_LIB=1", "-DGREVIR_TEST_STALE_ROUTE=1",
+            '-DGREVIR_GENERATED_IRQ_HEADER="grevir_generated_irq_bindings_mock.hpp"',
+            *INCLUDES, f"-I{output}", "-fsyntax-only", str(generated),
+            success=False)
 
     # The new attempt removes the old marker before doing any work. All four
     # failure points must leave the directory unready, even with old C++ files.
@@ -153,6 +165,9 @@ def main() -> None:
         one_case(directory, "mock_zero",
                  "scratch/interrupt-implementation-gates/mock_app_base.hpp")
         print("PASS zero-handler generated installer and transactional failures")
+        one_case(directory, "mock_event",
+                 "scratch/interrupt-implementation-gates/mock_event_app.hpp")
+        print("PASS on_event activation, direct dispatch, dual rejection and stale route")
 
 
 if __name__ == "__main__":

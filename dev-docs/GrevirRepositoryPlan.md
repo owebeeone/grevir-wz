@@ -7,6 +7,10 @@ for dependency callback ordering. Core's allocator remains a legacy placeholder;
 broader runtime/target milestones and remaining packages are still planned.
 Hardware validation is on hold at Gianni's request. See
 [extraction progress](GrevirExtractionProgress.md) for actual results and limits.
+The `SelectionResolver` placeholder mentioned in this historical plan was
+retired on 27 September 2026; current allocation lives in
+`grevir-core/src/grevir/core/allocation/search.hpp` and
+`allocated_application.hpp`.
 
 ## Recommendation
 

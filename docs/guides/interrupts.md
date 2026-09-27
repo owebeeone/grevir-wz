@@ -36,6 +36,27 @@ user-written ISR or registration list. Event keys and request identities must
 be stable and unique; reordering independent module declarations does not
 change the selected allocation.
 
+`on_event<Event>()` can also activate a catalogued hardware event. The direct
+route is supported now; it invokes the handler in interrupt context:
+
+```cpp
+template <>
+struct grevir::event::RouteFor<PeriodElapsed> {
+  using Context = grevir::event::IsrLevel;
+  using Delivery = grevir::event::Direct;
+};
+
+template <>
+inline void grevir::on_event<PeriodElapsed>() noexcept {
+  Motor::tick();
+}
+```
+
+Use either `on_interrupt` or `on_event` for a given event, not both. The default
+`on_event` route is `MainLoop`/`Elide`; its deferred queue backend is not yet
+implemented, so a strict build rejects that route. The `IsrLevel` route has
+the same interrupt-context restrictions as `on_interrupt`.
+
 The board inventory declares legal configurations, physical sources,
 selectors, entry and acknowledgement policies. It also declares reservations
 for sources owned by the core or another library. One physical source gets

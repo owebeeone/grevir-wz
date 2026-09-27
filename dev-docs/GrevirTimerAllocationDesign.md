@@ -66,8 +66,9 @@ range or which owner is allowed to change a shared timer.
 - AVR supplies timer configuration/output operations and ATmega328P bindings,
   exercised through host register mocks. Waveform-specific TOP corrections remain
   separate outstanding work.
-- Core's `SelectionResolver` is explicitly a placeholder. There is no working
-  request-to-AVR adapter or global timer allocator to preserve.
+- The old `SelectionResolver` placeholder was retired. The installed
+  fixed-PWM allocation path covers its stated target scope; there is no
+  general timer allocator to preserve or extend through that name.
 
 ## Proposed observable guarantees
 
