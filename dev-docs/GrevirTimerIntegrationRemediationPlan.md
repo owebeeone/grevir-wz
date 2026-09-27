@@ -2,7 +2,10 @@
 
 Status: proposed work plan. This records the architectural review of the
 uncommitted timer/interrupt integration; it does not claim that the design
-questions below are settled or that the implementation is complete.
+questions below are settled or that the implementation is complete. The
+[earlier review outcome](GrevirTimerIntegrationRemediationPlan-ReviewOutcome.md)
+applies to its named revision; the later one-module/one-timer decision below
+has not been through that review cycle.
 
 Grevir's aim is to derive MCU integration from application intent and
 authoritative target facts at build time. The current fixed-PWM path and narrow
@@ -24,19 +27,17 @@ the resulting model is clearer and more capable.
 each selected physical timer and its complete configuration. The allocator may
 choose among legal timers for that module, but it does not merge requirements
 from independently owning modules onto one timer, even when their frequencies
-or modes appear compatible. An application that wants several consumers to use
-one timer explicitly composes them around a provider module. That provider
-declares and manages the offered functions and internal endpoints; dependent
-consumers bind to those offers without claiming or configuring the physical
-timer again. Owner identity and offers must be derived from the actual module
-closure and validated against the selected configuration. Internal duplicate
-channels/pins and external ownership conflicts remain errors. Automatic
-cross-module sharing is deferred, not an implicit fallback on allocation
-failure. This also supersedes the earlier explicit `SameTimer` grouping of
-requests from separate owner modules: an actual provider module in the
-application closure owns the timer and offers endpoints to its dependents.
+or modes appear compatible. All timer uses, including channels and events,
+belong to that same module instance. Another module may depend on its
+application-level behavior but cannot claim a timer endpoint through the
+dependency. Owner identity and its internal uses derive from the actual module
+closure and are validated against one selected configuration. Internal duplicate
+channels/pins and external ownership conflicts remain errors. This supersedes
+both the earlier explicit `SameTimer` cross-module grouping and the later
+provider-offer model in which dependent modules claim channels of one timer.
+There is no implicit cross-module sharing or fallback on allocation failure.
 This is the contract for the redesign, not a claim that the installed fixed-PWM
-allocator already enforces it.
+allocator already enforces it. See the [Phase 1 design](GrevirTimerModuleDesign.md).
 
 ## Phase 1 — decide the timer capability abstraction
 
@@ -79,11 +80,11 @@ changing the allocator:
    target-specific constraints? What are the units, acceptable approximations,
    update semantics and failure conditions? Which behaviors are static, and
    which are runtime operations of a selected owner?
-2. **Configuration and offered functions.** One provider module owns a complete
-   configuration of one hardware block and may offer several endpoints. Decide
-   how that owner's requirements for PWM, counting and events combine into one
-   legal configuration rather than selecting each function independently. Identify
-   configuration-wide state, endpoint state, shared clock domains and resources
+2. **Configuration and internal uses.** One module owns a complete
+   configuration of one timer and may use several of its functions internally.
+   Decide how that module's requirements for PWM, counting and events combine
+   into one legal configuration rather than selecting each function independently. Identify
+   configuration-wide state, internal endpoint state, shared clock domains and resources
    consumed for TOP, duty, compare or capture.
 3. **Capabilities and provenance.** Which facts come from extracted device
    definitions, target manuals or SDK capability metadata, and which come from
@@ -104,11 +105,11 @@ changing the allocator:
    assignment must report conflict, and a bounded search that stops early must
    report exhaustion separately. Fix the supported search envelope and its
    diagnostic contract before treating allocation failure as impossibility.
-5. **Owner and lifecycle contract.** Define how the selected provider module
-   configures its block once, activates its offered endpoints and interrupt
+5. **Owner and lifecycle contract.** Define how the selected module
+   configures its timer once, activates its internal uses and interrupt
    sources, handles dynamic updates, and cleans up partial startup. Specify how
-   dependent modules refer to and claim those offers without becoming second
-   physical owners. Define dependency order and the boundary between
+   dependent modules use its application-level interface without claiming timer
+   resources. Define dependency order and the boundary between
    compile-time proof and runtime failures. Decide how shared clock domains
    spanning different physical timers are owned without allowing either timer
    endpoint to reconfigure them silently.
@@ -117,7 +118,7 @@ changing the allocator:
    remain inert without pulling in that target's SDK. A mock inventory must
    exercise the same portable semantics without masquerading as a physical MCU.
 
-Use at least these design cases: (a) one provider module offering both a PWM
+Use at least these design cases: (a) one module internally using both a PWM
 output and a compatible period event on the same AVR timer; (b) a PWM
 configuration using ICR as TOP alongside
 an input-capture request that also needs ICR, which must conflict; (c) two
@@ -138,7 +139,7 @@ or reject it until such ownership can be represented.
 **Exit gate:** a reviewed contract and worked API/plan examples define the
 supported first slice, the extension points for other timer functions, the
 source of each capability fact, and the static/runtime boundary. An independent
-synthetic counterexample should be able to say whether two offered functions
+synthetic counterexample should be able to say whether two internal uses
 can coexist. The contract identifies canonical resource identities and alias
 normalization required by the first implementation slice, a single-writer rule
 for every configurable shared domain it admits, and the completeness, conflict
@@ -150,7 +151,7 @@ backend models every AVR, ESP32 or RP2040 timer-capable mode.
 
 Implement the agreed representation in the portable candidate, solver and
 selected-plan path. Generate complete candidates for each declared owner module,
-including its internal offered endpoints; select one physical timer per owner and
+including all its internal uses; select one physical timer per owner and
 reject collisions between owners. The allocator must not silently co-locate two
 owner modules. Keep the initial vertical slice small: mock, ATmega328P
 Timer1 period/PWM coexistence, and the existing classic ESP32 timer-group alarm.

@@ -15,15 +15,15 @@ choices below remain recommendations. This is a focused design effort alongside
 the Ardoinus migration.
 
 **Later ownership decision:** for the next design slice, allocate each physical
-timer exclusively to one provider module instance. The application explicitly
-composes dependent consumers around that module, which manages any compatible
-internal sharing and offers its endpoints. The allocator does not merge separate
-timer-owning modules onto one timer. The `SameTimer`/sharing-group proposal and
-its examples below predate this decision; treat that spelling and the associated
-cross-module grouping behavior as superseded. See the
-[remediation plan](GrevirTimerIntegrationRemediationPlan.md) for the current
-design gate. The installed fixed-PWM grouping path has not yet been changed to
-this contract. Other unsolved details in this draft remain proposals.
+timer in its entirety to one module instance. Every use of that timer is
+declared inside the owner module; no dependent module claims an output channel
+or other timer endpoint. The allocator does not merge separate modules onto
+one timer. Both the `SameTimer` cross-module group and the later provider-offer
+model are superseded. See the
+[remediation plan](GrevirTimerIntegrationRemediationPlan.md) and
+[Phase 1 design](GrevirTimerModuleDesign.md) for the current contract. The
+installed fixed-PWM grouping path has not yet been changed to it. Other
+unsolved details in this draft remain proposals.
 
 [Worked API examples](GrevirTimerApiExamples.md) exercise this proposal with
 target selection, reusable modules, allocation outcomes, numeric guarantees and
@@ -36,12 +36,12 @@ Turn a complete application's static PWM requests into concrete timer/channel/pi
 bindings, or a useful compile-time failure. Application modules state what they
 need; MCU backends describe realizable choices; board policy supplies reservations.
 
-The first implementation should support fixed-frequency PWM, explicit pin
-requirements, optional explicit timer/channel constraints, and provider modules
-that offer multiple outputs from one owned timer configuration. A backend may offer several legal
-routes for a pin. Automatic choice among unrelated application pins is deferred.
-Runtime allocation, interrupt/capture **implementation**, a general peripheral
-optimizer, and an ESP32 backend are outside this first scope. The public
+The original fixed-PWM scope supported explicit pin requirements, optional
+timer/channel constraints, and module-internal uses of one owned timer
+configuration. A backend may offer several legal routes for a pin. Automatic
+choice among unrelated application pins was deferred. That prototype did not
+implement interrupt/capture or an ESP32 timer backend; the next slice is set by
+the [Phase 1 design](GrevirTimerModuleDesign.md). The public
 capability and candidate model must accommodate interrupt-bearing timer modes;
 its proposed [binding architecture](GrevirInterruptBindingArchitecture.md) is part of
 the design now. A synthetic non-AVR inventory should still demonstrate that
@@ -52,12 +52,12 @@ compare/overflow interrupts and input capture as independent resources merely
 because they have different names. A timer's waveform/counting mode, prescaler,
 TOP source and shared registers determine which functions can coexist. For
 example, an AVR configuration using an input-capture register as PWM TOP cannot
-simultaneously offer that register for independent input capture. Some interrupt
+simultaneously use that register for independent input capture. Some interrupt
 events may coexist with PWM under a compatible configuration, whereas using a
 compare register for TOP or duty can remove another independent use of that
 channel. Each backend must enumerate **complete legal configurations and their
-offered functions**; the allocator chooses one configuration owner and binds
-consumer endpoints only to functions that configuration actually provides.
+supported functions**; the allocator chooses one module owner whose internal
+uses fit one configuration. No other module receives a timer endpoint.
 This is a future design requirement, not a claim that the fixed-PWM MVP already
 models all timer modes.
 
@@ -191,10 +191,10 @@ Missing or contradictory active pin bindings fail; inactive bindings have no
 effect. Equivalent board aliases normalize to the same physical identity.
 
 After target selection and pin resolution, an allocation input carries the
-provider-module identity, its internal request identities, operation (initially
+owner-module identity, its internal request identities, operation (initially
 PWM), physical pin, frequency requirement, minimum duty resolution, and optional
-binding constraints. The provider specifies which internal endpoints it offers;
-the allocator does not infer a sharing group across different owner modules.
+binding constraints. The owner specifies all its internal uses; the allocator
+does not infer a sharing group across different modules.
 Clock sources/rates are explicit input facts.
 
 Following the worked examples, recommend an explicit accuracy policy alongside a
@@ -226,8 +226,8 @@ accepted. Boundary comparisons must avoid overflow. Existing metadata and tests
 do not establish hardware semantics that the new API must preserve.
 
 Duty capability belongs to one fixed concrete candidate, not a union across
-different timer configurations. For one provider's endpoints, all combinations of the declared
-endpoint duty values must be simultaneously realizable. Updating one endpoint
+different timer configurations. For one module's internal outputs, all combinations
+of the declared duty values must be simultaneously realizable. Updating one output
 must preserve the other endpoints' selected steady duties and the common timing
 configuration. Distinct channel names backed by one inseparable compare value
 cannot satisfy this independent-output contract. This does not promise atomic
@@ -252,22 +252,20 @@ be finite; deriving valid counts algebraically is preferable to enumerating ever
 possible counter value. Backend
 completeness and generic solver completeness require separate validation.
 
-## Sharing and ownership
+## Whole-timer ownership and internal uses
 
 The current decision is exclusive physical-timer allocation per owner module.
 Equal nominal frequency does not permit separate owners to share a timer.
-An application that needs several uses of one timer supplies one provider module
-with a complete configuration satisfying its internal uses; dependent modules
-bind to interfaces it offers. Every physical pin and output channel must still
-have a unique internal assignment. An incompatible internal request is rejected
-or requires a different explicitly composed provider; the allocator does not
-silently split or merge owners. The earlier `SameTimer` grouping vocabulary in
-the worked examples is superseded for this slice.
+An application that needs several uses of one timer must express all of them
+inside one module with a complete configuration satisfying those uses. A
+dependent module can call its application-level API but cannot claim a timer
+channel, event or other hardware endpoint. Every physical pin and output channel
+must still have a unique internal assignment. An incompatible internal request
+is rejected; the allocator does not silently split or merge owners. Both the
+earlier `SameTimer` grouping and provider-offer vocabulary are superseded.
 
-Represent the provider as one configuration owner with several offered endpoints.
-The owner claims/configures the timer once; dependent consumers claim only the
-specific offers they use, while the provider validates distinct internal
-pins/channels. The owner's complete footprint conflicts with external timer,
+The module claims/configures the whole timer once and validates its internal
+pins/channels. Its complete footprint conflicts with external timer,
 channel and pin users, including manually bound users and board reservations.
 Repeated exclusive claims and overlapping ranges remain errors. The design does
 not relax that rule or silently deduplicate two user requests.
@@ -275,8 +273,8 @@ not relax that rule or silently deduplicate two user requests.
 Existing `shared_use_claim` is not by itself a complete timer ownership model.
 The following ownership rules are a refined proposal, not an implementation or a
 user-approved extension to ordinary claims. Final application checks must see each
-owner and endpoint once; wrapper forwarding must not introduce a second declaration
-of ownership. A provider's internal composition is explicit, not an allocator loophole.
+owner and internal use once; wrapper forwarding must not introduce a second declaration
+of ownership. The module's internal composition is explicit, not an allocator loophole.
 
 ### Proposed resource compatibility rules
 
@@ -285,7 +283,7 @@ such as T0 containing channels T0/A and T0/B. Pin routing is a connection, not
 containment: a pin does not become a child of every timer that can drive it.
 Normalize aliases before checking ownership, and reject cyclic containment.
 
-Each provider module instance is one allocation unit with one timer
+Each timer-owning module instance is one allocation unit with one timer
 owner. The backend proposes a structured footprint, checked before search:
 
 - Exactly one whole-timer ownership declaration per unit, plus explicit internal
@@ -334,9 +332,9 @@ For the proposed order-independent contract:
    For later phases, order diagnostic records by category, identity and normalized
    constraint/resource details, not source position. Identical records may be
    collapsed with an occurrence count. Compiler traces remain outside this promise.
-2. Treat each provider-module instance as one allocation unit. Order owners by
+2. Treat each timer-owning module instance as one allocation unit. Order owners by
    stable identity and sort each owner's internal requests by their stable keys.
-   A candidate contains all offered endpoint bindings in canonical order, not
+   A candidate contains all internal bindings in canonical order, not
    their source declaration order. A request cannot belong to two owners.
 3. Ask the backend for candidates satisfying each unit's complete requirements.
    Remove candidates conflicting with reservations or fixed claims. Order them by
@@ -384,9 +382,9 @@ resource identities in canonical order. A minimal conflicting subset is useful b
 not required for v1. Structured diagnostic content is deterministic; compiler
 wording and template trace formatting need not be byte-identical.
 
-The application initializes each selected configuration owner exactly once before
-dependent modules use its endpoints. Endpoint setup must have a single defined
-owner too; it cannot be independently repeated by both the portable wrapper and
+The application initializes each selected timer-owning module exactly once before
+its own timer uses or dependent application code runs. Internal endpoint setup
+must have a single defined owner too; it cannot be independently repeated by both the portable wrapper and
 the AVR adapter. Allocation does not imply simultaneous or glitch-free hardware
 updates. Establish the initialization contract before wiring `HardwarePwm` to AVR.
 
@@ -397,10 +395,10 @@ updates. Establish the initialization contract before wiring `HardwarePwm` to AV
 - MCU backends own capabilities, routing, realizable configurations and drivers.
 - Board/platform policy owns aliases, clock inputs and framework reservations.
 
-Order independence, cross-target configuration coexistence, strict allocation to
-one provider module per physical timer, and freedom from API compatibility are
+Order independence, cross-target configuration coexistence, strict allocation of
+each entire physical timer to one module, and freedom from API compatibility are
 agreed. Next settle target-section composition and vocabulary, stable identities,
-frequency/resolution meaning, provider-offer validation, and completeness.
+frequency/resolution meaning, internal-use validation, and completeness.
 Then implement a small synthetic solver proof
 before integrating one AVR path. Correct AVR TOP/frequency calculations before
 using them as the capability oracle. No new repository or broad allocation
@@ -426,8 +424,9 @@ instantiations, [Avr.md](review-policies/Avr.md).
 
 ## Open decisions after the first review loop
 
-Only order independence, common/resident configuration selection and absence of
-backward-compatibility obligations have been accepted. The following need design
+Order independence, common/resident configuration selection, whole-timer
+ownership by one module instance, and absence of backward-compatibility
+obligations have been accepted. The following need design
 decisions; descriptive wording elsewhere in this draft does not settle them.
 
 | Decision | Current proposal or alternatives |
@@ -437,7 +436,7 @@ decisions; descriptive wording elsewhere in this draft does not settle them.
 | Request identity | Named hierarchical instance paths plus local request keys; lexicographic component order |
 | Frequency accuracy | Explicit exact or relative-tolerance policy; recommend both in the first scope |
 | Duty resolution | Recommend a full-range maximum duty-step ratio, with bits shorthand deferred |
-| Sharing | One physical timer per provider module instance; sharing is explicit inside that owner and its dependent-module interfaces. Automatic merging of separate owners is deferred. |
+| Whole-timer ownership | One physical timer per module instance; all timer uses are internal to it. No cross-module timer endpoint claims or automatic merging. |
 | Solver guarantee | Complete over the declared candidate model, with separate search-limit failure |
 | Initial scope | Fixed-frequency PWM is a proposed first increment, not the whole portable timer API |
 

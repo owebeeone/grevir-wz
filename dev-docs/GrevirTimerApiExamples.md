@@ -10,8 +10,9 @@ The examples recommend concrete semantics for discussion. They do not turn those
 recommendations into user-approved decisions. Deterministic allocation,
 independence from declaration order, common plus resident-target configuration,
 freedom from backward compatibility, and strict physical-timer ownership by one
-provider module are agreed. The older `SameTimer` cross-module grouping example
-has been replaced by provider-module composition below.
+module are agreed. Both the older `SameTimer` cross-module grouping example and
+the later dependent-consumer endpoint proposal are superseded. All timer uses
+belong to the module that owns the entire timer.
 
 ## 1. One request, multiple target sections
 
@@ -100,11 +101,10 @@ using RightPwm = RequestRef<"right", "pwm">;
 As written, `left` and `right` are separate timer-owning module instances.
 They must receive different physical timers or allocation fails. Neither
 `SameTimer<LeftPwm, RightPwm>` nor equal requested frequency changes that result.
-If both motors must use one timer, the application instead instantiates one
-timer provider with two internal PWM endpoints; `left` and `right` depend on
-its distinct offers and do not declare their own physical-timer requests.
-The names and template syntax for that provider/offer declaration remain a
-Phase 1 API decision.
+A module cannot claim a channel from the other's timer. A different single
+module could own one timer and internally use two PWM channels to control two
+outputs, but that is a different module boundary; the allocator cannot
+silently transform these two instances into it.
 
 Full request identities are tuples of path components, here `("left", "pwm")`
 and `("right", "pwm")`. A module author names each local request once; the
@@ -218,38 +218,35 @@ contract. No claim of glitch-free transitions follows.
 The duty set belongs to one fixed candidate. Combining attainable values from
 different TOP/clock/waveform configurations cannot establish its granularity.
 
-## 7. Shared timer use belongs to one provider module
+## 7. Several timer uses belong to one module
 
-The application explicitly composes a provider module for the timer and makes
-the two consumers depend on its separate offered PWM endpoints. The provider
-owns one complete configuration and the physical timer; consumers do not claim
-or configure that timer a second time. Two independent timer-owning modules
-remain exclusive even if they request the same frequency. The allocator does
-not opportunistically merge them or silently fall back to separate timers.
-For the `left` and `right` modules in section 3, this is a different composition:
-their original `RequestRef` declarations must be replaced by references to
-the provider's two offers, and only that provider configures the timer.
+One module may declare several uses of the timer it owns, such as a PWM output
+and a compatible period event, or two PWM outputs under one mode. These uses
+are internal to that module. No dependent module receives a timer-resource
+offer or claims a channel through a dependency. Two independent timer-owning
+modules remain exclusive even if they request the same frequency. The
+allocator does not opportunistically merge them.
 
 For a synthetic timer with channels A and B routed to distinct bound pins, two
-1 kHz internal endpoints can coexist if one concrete configuration meets both
-duty requirements and all active target constraints. The result has one timer
-owner and two exclusive endpoints. Different duty values do not require
+1 kHz outputs inside one module can coexist if one concrete configuration
+meets both duty requirements and all active target constraints. The result has
+one timer owner and two internal channel assignments. Different duty values do not require
 different timer configurations.
 
 | Variation | Expected result |
 | --- | --- |
-| Distinct pins/channels, one compatible configuration | One owner, two endpoint bindings |
+| Distinct pins/channels, one compatible configuration inside one module | One owner, two internal channel bindings |
 | Both endpoints need channel A | Fail: channel conflict |
 | Both aliases resolve to one physical pin | Fail: pin conflict |
 | Exact 1 kHz versus exact 2 kHz | Fail: no common configuration |
 | Requested TOP source consumes a required output channel | Fail unless another permitted common candidate exists |
 | Another module owns the whole timer | Fail: ownership conflict |
-| Same provider endpoint declared twice | Fail: duplicate endpoint |
+| Same internal output declared twice | Fail: duplicate use identity |
 
-All provider endpoints must be resolved, sorted and checked before candidate selection.
-Initialize the configuration owner and its endpoints once before dependent modules
-run. Members can change their own duty; the fixed-frequency endpoint API exposes
-no independent frequency control. Runtime frequency changes need a separate owner
+All internal uses must be resolved, sorted and checked before candidate selection.
+Initialize the module's timer once before that module runs. It may change an
+internal output's duty through its own API; that does not grant another module
+independent frequency control. Runtime frequency changes need a separate owner
 contract and remain outside this first scope.
 
 ## 8. Ownership and simultaneous duty counterexamples
@@ -267,7 +264,7 @@ independent review. Resource identity/containment is explicit backend metadata.
 | Separate T0/T1 owners require shared divider D=8 | Compatible; compose one D setup owner |
 | Separate T0/T1 owners require D=8 and D=64 | Incompatible; backtrack to agreeing candidates or fail |
 | Exclusive external reservation of D, candidate requires D=8 | Conflict, even if the external setting happens to be 8 |
-| Distinct channels A/B driven by one inseparable compare value | Cannot offer independent duty control |
+| Distinct channels A/B driven by one inseparable compare value | Cannot provide independent duty control |
 
 For the last case, each channel separately might support k/256 for k=0..256.
 Nevertheless A=25% and B=75% cannot coexist. Such a candidate must not pass by
@@ -280,11 +277,11 @@ different contract and is not implicitly substituted.
 
 These examples make concrete recommendations: explicit target sections with
 constraint intersection; hierarchical instance/local identities; explicit exact or
-tolerant frequency; a duty-step guarantee; and provider-offered internal endpoints.
+tolerant frequency; a duty-step guarantee; and module-internal timer uses.
 They are ready for user discussion and independent design review, not yet an
 implementation specification accepted by the user.
 
-Before coding, review the user-facing forms and the provider-offer contract.
+Before coding, review the user-facing forms and the whole-timer ownership contract.
 Before integration, specify duty-write rounding, initial output state, owner setup
 ordering and failure behavior. Prototype evidence must then establish lazy inactive
 section handling, canonical allocation and a practical search budget. The proposed

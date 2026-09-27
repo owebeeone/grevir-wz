@@ -1,6 +1,7 @@
 #include <GrevirAVR.h>
 #include <grevir/avr/devices/atmega328p/timers.hpp>
 #include <grevir/avr/devices/atmega328p/pwm_backend.hpp>
+#include <grevir/peripherals/timer/own.hpp>
 #include <array>
 #include <cstring>
 
@@ -34,11 +35,15 @@ using Device = ardo::sys::avr::arch_atmega328p::TimerBindings<Memory, Barrier>;
 namespace p = grevir::pwm;
 namespace avr_pwm = p::atmega328p;
 
-using MotorPwm = p::Instance<"motor", p::PwmRequest<"pwm",
+using MotorTimer = grevir::timer::Own<p::PwmRequest<"pwm",
   p::Frequency<p::Hertz<1000>, p::Exact>,
   p::DutyStepAtMost<1, 256>,
-  p::For<p::Target::avr, p::Pin<avr_pwm::PB1>, p::avr::TopFromIcr>,
-  p::For<p::Target::esp32, p::Pin<18>, p::esp32::ApbClock>>>;
+  p::For<p::Target::avr, p::Pin<avr_pwm::physical_pin<typename Device::Gpio::ppPB1>()>, p::avr::TopFromIcr>,
+  p::For<p::Target::esp32, p::Pin<18>, p::esp32::ApbClock>>,
+  grevir::timer::For<p::Target::avr, grevir::timer::CounterBitsAtLeast<16>>,
+  grevir::timer::For<p::Target::atmega328p,
+    grevir::timer::RequireTimer<grevir::timer::atmega328p::Timer1>>>;
+using MotorPwm = grevir::timer::Instance<"motor", MotorTimer>;
 
 template <typename Allocation>
 struct Motor : ardo::ModuleBase<
