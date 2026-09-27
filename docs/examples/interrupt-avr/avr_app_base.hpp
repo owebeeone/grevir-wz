@@ -6,6 +6,7 @@
 #include <grevir/interrupt/single_thread_start_policy.hpp>
 #include <grevir/peripherals/timer/interrupt_allocator.hpp>
 #include <grevir/avr/devices/atmega328p/interrupt_timer1.hpp>
+#include <grevir/avr/event_lock.hpp>
 
 namespace avr_app {
 namespace irq = grevir::interrupt;
@@ -20,6 +21,8 @@ using Motor = grevir::RequestedModule<setl::TypeArgs<TimerRequest>, MotorModule>
 extern "C" volatile unsigned char grevir_irq_test_ticks;
 
 struct Board {
+  using EventLock = grevir::avr::EventLock;
+  inline static constexpr unsigned event_queue_capacity = 4;
   template <class Spec>
   using StartPolicy = irq::SingleThreadStartPolicy<Spec>;
   inline static constexpr auto backend = irq::literal("avr");

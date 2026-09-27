@@ -6,6 +6,7 @@
 #include <grevir/peripherals/timer/interrupt_allocator.hpp>
 #include <grevir/test/host_start_policy.hpp>
 #include <grevir/test/interrupt_controller.hpp>
+#include <grevir/test/event_lock.hpp>
 
 namespace example {
 namespace irq = grevir::interrupt;
@@ -21,6 +22,8 @@ inline grevir::test::InterruptController controller{};
 inline unsigned ticks = 0;
 
 struct Board {
+  using EventLock = grevir::test::EventLock;
+  inline static constexpr unsigned event_queue_capacity = 4;
   template <class Spec>
   using StartPolicy = grevir::test::HostStartPolicy<Spec>;
   inline static constexpr auto backend = irq::literal("mock");
@@ -88,6 +91,6 @@ using GrevirApplication = grevir::ApplicationSpec<example::Board, example::Motor
 #include <grevir/interrupt/handler.hpp>
 
 template <>
-inline void grevir::on_interrupt<example::PeriodElapsed>() noexcept {
+inline void grevir::on_event<example::PeriodElapsed>() noexcept {
   ++example::ticks;
 }

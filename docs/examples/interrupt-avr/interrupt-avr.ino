@@ -21,4 +21,6 @@ void setup() {
   }
 }
 
-void loop() {}
+void loop() {
+  grevir::event::dispatch<GrevirApplication>(4);
+}

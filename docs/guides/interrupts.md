@@ -36,8 +36,32 @@ user-written ISR or registration list. Event keys and request identities must
 be stable and unique; reordering independent module declarations does not
 change the selected allocation.
 
-`on_event<Event>()` can also activate a catalogued hardware event. The direct
-route is supported now; it invokes the handler in interrupt context:
+`on_event<Event>()` can also activate a catalogued hardware event. Its default
+route elides repeated firings into a fixed-capacity main-loop queue. The
+application dispatches a bounded number of callbacks in its `loop()`:
+
+```cpp
+template <>
+inline void grevir::on_event<PeriodElapsed>() noexcept {
+  Motor::tick();
+}
+
+void loop() {
+  grevir::event::dispatch<GrevirApplication>(4);
+}
+```
+
+The board supplies `event_queue_capacity` and an `EventLock` that serializes
+ISR producers with the loop consumer. An accepted event stays queued until
+dispatch. Another firing while it is queued coalesces; if the queue is full,
+the firing is dropped and a sticky overrun flag is set. The callback runs
+outside the queue lock and may post again. For a catalogued hardware event,
+loop code may call `event::post<Application, Event>()`, and an ISR may call
+`event::post_from_isr<Application, Event>()`; each returns `queued`,
+`coalesced`, `full`, or `not_ready`. The queue is prepared during application
+startup before interrupt sources are enabled and stopped if startup fails.
+
+An explicit direct route invokes the handler in interrupt context:
 
 ```cpp
 template <>
@@ -53,9 +77,14 @@ inline void grevir::on_event<PeriodElapsed>() noexcept {
 ```
 
 Use either `on_interrupt` or `on_event` for a given event, not both. The default
-`on_event` route is `MainLoop`/`Elide`; its deferred queue backend is not yet
-implemented, so a strict build rejects that route. The `IsrLevel` route has
-the same interrupt-context restrictions as `on_interrupt`.
+`on_event` route is `MainLoop`/`Elide`. `Stream` and extra dispatch contexts
+remain future work. The `IsrLevel` route has the same interrupt-context
+restrictions as `on_interrupt`.
+Deferred delivery currently has mock and ATmega328P backends. The classic
+ESP32 example uses a direct route while its deferred queue synchronization
+and loop-task publication remain to be implemented. Software-only event
+catalogues are also pending; the current handler probe treats each visible
+catalogue handler as a hardware interrupt demand.
 
 The board inventory declares legal configurations, physical sources,
 selectors, entry and acknowledgement policies. It also declares reservations

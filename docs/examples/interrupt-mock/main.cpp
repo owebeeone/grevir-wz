@@ -9,12 +9,17 @@ int main() {
     return 1;
   }
   example::controller.raise();
+  example::controller.raise();
+  if (example::ticks != 0
+      || grevir::event::dispatch<GrevirApplication>(1) != 1) {
+    return 2;
+  }
   const auto repeated = grevir::interrupt::Application<GrevirApplication>::start();
   if (example::ticks != 1
       || repeated.outcome != grevir::interrupt::SetupOutcome::success
       || repeated.disposition != grevir::interrupt::CallDisposition::replayed) {
     return 2;
   }
-  std::puts("PASS mock interrupt handler called once");
+  std::puts("PASS mock interrupt event elided and dispatched in main loop");
   return 0;
 }
