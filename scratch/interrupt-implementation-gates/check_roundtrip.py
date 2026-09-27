@@ -231,6 +231,36 @@ def one_case(directory: Path, stem: str, header: str) -> None:
     assert not ready.exists()
 
 
+def stream_case(directory: Path) -> None:
+    output = directory / "mock_stream"
+    output.mkdir()
+    source = HERE / "mock_deferred_two_record.cpp"
+    header = "scratch/interrupt-implementation-gates/mock_deferred_two_app.hpp"
+    define = "-DGREVIR_TEST_STREAM_B=1"
+    probe = output / "probe.o"
+    run(CXX, "-std=c++23", "-DHAS_STD_LIB=1", "-DGREVIR_IRQ_PROBE=1",
+        define, *INCLUDES, "-c", str(source), "-o", str(probe))
+    run(sys.executable, "-B", str(TOOL), "plan", "--object", str(probe),
+        "--out-dir", str(output), "--attempt", "stream", "--backend", "mock",
+        "--target", "mock_mcu", "--board", "mock_board",
+        "--compiler", "scratch_compiler")
+    plan = json.loads((output / "grevir_generated_irq_plan_mock.json").read_text())
+    assert [demand["delivery"] for demand in plan["demands"]] == ["elide", "stream"]
+    run(sys.executable, "-B", str(TOOL), "emit", "--out-dir", str(output),
+        "--attempt", "stream", "--backend", "mock", "--compiler",
+        "scratch_compiler", "--application-header", header)
+    generated = output / "grevir_generated_irq_bindings_mock.cpp"
+    strict = [CXX, "-std=c++23", "-DHAS_STD_LIB=1",
+              '-DGREVIR_GENERATED_IRQ_HEADER="grevir_generated_irq_bindings_mock.hpp"',
+              *INCLUDES, f"-I{output}"]
+    firmware = output / "firmware"
+    run(*strict, define, str(HERE / "mock_deferred_two_main.cpp"),
+        str(generated), "-o", str(firmware))
+    run(str(firmware))
+    result = run(*strict, "-fsyntax-only", str(generated), success=False)
+    assert "GREVIR_IRQ_STALE_DEMAND_SET" in result.stderr, result.stderr
+
+
 def main() -> None:
     run(CXX, "-std=c++23", "-Igrevir-base/src", "-Igrevir-core/src",
         "-Igrevir-peripherals/src", "-fsyntax-only",
@@ -255,6 +285,8 @@ def main() -> None:
         one_case(directory, "mock_deferred_two",
                  "scratch/interrupt-implementation-gates/mock_deferred_two_app.hpp")
         print("PASS two-event deferred plan, capacity bounds and strict demand/context gates")
+        stream_case(directory)
+        print("PASS stream demand, generated dispatch and strict route mismatch")
 
 
 if __name__ == "__main__":

@@ -1,7 +1,8 @@
 # Event handler activation through the interrupt catalog
 
-Status: direct and `MainLoop`/`Elide` activation implemented for mock and AVR;
-`Stream`, software-only event discovery, and ESP32 deferred dispatch remain.
+Status: direct, `MainLoop`/`Elide`, and `MainLoop`/`Stream` activation implemented
+for mock and AVR; software-only event discovery and ESP32 deferred dispatch
+remain.
 This replaces the handler-activation
 mechanism in [Event contexts and deferred dispatch](GrevirEventContextsAndDispatchDesign.md).
 That document's queue, context and deadline semantics remain separate questions.
@@ -83,15 +84,16 @@ because the generated dispatcher has no entry for it.
 
 The emitter calls `dispatch_bound_interrupt<Event>()` in each target entry.
 The dispatcher calls `on_event<Event>()` directly for `IsrLevel`/`Direct`.
-Deferred `MainLoop`/`Elide` delivery uses a fixed-capacity application queue
-on mock and AVR. The target entry posts one record; main-loop dispatch clears
-the pending mark before invoking the handler. The queue is prepared during
+Deferred `MainLoop` delivery uses a fixed-capacity application queue on mock
+and AVR. `Elide` posts at most one pending record; main-loop dispatch clears
+its pending mark before invoking the handler. `Stream` posts each accepted
+firing as a separate record, with no pending mark. The queue is prepared during
 startup before source enablement and stopped on startup failure only when the
 compiled demand set selects deferred delivery. Direct-only and zero-demand
 applications may declare an inactive queue capability without allocating or
 preparing queue storage. Its critical
-section is supplied by the board's target policy. `Stream` and ESP32 deferred
-dispatch still require target implementations.
+section is supplied by the board's target policy. ESP32 deferred dispatch
+still requires a target implementation.
 Only one consumer may dispatch an application's queue at a time. A nested or
 competing dispatch returns zero; the queue lock is released before invoking a
 callback, so a callback can post another event for later dispatch.

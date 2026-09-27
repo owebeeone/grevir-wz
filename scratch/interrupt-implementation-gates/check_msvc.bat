@@ -63,4 +63,20 @@ if not errorlevel 1 exit /b 27
 findstr /C:"GREVIR_EVENT_CAPACITY_OUT_OF_RANGE" build\irq-msvc\zero\invalid_capacity.log >nul
 if errorlevel 1 exit /b 28
 echo PASS native MSVC strict-demand and capacity bounds
+if not exist build\irq-msvc\stream mkdir build\irq-msvc\stream
+cl %CXX_FLAGS% /c /DGREVIR_IRQ_PROBE=1 /DGREVIR_TEST_STREAM_B=1 /Fobuild\irq-msvc\stream\probe.obj scratch\interrupt-implementation-gates\mock_deferred_two_record.cpp
+if errorlevel 1 exit /b 29
+"C:\Users\gianni\AppData\Local\Programs\Python\Python313\python.exe" -B grevir-core\tools\grevir_irqgen\__main__.py plan --object build\irq-msvc\stream\probe.obj --out-dir build\irq-msvc\stream --attempt native-msvc-stream --backend mock --target mock_mcu --board mock_board --compiler scratch_compiler
+if errorlevel 1 exit /b 30
+"C:\Users\gianni\AppData\Local\Programs\Python\Python313\python.exe" -B grevir-core\tools\grevir_irqgen\__main__.py emit --out-dir build\irq-msvc\stream --attempt native-msvc-stream --backend mock --compiler scratch_compiler --application-header scratch/interrupt-implementation-gates/mock_deferred_two_app.hpp
+if errorlevel 1 exit /b 31
+cl %CXX_FLAGS% /Ibuild\irq-msvc\stream /DGREVIR_TEST_STREAM_B=1 /DGREVIR_GENERATED_IRQ_HEADER=\"grevir_generated_irq_bindings_mock.hpp\" scratch\interrupt-implementation-gates\mock_deferred_two_main.cpp build\irq-msvc\stream\grevir_generated_irq_bindings_mock.cpp /Febuild\irq-msvc\stream\firmware.exe
+if errorlevel 1 exit /b 32
+build\irq-msvc\stream\firmware.exe
+if errorlevel 1 exit /b 33
+cl %CXX_FLAGS% /Zs /Ibuild\irq-msvc\stream /DGREVIR_GENERATED_IRQ_HEADER=\"grevir_generated_irq_bindings_mock.hpp\" build\irq-msvc\stream\grevir_generated_irq_bindings_mock.cpp >build\irq-msvc\stream\stale.log 2>&1
+if not errorlevel 1 exit /b 34
+findstr /C:"GREVIR_IRQ_STALE_DEMAND_SET" build\irq-msvc\stream\stale.log >nul
+if errorlevel 1 exit /b 35
+echo PASS native MSVC stream binding, dispatch and strict route mismatch
 exit /b 0

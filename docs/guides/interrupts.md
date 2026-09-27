@@ -55,6 +55,29 @@ void loop() {
 }
 ```
 
+For one callback per **accepted** firing, specialize the route before the
+handler:
+
+```cpp
+template <>
+struct grevir::event::RouteFor<PeriodElapsed> {
+  using Context = grevir::event::MainLoop;
+  using Delivery = grevir::event::Stream;
+};
+
+template <>
+inline void grevir::on_event<PeriodElapsed>() noexcept {
+  Motor::tick();
+}
+```
+
+`Stream` adds a record for every firing until the selected queue is full;
+it never returns `coalesced`. A full queue drops that firing, returns `full`
+to a caller of `post` or `post_from_isr`, and sets the same sticky overrun
+flag. The hardware entry also uses this queue. A `Stream` record carries no
+payload; a device needing bytes or frames retains them in its owned buffer.
+Choose either this route or the default `Elide` route for each event.
+
 The board supplies `event_queue_capacity` and an `EventLock` that serializes
 ISR producers with the loop consumer. An accepted event stays queued until
 dispatch. Another firing while it is queued coalesces; if the queue is full,
@@ -101,8 +124,8 @@ inline void grevir::on_event<PeriodElapsed>() noexcept {
 ```
 
 Use either `on_interrupt` or `on_event` for a given event, not both. The default
-`on_event` route is `MainLoop`/`Elide`. `Stream` and extra dispatch contexts
-remain future work. The `IsrLevel` route has the same interrupt-context
+`on_event` route is `MainLoop`/`Elide`; `MainLoop`/`Stream` is also supported on
+mock and ATmega328P. Extra dispatch contexts remain future work. The `IsrLevel` route has the same interrupt-context
 restrictions as `on_interrupt`.
 Deferred delivery currently has mock and ATmega328P backends. The classic
 ESP32 example uses a direct route while its deferred queue synchronization

@@ -26,5 +26,7 @@ runs up to `budget` queued callbacks. `grevir::event::overrun<Application>()`
 reports whether a firing was dropped because the queue was full. Reading this
 sticky flag does not clear it; `grevir::event::clear_overrun<Application>()`
 clears the flag without discarding queued callbacks. Application startup
-resets the diagnostic. See [Interrupt bindings](../guides/interrupts.md) for
+resets the diagnostic. `MainLoop`/`Elide` coalesces repeated pending firings;
+`MainLoop`/`Stream` retains one queue record per accepted firing. See
+[Interrupt bindings](../guides/interrupts.md) for
 the complete declaration and loop example.

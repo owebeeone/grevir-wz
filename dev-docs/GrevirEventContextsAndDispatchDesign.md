@@ -1,12 +1,14 @@
 # Event contexts and deferred dispatch
 
-Status: design proposal; no API or backend described here is implemented. This
+Status: design proposal. `MainLoop`/`Elide` and `MainLoop`/`Stream` dispatch are
+implemented for mock and ATmega328P AVR; named contexts, software-only events,
+the deadline service, and ESP32 deferred dispatch remain proposed. This
 document extends the [interrupt binding architecture](GrevirInterruptBindingArchitecture.md)
 and its [implemented first slice](GrevirInterruptBindingImplementationProgress.md).
 It does not change the existing `grevir::on_interrupt<Event>()` contract.
 The two-parameter handler spelling below has been superseded by the
 [one-parameter activation candidate](GrevirEventActivationDesign.md); the
-queue, context and deadline semantics here remain under discussion.
+remaining context and deadline semantics here remain under discussion.
 Public API documentation and complete examples belong under `/docs` after this
 design is implemented.
 

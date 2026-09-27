@@ -126,6 +126,14 @@ using GrevirApplication = grevir::ApplicationSpec<mock_deferred_two::Board,
 
 #include <grevir/interrupt/handler.hpp>
 
+#if defined(GREVIR_TEST_STREAM_B)
+template <>
+struct grevir::event::RouteFor<mock_deferred_two::B> {
+  using Context = grevir::event::MainLoop;
+  using Delivery = grevir::event::Stream;
+};
+#endif
+
 template <>
 inline void grevir::on_event<mock_deferred_two::A>() noexcept {
   ++mock_deferred_two::calls_a;

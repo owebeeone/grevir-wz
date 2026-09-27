@@ -6,9 +6,9 @@ MCU. Physical hardware behavior has not yet been validated.
 
 | Environment | Current evidence | Scope |
 | --- | --- | --- |
-| macOS, Apple Clang 21, C++23 | Full native build and 188 CTest cases pass; generated mock deferred interrupt dispatch passes | Host behavior, mock hardware and compiler contracts |
-| Raspberry Pi, native GCC, C++23 | Earlier full native build and 186 CTest cases pass; current generated mock deferred interrupt dispatch passes | Host behavior and Linux object transport |
-| Windows 11, MSVC 19.44, C++23 mode | Earlier full native build, compiler probes and 186 CTest cases pass; current generated mock deferred interrupt dispatch passes | Host behavior, native COFF transport and public-header portability |
+| macOS, Apple Clang 21, C++23 | Full native build and 190 CTest cases pass; generated mock deferred interrupt dispatch passes, including `Stream` | Host behavior, mock hardware and compiler contracts |
+| Raspberry Pi, native GCC, C++23 | Earlier full native build and 186 CTest cases pass; current generated mock deferred interrupt dispatch passes, including `Stream` | Host behavior and Linux object transport |
+| Windows 11, MSVC 19.44, C++23 mode | Earlier full native build, compiler probes and 186 CTest cases pass; current generated mock deferred interrupt dispatch passes, including `Stream` | Host behavior, native COFF transport and public-header portability |
 | ATmega328P, Arduino Uno/Nano, Debian AVR GCC 14.2 | Selected Uno sketches and selected Nano sketches compile with Arduino AVR 1.8.8 and `-std=c++23` | Arduino, PWM/pin, Pulse IO and Packet compositions; individual package coverage varies |
 | ATmega328P, simavr 1.6 | Selected timer, GPIO/Pulse IO and Packet probes pass; generated Timer1 overflow event reaches the main-loop handler | Simulated behavior only |
 | Physical Uno/Nano | Not run | Electrical behavior, real timing and silicon-specific effects remain unvalidated |
@@ -19,6 +19,10 @@ consumer. "AVR compiled" means a named target program compiled and linked with
 the AVR toolchain; it does not cover every template instantiation. "Simulated"
 means a named firmware path ran in simavr. "Hardware validated" would require
 a named physical board; no feature has that evidence yet.
+
+The ATmega328P `MainLoop`/`Stream` queue has passed a target compiler
+instantiation. The simavr interrupt example still uses `Elide`; simulated
+Stream delivery is not claimed.
 
 The selected ATmega328P toolchain has no AVR libstdc++. Grevir Base provides the
 compatibility subset used by the selected target programs. Standard-library
