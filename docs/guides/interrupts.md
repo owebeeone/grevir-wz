@@ -80,8 +80,10 @@ Choose either this route or the default `Elide` route for each event.
 
 The board supplies `event_queue_capacity` and an `EventLock` that serializes
 ISR producers with the loop consumer. An accepted event stays queued until
-dispatch. Another firing while it is queued coalesces; if the queue is full,
-the firing is dropped and a sticky overrun flag is set. The callback runs
+dispatch. With `Elide`, another firing while that event is queued returns
+`coalesced` without adding a record. With `Stream`, each firing needs its own
+record. When a new record is needed and the queue is full, that firing is
+dropped and a sticky overrun flag is set. The callback runs
 outside the queue lock and may post again. For a catalogued hardware event,
 loop code may call `event::post<Application, Event>()`, and an ISR may call
 `event::post_from_isr<Application, Event>()`; each returns `queued`,
