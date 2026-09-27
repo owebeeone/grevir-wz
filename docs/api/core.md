@@ -20,3 +20,11 @@ inventory. [PWM](../guides/pwm.md) describes the supported ATmega328P scope.
 
 Core's default sequential lifecycle does not imply interrupt safety or
 ownership of physical device registers.
+
+For deferred interrupt events, `grevir::event::dispatch<Application>(budget)`
+runs up to `budget` queued callbacks. `grevir::event::overrun<Application>()`
+reports whether a firing was dropped because the queue was full. Reading this
+sticky flag does not clear it; `grevir::event::clear_overrun<Application>()`
+clears the flag without discarding queued callbacks. Application startup
+resets the diagnostic. See [Interrupt bindings](../guides/interrupts.md) for
+the complete declaration and loop example.

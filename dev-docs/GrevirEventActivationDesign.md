@@ -69,8 +69,10 @@ The probe tests both `requires { grevir::on_interrupt<Event>(); }` and
 simultaneous handlers and invalid routes, then places the event key in
 `DemandSet<Application>`. The allocator consumes that demand set.
 
-The canonical plan includes the handler kind, context identity and
-delivery mode, not only the event key and physical binding. Strict compilation
+The canonical plan includes the handler kind, context identity, delivery mode,
+and, when deferred delivery is selected, the queue capacity and stable lock
+policy identity. These facts are derived from the compiled application and
+board rather than chosen by the generator. Strict compilation
 must compare those values against the visible route policy. Changing
 an `Elide` main-loop handler to an `IsrLevel` handler after the probe must fail
 as stale output rather than silently retaining the old binding.
@@ -83,6 +85,9 @@ the pending mark before invoking the handler. The queue is prepared during
 startup before source enablement and stopped on startup failure. Its critical
 section is supplied by the board's target policy. `Stream` and ESP32 deferred
 dispatch still require target implementations.
+Only one consumer may dispatch an application's queue at a time. A nested or
+competing dispatch returns zero; the queue lock is released before invoking a
+callback, so a callback can post another event for later dispatch.
 The handwritten raw-interrupt route still calls `on_interrupt<Event>()`.
 The backend owns queue publication, elision and wakeup; the handler declaration
 does not pretend to solve target concurrency.

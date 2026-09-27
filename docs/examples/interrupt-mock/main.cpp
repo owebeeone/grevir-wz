@@ -20,6 +20,10 @@ int main() {
       || repeated.disposition != grevir::interrupt::CallDisposition::replayed) {
     return 2;
   }
+  if (grevir::event::overrun<GrevirApplication>()) {
+    grevir::event::clear_overrun<GrevirApplication>();
+    return 3;
+  }
   std::puts("PASS mock interrupt event elided and dispatched in main loop");
   return 0;
 }

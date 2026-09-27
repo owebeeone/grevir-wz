@@ -21,11 +21,13 @@ INCLUDES = ["-I.", "-Igrevir-base/src", "-Igrevir-core/src",
             "-Igrevir-peripherals/src", "-Igrevir-test-support/include"]
 
 
-def run(*args: str, env: dict[str, str] | None = None, success: bool = True) -> None:
+def run(*args: str, env: dict[str, str] | None = None,
+        success: bool = True) -> subprocess.CompletedProcess[str]:
     result = subprocess.run(args, cwd=ROOT, env=env, capture_output=True, text=True)
     if (result.returncode == 0) != success:
         raise AssertionError(f"unexpected command result {result.returncode}: {args}\n"
                              f"{result.stdout}\n{result.stderr}")
+    return result
 
 
 def one_case(directory: Path, stem: str, header: str) -> None:
@@ -41,7 +43,11 @@ def one_case(directory: Path, stem: str, header: str) -> None:
     plan_path = output / "grevir_generated_irq_plan_mock.json"
     first_plan = plan_path.read_bytes()
     plan = json.loads(first_plan)
-    assert len(plan["demands"]) == (0 if stem == "mock_zero" else 1)
+    expected_demands = 0 if stem == "mock_zero" else (2 if stem == "mock_deferred_two" else 1)
+    assert len(plan["demands"]) == expected_demands
+    if stem == "mock_deferred_two":
+        assert plan["deferred_context"] == {
+            "capacity": 2, "policy": "host_mutex_v1"}
     run(sys.executable, "-B", str(TOOL), "emit", "--out-dir", str(output),
         "--attempt", "first", "--backend", "mock", "--compiler",
         "scratch_compiler", "--application-header", header)
@@ -73,7 +79,7 @@ def one_case(directory: Path, stem: str, header: str) -> None:
         marker["emitter"] = "stale_emitter"
         ready.write_text(json.dumps(marker, sort_keys=True, indent=2) + "\n")
         run(*verification, success=False)
-        marker["emitter"] = "grevir_irqgen_2"
+        marker["emitter"] = "grevir_irqgen_3"
         ready.write_text(json.dumps(marker, sort_keys=True, indent=2) + "\n")
         run(*verification)
     executable = output / "firmware"
@@ -111,6 +117,29 @@ def one_case(directory: Path, stem: str, header: str) -> None:
             '-DGREVIR_GENERATED_IRQ_HEADER="grevir_generated_irq_bindings_mock.hpp"',
             *INCLUDES, f"-I{output}", "-fsyntax-only", str(generated),
             success=False)
+    if stem == "mock_deferred_two":
+        strict = [CXX, "-std=c++23", "-DHAS_STD_LIB=1",
+                  '-DGREVIR_GENERATED_IRQ_HEADER="grevir_generated_irq_bindings_mock.hpp"',
+                  *INCLUDES, f"-I{output}"]
+        for define, diagnostic in (
+                ("GREVIR_TEST_STALE_CAPACITY", "GREVIR_IRQ_STALE_EVENT_CONTEXT_CAPACITY"),
+                ("GREVIR_TEST_STALE_POLICY", "GREVIR_IRQ_STALE_EVENT_CONTEXT_POLICY")):
+            result = run(*strict, f"-D{define}=1", "-fsyntax-only",
+                         str(generated), success=False)
+            assert diagnostic in result.stderr, result.stderr
+        changed = output / "changed"
+        changed.mkdir()
+        changed_object = changed / "probe.o"
+        run(CXX, "-std=c++23", "-DHAS_STD_LIB=1", "-DGREVIR_IRQ_PROBE=1",
+            "-DGREVIR_TEST_STALE_CAPACITY=1", *INCLUDES, "-c",
+            str(HERE / "mock_deferred_two_record.cpp"), "-o", str(changed_object))
+        run(sys.executable, "-B", str(TOOL), "plan", "--object", str(changed_object),
+            "--out-dir", str(changed), "--attempt", "changed", "--backend", "mock",
+            "--target", "mock_mcu", "--board", "mock_board",
+            "--compiler", "scratch_compiler")
+        changed_plan = json.loads((changed / plan_path.name).read_text())
+        assert changed_plan["deferred_context"]["capacity"] == 1
+        assert changed_plan["fingerprint"] != plan["fingerprint"]
 
     # The new attempt removes the old marker before doing any work. All four
     # failure points must leave the directory unready, even with old C++ files.
@@ -168,6 +197,9 @@ def main() -> None:
         one_case(directory, "mock_event",
                  "scratch/interrupt-implementation-gates/mock_event_app.hpp")
         print("PASS on_event activation, direct dispatch, dual rejection and stale route")
+        one_case(directory, "mock_deferred_two",
+                 "scratch/interrupt-implementation-gates/mock_deferred_two_app.hpp")
+        print("PASS two-event deferred plan, capacity fingerprint and strict context gates")
 
 
 if __name__ == "__main__":

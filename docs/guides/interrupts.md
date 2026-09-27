@@ -48,6 +48,10 @@ inline void grevir::on_event<PeriodElapsed>() noexcept {
 
 void loop() {
   grevir::event::dispatch<GrevirApplication>(4);
+  if (grevir::event::overrun<GrevirApplication>()) {
+    // Record or report that at least one firing could not be queued.
+    grevir::event::clear_overrun<GrevirApplication>();
+  }
 }
 ```
 
@@ -60,6 +64,11 @@ loop code may call `event::post<Application, Event>()`, and an ISR may call
 `event::post_from_isr<Application, Event>()`; each returns `queued`,
 `coalesced`, `full`, or `not_ready`. The queue is prepared during application
 startup before interrupt sources are enabled and stopped if startup fails.
+`overrun<Application>()` reads the flag without clearing it;
+`clear_overrun<Application>()` clears only the flag, leaving queued callbacks
+intact. Preparing the queue during startup resets the flag. A nested or
+competing `dispatch()` call returns zero while another dispatch is active;
+callbacks for one application do not run concurrently through this queue.
 
 An explicit direct route invokes the handler in interrupt context:
 
