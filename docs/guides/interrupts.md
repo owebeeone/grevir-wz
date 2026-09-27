@@ -78,8 +78,11 @@ flag. The hardware entry also uses this queue. A `Stream` record carries no
 payload; a device needing bytes or frames retains them in its owned buffer.
 Choose either this route or the default `Elide` route for each event.
 
-The board supplies `event_queue_capacity` and an `EventLock` that serializes
-ISR producers with the loop consumer. An accepted event stays queued until
+The board supplies `event_queue_capacity` and an `EventLock` with task and ISR
+guards that serialize producers with the loop consumer. On a single-core target
+the guards may use the same interrupt-state operation; on ESP32 they enter one
+cross-core spinlock through the appropriate FreeRTOS context API. An accepted
+event stays queued until
 dispatch. With `Elide`, another firing while that event is queued returns
 `coalesced` without adding a record. With `Stream`, each firing needs its own
 record. When a new record is needed and the queue is full, that firing is
@@ -127,11 +130,13 @@ inline void grevir::on_event<PeriodElapsed>() noexcept {
 
 Use either `on_interrupt` or `on_event` for a given event, not both. The default
 `on_event` route is `MainLoop`/`Elide`; `MainLoop`/`Stream` is also supported on
-mock and ATmega328P. Extra dispatch contexts remain future work. The `IsrLevel` route has the same interrupt-context
+mock, ATmega328P, and classic ESP32. Extra dispatch contexts remain future work.
+The `IsrLevel` route has the same interrupt-context
 restrictions as `on_interrupt`.
-Deferred delivery currently has mock and ATmega328P backends. The classic
-ESP32 example uses a direct route while its deferred queue synchronization
-and loop-task publication remain to be implemented. Software-only event
+The ESP32 example binds `MainLoop` to the Arduino task running `setup()` and
+`loop()`; `dispatch` from another task returns zero. It polls the queue on each
+`loop()` call, so handler latency depends on loop cadence. It creates no
+additional task and does not sleep or notify the loop task. Software-only event
 catalogues are also pending; the current handler probe treats each visible
 catalogue handler as a hardware interrupt demand.
 

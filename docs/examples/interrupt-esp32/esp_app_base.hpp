@@ -4,6 +4,7 @@
 #include <grevir/interrupt/binding.hpp>
 #include <grevir/interrupt/install.hpp>
 #include <grevir/peripherals/timer/interrupt_allocator.hpp>
+#include <grevir/arduino_esp32/event_context.hpp>
 #include <grevir/arduino_esp32/timer_group0_timer0.hpp>
 
 namespace esp_app {
@@ -16,9 +17,13 @@ template <class>
 struct MotorModule : ardo::ModuleBase<ardo::Parameters<>> {};
 using Motor = grevir::RequestedModule<setl::TypeArgs<TimerRequest>, MotorModule>;
 
-inline volatile unsigned ticks = 0;
+inline unsigned ticks = 0;
+inline bool started = false;
 
 struct Board {
+  using EventLock = grevir::arduino_esp32::EventLock;
+  using MainLoopContext = grevir::arduino_esp32::MainLoopContext;
+  inline static constexpr unsigned event_queue_capacity = 4;
   template <class Spec>
   using StartPolicy = grevir::arduino_esp32::TimerStartPolicy<Spec>;
   inline static constexpr auto backend = irq::literal("esp32");

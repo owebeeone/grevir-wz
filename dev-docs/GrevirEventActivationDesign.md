@@ -1,8 +1,8 @@
 # Event handler activation through the interrupt catalog
 
 Status: direct, `MainLoop`/`Elide`, and `MainLoop`/`Stream` activation implemented
-for mock and AVR; software-only event discovery and ESP32 deferred dispatch
-remain.
+for mock and AVR. Classic ESP32 has `MainLoop`/`Elide` target compile/link
+evidence; silicon behavior and software-only event discovery remain open.
 This replaces the handler-activation
 mechanism in [Event contexts and deferred dispatch](GrevirEventContextsAndDispatchDesign.md).
 That document's queue, context and deadline semantics remain separate questions.
@@ -121,8 +121,8 @@ source entry, removing it leaves no demand, dual handlers fail and a stale
 route fails strict compilation. The generated mock `MainLoop`/`Elide` example
 passes on macOS, Raspberry Pi and Windows/MSVC. The AVR staged Uno build
 compiles and links the deferred route, and simavr observes its main-loop
-callback. The ESP32 staged Arduino build has evidence only for an explicit
-`IsrLevel`/`Direct` route; no silicon behavior is established.
+callback. The ESP32 staged Arduino build now also compiles and links the
+default `MainLoop`/`Elide` route; no silicon behavior is established.
 Declaration-only, malformed and uncatalogued cases remain additional negative
 checks. The earlier
 `scratch/event-dispatch-bridge` experiment proves only C++ handler selection

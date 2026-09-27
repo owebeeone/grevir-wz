@@ -3,7 +3,7 @@
 
 #if !defined(GREVIR_TEST_NO_HANDLER)
 template <>
-inline void grevir::on_interrupt<esp_app::PeriodElapsed>() noexcept {
-  esp_app::ticks = esp_app::ticks + 1;
+inline void grevir::on_event<esp_app::PeriodElapsed>() noexcept {
+  ++esp_app::ticks;
 }
 #endif
