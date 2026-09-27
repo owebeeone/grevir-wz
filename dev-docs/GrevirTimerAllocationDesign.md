@@ -14,6 +14,17 @@ not a contract to preserve. Stable identities, the selection algorithm and other
 choices below remain recommendations. This is a focused design effort alongside
 the Ardoinus migration.
 
+**Later ownership decision:** for the next design slice, allocate each physical
+timer exclusively to one provider module instance. The application explicitly
+composes dependent consumers around that module, which manages any compatible
+internal sharing and offers its endpoints. The allocator does not merge separate
+timer-owning modules onto one timer. The `SameTimer`/sharing-group proposal and
+its examples below predate this decision; treat that spelling and the associated
+cross-module grouping behavior as superseded. See the
+[remediation plan](GrevirTimerIntegrationRemediationPlan.md) for the current
+design gate. The installed fixed-PWM grouping path has not yet been changed to
+this contract. Other unsolved details in this draft remain proposals.
+
 [Worked API examples](GrevirTimerApiExamples.md) exercise this proposal with
 target selection, reusable modules, allocation outcomes, numeric guarantees and
 sharing. They recommend concrete semantics without claiming user acceptance or
@@ -26,8 +37,8 @@ bindings, or a useful compile-time failure. Application modules state what they
 need; MCU backends describe realizable choices; board policy supplies reservations.
 
 The first implementation should support fixed-frequency PWM, explicit pin
-requirements, optional explicit timer/channel constraints, and explicit groups
-of outputs sharing one timer configuration. A backend may offer several legal
+requirements, optional explicit timer/channel constraints, and provider modules
+that offer multiple outputs from one owned timer configuration. A backend may offer several legal
 routes for a pin. Automatic choice among unrelated application pins is deferred.
 Runtime allocation, interrupt/capture **implementation**, a general peripheral
 optimizer, and an ESP32 backend are outside this first scope. The public
@@ -179,10 +190,12 @@ The first scope requires an explicit resident binding, not automatic pin choice.
 Missing or contradictory active pin bindings fail; inactive bindings have no
 effect. Equivalent board aliases normalize to the same physical identity.
 
-After target selection and pin resolution, an allocation input carries request
-identity, operation (initially PWM), physical pin, frequency requirement, minimum
-duty resolution, optional binding constraints, and optional explicit sharing-group
-identity. Clock sources/rates are explicit input facts.
+After target selection and pin resolution, an allocation input carries the
+provider-module identity, its internal request identities, operation (initially
+PWM), physical pin, frequency requirement, minimum duty resolution, and optional
+binding constraints. The provider specifies which internal endpoints it offers;
+the allocator does not infer a sharing group across different owner modules.
+Clock sources/rates are explicit input facts.
 
 Following the worked examples, recommend an explicit accuracy policy alongside a
 positive rational frequency: exact, or a bounded relative error in parts per
@@ -213,7 +226,7 @@ accepted. Boundary comparisons must avoid overflow. Existing metadata and tests
 do not establish hardware semantics that the new API must preserve.
 
 Duty capability belongs to one fixed concrete candidate, not a union across
-different timer configurations. For a group, all combinations of the declared
+different timer configurations. For one provider's endpoints, all combinations of the declared
 endpoint duty values must be simultaneously realizable. Updating one endpoint
 must preserve the other endpoints' selected steady duties and the common timing
 configuration. Distinct channel names backed by one inseparable compare value
@@ -241,18 +254,20 @@ completeness and generic solver completeness require separate validation.
 
 ## Sharing and ownership
 
-Independent requests are exclusive by default, even if their frequencies match.
-Explicit fixed-frequency groups may share a timer only when the backend can
-produce one common concrete configuration satisfying every member. Equal nominal
-frequency alone does not prove compatible waveform, TOP, clock or channel usage.
-Every physical pin and output channel remains exclusive within the group.
-The worked examples recommend that an explicit group requires a single timer;
-failure to find a common configuration does not fall back to separate timers.
-Whether to include this sharing feature in the first implementation remains open.
+The current decision is exclusive physical-timer allocation per owner module.
+Equal nominal frequency does not permit separate owners to share a timer.
+An application that needs several uses of one timer supplies one provider module
+with a complete configuration satisfying its internal uses; dependent modules
+bind to interfaces it offers. Every physical pin and output channel must still
+have a unique internal assignment. An incompatible internal request is rejected
+or requires a different explicitly composed provider; the allocator does not
+silently split or merge owners. The earlier `SameTimer` grouping vocabulary in
+the worked examples is superseded for this slice.
 
-Represent a sharing group as one configuration owner with several endpoints.
-The owner claims/configures the timer once; endpoints claim their own distinct
-pins/channels. The group's complete footprint conflicts with external timer,
+Represent the provider as one configuration owner with several offered endpoints.
+The owner claims/configures the timer once; dependent consumers claim only the
+specific offers they use, while the provider validates distinct internal
+pins/channels. The owner's complete footprint conflicts with external timer,
 channel and pin users, including manually bound users and board reservations.
 Repeated exclusive claims and overlapping ranges remain errors. The design does
 not relax that rule or silently deduplicate two user requests.
@@ -261,7 +276,7 @@ Existing `shared_use_claim` is not by itself a complete timer ownership model.
 The following ownership rules are a refined proposal, not an implementation or a
 user-approved extension to ordinary claims. Final application checks must see each
 owner and endpoint once; wrapper forwarding must not introduce a second declaration
-of ownership. A group is an explicit composition, not an allocator loophole.
+of ownership. A provider's internal composition is explicit, not an allocator loophole.
 
 ### Proposed resource compatibility rules
 
@@ -270,7 +285,7 @@ such as T0 containing channels T0/A and T0/B. Pin routing is a connection, not
 containment: a pin does not become a child of every timer that can drive it.
 Normalize aliases before checking ownership, and reject cyclic containment.
 
-Each exclusive request or sharing group is one allocation unit with one timer
+Each provider module instance is one allocation unit with one timer
 owner. The backend proposes a structured footprint, checked before search:
 
 - Exactly one whole-timer ownership declaration per unit, plus explicit internal
@@ -319,17 +334,17 @@ For the proposed order-independent contract:
    For later phases, order diagnostic records by category, identity and normalized
    constraint/resource details, not source position. Identical records may be
    collapsed with an occurrence count. Compiler traces remain outside this promise.
-2. Treat each exclusive request or explicit sharing group as an allocation unit.
-   Order units by stable identity; use the least member request identity as the
-   group ordering key. A request belongs to at most one group. Sort group members
-   by request identity too. A group candidate contains all member endpoint bindings
-   in that canonical order, not their source declaration order.
+2. Treat each provider-module instance as one allocation unit. Order owners by
+   stable identity and sort each owner's internal requests by their stable keys.
+   A candidate contains all offered endpoint bindings in canonical order, not
+   their source declaration order. A request cannot belong to two owners.
 3. Ask the backend for candidates satisfying each unit's complete requirements.
    Remove candidates conflicting with reservations or fixed claims. Order them by
    documented preference rank, then timer/configuration/endpoint identities.
 4. Search in that order with backtracking. Select the first complete compatible
-   assignment. This defines the lexicographically first feasible candidate vector
-   and prevents an early flexible request from blocking a later constrained one.
+   assignment. Separate owner modules may not receive the same physical timer.
+   This defines the lexicographically first feasible candidate vector and prevents
+   an early flexible owner from blocking a later constrained one.
 5. Emit bindings, their actual capabilities and the combined ownership plan.
 
 All identity comparisons require documented total orders. Candidate keys must
@@ -382,9 +397,10 @@ updates. Establish the initialization contract before wiring `HardwarePwm` to AV
 - MCU backends own capabilities, routing, realizable configurations and drivers.
 - Board/platform policy owns aliases, clock inputs and framework reservations.
 
-Order independence, cross-target configuration coexistence and freedom from API
-compatibility are agreed. Next settle target-section composition and vocabulary,
-stable identities, frequency/resolution meaning, explicit sharing, and completeness.
+Order independence, cross-target configuration coexistence, strict allocation to
+one provider module per physical timer, and freedom from API compatibility are
+agreed. Next settle target-section composition and vocabulary, stable identities,
+frequency/resolution meaning, provider-offer validation, and completeness.
 Then implement a small synthetic solver proof
 before integrating one AVR path. Correct AVR TOP/frequency calculations before
 using them as the capability oracle. No new repository or broad allocation
@@ -394,10 +410,11 @@ Acceptance evidence should cover common plus resident-target selection; inactive
 section invariance and absence of nonresident SDK dependencies; rejection of
 unsupported active requirements; conflicting active sections; logical pin binding
 and aliases; missing/ambiguous target selection; misplaced active option domains;
-permutation invariance including group members; candidate-key collisions; stable tie-breaking;
+permutation invariance including owner-local endpoints; candidate-key collisions; stable tie-breaking;
 the greedy-trap example; exhaustive agreement with a small independent feasibility
 oracle; reserved and fixed resources; aliases of one physical pin; duplicate
-identities/claims; overlapping ranges; compatible and incompatible sharing;
+identities/claims; overlapping ranges; compatible and incompatible internal uses
+under one owner, and rejection of cross-owner timer sharing;
 unsupported requests; exact-frequency/resolution boundaries; and distinguished
 search exhaustion. The AVR integration then needs one portable request through
 allocation and lifecycle setup to expected mock register writes and duty updates.
@@ -420,7 +437,7 @@ decisions; descriptive wording elsewhere in this draft does not settle them.
 | Request identity | Named hierarchical instance paths plus local request keys; lexicographic component order |
 | Frequency accuracy | Explicit exact or relative-tolerance policy; recommend both in the first scope |
 | Duty resolution | Recommend a full-range maximum duty-step ratio, with bits shorthand deferred |
-| Sharing | Explicit groups require one common timer owner; first-implementation scope remains open |
+| Sharing | One physical timer per provider module instance; sharing is explicit inside that owner and its dependent-module interfaces. Automatic merging of separate owners is deferred. |
 | Solver guarantee | Complete over the declared candidate model, with separate search-limit failure |
 | Initial scope | Fixed-frequency PWM is a proposed first increment, not the whole portable timer API |
 

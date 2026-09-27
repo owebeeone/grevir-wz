@@ -32,8 +32,11 @@ timer again. Owner identity and offers must be derived from the actual module
 closure and validated against the selected configuration. Internal duplicate
 channels/pins and external ownership conflicts remain errors. Automatic
 cross-module sharing is deferred, not an implicit fallback on allocation
-failure. This is the contract for the redesign, not a claim that the installed
-fixed-PWM allocator already enforces it.
+failure. This also supersedes the earlier explicit `SameTimer` grouping of
+requests from separate owner modules: an actual provider module in the
+application closure owns the timer and offers endpoints to its dependents.
+This is the contract for the redesign, not a claim that the installed fixed-PWM
+allocator already enforces it.
 
 ## Phase 1 — decide the timer capability abstraction
 
@@ -96,7 +99,11 @@ changing the allocator:
    A name such as `period_1ms_div80` must not be checked while divider and alarm
    counts are supplied independently elsewhere. The plan must remain
    deterministic under declaration reordering and inspectable with reasons for
-   selection or failure.
+   selection or failure. Specify a complete search over the supported candidate
+   model: a feasible assignment must be found, an exhaustive proof of no
+   assignment must report conflict, and a bounded search that stops early must
+   report exhaustion separately. Fix the supported search envelope and its
+   diagnostic contract before treating allocation failure as impossibility.
 5. **Owner and lifecycle contract.** Define how the selected provider module
    configures its block once, activates its offered endpoints and interrupt
    sources, handles dynamic updates, and cleans up partial startup. Specify how
@@ -122,13 +129,20 @@ Pico PIO program offering a timed I/O function alongside PWM-slice input
 measurement, to test whether the model handles programmable and multifunction
 resources without treating them as interchangeable timer channels. Include a
 zero-request case and a two-owner case so the API cannot depend on
-`configurations[0]`.
+`configurations[0]`. Add a three-owner synthetic case in which a first legal
+choice blocks a later constrained owner but backtracking finds a solution, and
+two owners on different timers requiring one configurable shared clock domain.
+For that domain, decide which selected owner performs setup, update and cleanup,
+or reject it until such ownership can be represented.
 
 **Exit gate:** a reviewed contract and worked API/plan examples define the
 supported first slice, the extension points for other timer functions, the
 source of each capability fact, and the static/runtime boundary. An independent
 synthetic counterexample should be able to say whether two offered functions
-can coexist. Check the abstraction against the Pico case before freezing it;
+can coexist. The contract identifies canonical resource identities and alias
+normalization required by the first implementation slice, a single-writer rule
+for every configurable shared domain it admits, and the completeness, conflict
+and search-exhaustion outcomes. Check the abstraction against the Pico case before freezing it;
 RP2040 implementation is not required to complete this gate. Do not claim the
 backend models every AVR, ESP32 or RP2040 timer-capable mode.
 
@@ -146,12 +160,33 @@ names to register settings. Replace `solution.configurations[0]` and
 whole-application peripheral switches with dispatch over selected owner
 identities. The owner uses its target's established programming facilities;
 for AVR that includes typed metadata and `setl::ApplierValues` where applicable.
+Before a candidate enters selection, normalize each physical resource in the
+supported slice against device facts and board aliases, including explicit
+claims; reject a candidate whose identity or routing cannot be established.
+For any configurable domain shared by selected timers, derive exactly one
+domain setup owner with ordered acquisition, update and cleanup, or reject the
+candidate until that ownership can be represented. An individual timer owner
+must not become a second writer of the domain.
 
-**Exit gate:** changing a selected mode, clock, period or source changes the
-owner's applied program through the plan, or fails at compile time. Zero, one
-and two selected owners are covered. The same input produces the same plan
-regardless of declaration order. AVR, ESP32 and mock each exercise the common
-contract only for capabilities they actually implement.
+**Exit gate:** for the supported slice, independently calculate expected
+realized timing and offered capability from authoritative target facts, then
+compare the selected plan with the applied register/program effects, including
+TOP boundaries, interrupt source and pin routing. An incompatible mode/source
+combination fails. Changing a selected mode, clock, period or source changes
+the owner's applied program through the plan, or fails at compile time. A
+board alias and device pin for the same physical GPIO conflict with an
+explicit claim in either declaration order. Shared-domain cases prove one
+writer through setup and cleanup, or fail explicitly while unsupported;
+agreeing and conflicting divider requirements must not pass as independent
+writes. Zero, one, two and a backtracking three-owner synthetic case are
+covered. An independent small feasibility oracle agrees with selection:
+feasible assignments are found, fully searched infeasible assignments report
+conflict, and a forced search limit reports exhaustion. The same input produces
+the same plan regardless of declaration order. Compile shared common/AVR/ESP32
+declarations for each resident target without the nonresident SDK; changing
+only an inactive section leaves the active plan and diagnostics unchanged.
+Source checks inspect disabled platform branches. AVR, ESP32 and mock each
+exercise the common contract only for capabilities they actually implement.
 
 ## Phase 3 — close startup, failure and dependency semantics
 
@@ -169,15 +204,17 @@ source-mask state and cleanup result. A timer-dependent module never runs after
 its provider fails; an independent service behaves according to the documented
 policy. Repeated startup follows the existing interrupt start-state contract.
 
-## Phase 4 — make GPIO and resource identities authoritative
+## Phase 4 — complete authoritative GPIO and resource identities
 
-Replace AVR PWM's `pad_b1 = 101`-style identities and parallel reservation
-mapping with canonical identities derived from typed device GPIO facts and board
-bindings. Normalize aliases before conflict checks. Keep whole-timer,
-subresource, shared-domain and pin-routing relationships explicit; do not infer
-independence because two resources have different names. The portable claim API
-may need to change to express these identities, since it has no compatibility
-obligation.
+Phase 2 already requires canonical identity and claim interoperability for
+every resource in its supported slice. Complete that migration for the broader
+GPIO and peripheral inventory: replace any remaining `pad_b1 = 101`-style
+identities and parallel reservation mapping with canonical identities derived
+from typed device facts and board bindings. Normalize aliases before conflict
+checks. Keep whole-timer, subresource, shared-domain and pin-routing
+relationships explicit; do not infer independence because two resources have
+different names. The portable claim API may need to change to express these
+identities, since it has no compatibility obligation.
 
 **Exit gate:** a board alias and device pin resolve to the same resource; PWM
 allocation and explicit GPIO claims detect the same conflict; repeated and

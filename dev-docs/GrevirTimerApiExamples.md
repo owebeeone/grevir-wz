@@ -7,9 +7,11 @@ The subsequent [host prototype](../experiments/timer-allocation/README.md) provi
 compilable examples for a narrower subset and records its differences explicitly.
 
 The examples recommend concrete semantics for discussion. They do not turn those
-recommendations into user-approved decisions. Only deterministic allocation,
+recommendations into user-approved decisions. Deterministic allocation,
 independence from declaration order, common plus resident-target configuration,
-and freedom from backward compatibility have been agreed.
+freedom from backward compatibility, and strict physical-timer ownership by one
+provider module are agreed. The older `SameTimer` cross-module grouping example
+has been replaced by provider-module composition below.
 
 ## 1. One request, multiple target sections
 
@@ -94,6 +96,15 @@ using RightDrive = EndpointRef<"right", "drive">;
 using LeftPwm = RequestRef<"left", "pwm">;
 using RightPwm = RequestRef<"right", "pwm">;
 ```
+
+As written, `left` and `right` are separate timer-owning module instances.
+They must receive different physical timers or allocation fails. Neither
+`SameTimer<LeftPwm, RightPwm>` nor equal requested frequency changes that result.
+If both motors must use one timer, the application instead instantiates one
+timer provider with two internal PWM endpoints; `left` and `right` depend on
+its distinct offers and do not declare their own physical-timer requests.
+The names and template syntax for that provider/offer declaration remain a
+Phase 1 API decision.
 
 Full request identities are tuples of path components, here `("left", "pwm")`
 and `("right", "pwm")`. A module author names each local request once; the
@@ -207,22 +218,23 @@ contract. No claim of glitch-free transitions follows.
 The duty set belongs to one fixed candidate. Combining attainable values from
 different TOP/clock/waveform configurations cannot establish its granularity.
 
-## 7. Shared timer ownership is explicit
+## 7. Shared timer use belongs to one provider module
 
-```cpp
-using Ownership = SameTimer<
-    RequestRef<"left", "pwm">,
-    RequestRef<"right", "pwm">>;
-```
-
-Recommend that `SameTimer` requires one common configuration owner. It is not
-permission to share opportunistically or silently fall back to separate timers.
-Without it, the requests own independent timers under the proposed first policy.
+The application explicitly composes a provider module for the timer and makes
+the two consumers depend on its separate offered PWM endpoints. The provider
+owns one complete configuration and the physical timer; consumers do not claim
+or configure that timer a second time. Two independent timer-owning modules
+remain exclusive even if they request the same frequency. The allocator does
+not opportunistically merge them or silently fall back to separate timers.
+For the `left` and `right` modules in section 3, this is a different composition:
+their original `RequestRef` declarations must be replaced by references to
+the provider's two offers, and only that provider configures the timer.
 
 For a synthetic timer with channels A and B routed to distinct bound pins, two
-1 kHz requests can share if one concrete configuration meets both duty requirements
-and all active target constraints. The result has one timer owner and two exclusive
-endpoints. Different duty values do not require different timer configurations.
+1 kHz internal endpoints can coexist if one concrete configuration meets both
+duty requirements and all active target constraints. The result has one timer
+owner and two exclusive endpoints. Different duty values do not require
+different timer configurations.
 
 | Variation | Expected result |
 | --- | --- |
@@ -232,9 +244,9 @@ endpoints. Different duty values do not require different timer configurations.
 | Exact 1 kHz versus exact 2 kHz | Fail: no common configuration |
 | Requested TOP source consumes a required output channel | Fail unless another permitted common candidate exists |
 | Another module owns the whole timer | Fail: ownership conflict |
-| Same request reference repeated in the group | Fail: duplicate member |
+| Same provider endpoint declared twice | Fail: duplicate endpoint |
 
-All group members must be resolved, sorted and checked before candidate selection.
+All provider endpoints must be resolved, sorted and checked before candidate selection.
 Initialize the configuration owner and its endpoints once before dependent modules
 run. Members can change their own duty; the fixed-frequency endpoint API exposes
 no independent frequency control. Runtime frequency changes need a separate owner
@@ -248,7 +260,7 @@ independent review. Resource identity/containment is explicit backend metadata.
 | Configuration | Expected result |
 | --- | --- |
 | One T0 owner with internal A/P0 and B/P1 endpoints | Valid if both endpoints meet the common configuration |
-| Same group plus an external whole-T0 reservation | Conflict with the group owner |
+| Same provider plus an external whole-T0 reservation | Conflict with the provider owner |
 | T0 owner using B, external claim on T0/A | Conflict: whole ownership excludes external child use |
 | Two internal endpoints both assigned T0/A | Conflict even though they have the same owner |
 | Two pins with different aliases but one physical identity | Conflict after alias normalization |
@@ -268,11 +280,11 @@ different contract and is not implicitly substituted.
 
 These examples make concrete recommendations: explicit target sections with
 constraint intersection; hierarchical instance/local identities; explicit exact or
-tolerant frequency; a duty-step guarantee; and explicit mandatory sharing groups.
+tolerant frequency; a duty-step guarantee; and provider-offered internal endpoints.
 They are ready for user discussion and independent design review, not yet an
 implementation specification accepted by the user.
 
-Before coding, review the user-facing forms and decide the initial sharing scope.
+Before coding, review the user-facing forms and the provider-offer contract.
 Before integration, specify duty-write rounding, initial output state, owner setup
 ordering and failure behavior. Prototype evidence must then establish lazy inactive
 section handling, canonical allocation and a practical search budget. The proposed
