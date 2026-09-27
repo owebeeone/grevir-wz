@@ -1,0 +1,29 @@
+# Deferred event dispatch follow-up — CODE-axis review
+
+**Reviewed tuple (28 September 2026):** root `2f25854834f83a2f9fbb0372a352d5bb5f1a1be0`; Core `e37470b5e6ffa628e0788727c56704c394a46a07`; Test Support `d8fdd2e86c07ff62d08e282fc7fdb9990cdf9fec`; Peripherals `4612cecdc99c22f326a0c1498846fea34c0c596c`; AVR `5f4feffa15110aac9bf27f0bc17c2ce668b003d6`.
+
+**Object:** root diff `3ea2c2d31ab50b099247687274c0571e300352ca..HEAD`, Core diff `0944c59b0c7a1ca53656f4a71fd62f1cce8969f5..HEAD`, and the controlling DRAFT `dev-docs/GrevirEventDispatchFollowupRemediation.md`.
+
+**Verdict: GO on the CODE axis.** I found no open P0–P2 code defect in the reviewed scope. The prior Code P2-1 counterexample is closed by source inspection. This verdict does not claim that the prescribed builds or target checks passed in this review.
+
+## 0 Evidence base
+
+This was an independent, peer-blind, read-only review. I did not consult the current State or Surface reviewers, modify files, or run builds or tests. At both the start and end, all five repositories matched the tuple above and had empty `git status --porcelain=v1` output.
+
+I inspected both diffs; the controlling DRAFT; the prior Code P2-1 report and merged outcome; `AGENTS.md`, `AGENTS_GWZ.md`, the declarative Dos and DontDos, and the CrossMcu, AVR, and ESP32 review policies. Source inspection covered the C++ catalog, handler gate, live demand, binding plan, probe record, queue, Python protocol and emitter, CMake and Arduino build paths, and the changed negative probes. I inspected the probe and strict conditional branches. The generic Core contract was assessed under CrossMcu; AVR-specific implications were kept to the ATmega328P instantiation. The inherited board-owned timer setup, other event contexts, silicon behavior, and unrelated packages were excluded.
+
+## 2 Invariant analysis
+
+**Original Code P2-1 — closed.** `LiveDemandSet<Spec>` now enumerates the complete application event catalog through `DemandData` in strict compilation (`grevir-core/src/grevir/interrupt/demand.hpp:61–65`). It does not obtain its members from the emitted `DemandSet`. The generated source compares event count, keys, handler kinds, contexts, and deliveries against the emitted snapshot (`demand.hpp:68–81`; `grevir-core/tools/grevir_irqgen/emit.py:103–110`). For the zero-to-one fixture, a strict-only `on_event` changes live count from zero to one. For the one-to-two fixture, the second strict-only handler changes it from one to two. Both make `GREVIR_IRQ_STALE_DEMAND_SET` reachable before the generated source accepts its bindings. The changed round-trip script defines both counterexamples and checks that diagnostic; I inspected those checks but did not execute them.
+
+**Raw handlers and binding gate.** Probe mode still checks `on_interrupt<Event>()` without requiring a generated binding. Strict mode checks raw presence only after a `BoundEventKey` exists (`grevir-core/src/grevir/interrupt/handler.hpp:27–42`). The `BindingGate<Event>::id` default template argument requires an actual generated binding for a strict raw specialization (`handler.hpp:18–20, 71–83`), so an unbound or foreign-key raw specialization cannot silently become a valid handler. A bound event with both raw and `on_event` handlers reaches `GREVIR_IRQ_DUPLICATE_HANDLER`. GCC/Clang round-trip definitions and MSVC negative checks are present; their execution on this tuple remains a validation task, not evidence produced here.
+
+**Final-unit and schema boundary.** The emitter places the live-demand assertion in the generated `.cpp`, after including the application header and demand machinery. CMake adds that `.cpp` to the firmware target (`grevir-core/cmake/GrevirInterruptBindings.cmake:51–84`); the Arduino builder copies it into the strict staged sketch before compiling (`grevir-core/tools/grevir_irqgen/arduino_build.py:99–108`). Probe encoding writes schema 4 and a two-byte capacity (`grevir-core/src/grevir/interrupt/probe_record.hpp:79–89`); Python expects schema 4 and reads the capacity as a word (`grevir-core/tools/grevir_irqgen/protocol.py:14,181–194`). The emitter identity advances to `grevir_irqgen_4`. I found no schema-3 interpretation on the active lowering path.
+
+**Selected capacity and declarative provenance.** `QueueCapacity<Board>` checks the original integral board value against `1..2048` before conversion (`grevir-core/src/grevir/event/queue_capacity.hpp:12–27`). `SelectedQueueCapacity` is instantiated only for an available, selected deferred context (`grevir-core/src/grevir/interrupt/binding.hpp:155–180`); direct and zero-demand plans retain inactive capacity zero. The probe serializes that checked board value, Python validates the range, and the strict source compares the current board-derived capacity with the emitted value. Queue index storage derives from the selected capacity and can represent counts above 255 (`grevir-core/src/grevir/event/queue.hpp:28–32,124–126`). The generator does not choose capacity or introduce a binding list. The new capacity probe declares a board value for validation; existing mock candidate/resource facts were already present before this diff.
+
+The changed C++ control-flow bodies are braced. I found no newly placed per-declaration conditional attribute or condition that could transfer to an adjacent declaration.
+
+## 3 Risks and next action
+
+The CODE verdict rests on source inspection. Run the DRAFT’s targeted GCC/Clang/MSVC negative and unchanged-plan checks, AVR compiler and simavr checks, and classic ESP32 compile/link path before merging the overall verdict. In particular, confirm the two stale-demand diagnostics on the final generated translation unit and the `65537UL` capacity rejection on AVR GCC. Those checks would validate compiler and build integration; silicon remains on hold.
