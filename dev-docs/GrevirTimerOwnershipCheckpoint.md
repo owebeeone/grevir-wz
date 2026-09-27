@@ -1,6 +1,6 @@
 # Timer ownership implementation checkpoint
 
-Status: **remediation round 1 ready for re-review**. The controlling design is
+Status: **remediation round 2 ready for final re-review**. The controlling design is
 [Module-owned timer configuration](GrevirTimerModuleDesign.md). This checkpoint
 records the supported implementation slice, not completion of that design.
 
@@ -35,5 +35,5 @@ Review question: does this corrected slice establish module ownership and a
 use-neutral allocation boundary without silently accepting unsupported uses,
 losing dependency ordering, or permitting board/device pin aliases? A reviewer
 should treat any structural obstruction as blocking, even if the host tests
-pass. The first review and remediation disposition are filed beside this
-checkpoint.
+pass. Both peer-blind review rounds and their remediation dispositions are
+filed beside this checkpoint.

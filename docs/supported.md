@@ -6,7 +6,7 @@ MCU. Physical hardware behavior has not yet been validated.
 
 | Environment | Current evidence | Scope |
 | --- | --- | --- |
-| macOS, Apple Clang 21, C++23 | Full native build and 186 CTest cases pass; generated mock interrupt dispatch passes | Host behavior, mock hardware and compiler contracts |
+| macOS, Apple Clang 21, C++23 | Full native build and 187 CTest cases pass at this timer checkpoint; generated mock interrupt dispatch passes | Host behavior, mock hardware and compiler contracts |
 | Raspberry Pi, native GCC, C++23 | Full native build and 186 CTest cases pass; generated mock interrupt dispatch passes | Host behavior and Linux object transport |
 | Windows 11, MSVC 19.44, C++23 mode | Full native build, compiler probes and 186 CTest cases pass; generated mock interrupt dispatch passes | Host behavior, native COFF transport and public-header portability |
 | ATmega328P, Arduino Uno/Nano, Debian AVR GCC 14.2 | Selected Uno sketches and selected Nano sketches compile with Arduino AVR 1.8.8 and `-std=c++23` | Arduino, PWM/pin, Pulse IO and Packet compositions; individual package coverage varies |
