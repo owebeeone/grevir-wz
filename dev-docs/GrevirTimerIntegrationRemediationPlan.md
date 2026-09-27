@@ -7,6 +7,11 @@ questions below are settled or that the implementation is complete. The
 applies to its named revision; the later one-module/one-timer decision below
 has not been through that review cycle.
 
+Operator decision, 28 September 2026: the remaining Phase 1 timer design gate
+is deferred. The [accepted fixed-PWM ownership checkpoint](GrevirTimerOwnershipCheckpoint.md)
+does not complete that gate. Phase 2's broader timer integration remains
+dependent on it; independent event dispatch work may proceed meanwhile.
+
 Grevir's aim is to derive MCU integration from application intent and
 authoritative target facts at build time. The current fixed-PWM path and narrow
 interrupt examples demonstrate parts of that approach, but the selected

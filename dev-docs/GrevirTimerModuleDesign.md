@@ -6,6 +6,11 @@ It is not an implementation claim or a freeze of the illustrative C++ names.
 The current fixed-PWM allocator, AVR `TimerConfiguration`, and narrow interrupt
 examples do not yet implement this contract. No silicon validation is implied.
 
+The operator deferred the remaining Phase 1 design review on 28 September
+2026. The accepted fixed-PWM ownership slice is recorded separately in the
+[implementation checkpoint](GrevirTimerOwnershipCheckpoint.md); this full
+timer capability design is not frozen.
+
 The settled constraints are: allocation is deterministic under declaration
 reordering; common intent and resident-target options coexist while nonresident
 options are inert; there is no backward-compatibility requirement for the
