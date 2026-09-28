@@ -7,6 +7,7 @@
 #include <grevir/peripherals/timer/interrupt_allocator.hpp>
 #include <grevir/avr/devices/atmega328p/interrupt_timer1.hpp>
 #include <grevir/avr/event_lock.hpp>
+#include <grevir/event/context_policy.hpp>
 
 namespace avr_app {
 namespace irq = grevir::interrupt;
@@ -22,6 +23,8 @@ extern "C" volatile unsigned char grevir_irq_test_ticks;
 
 struct Board {
   using EventLock = grevir::avr::EventLock;
+  template <class Spec>
+  using MainLoopContext = grevir::event::UnrestrictedMainLoopContext<Spec>;
   inline static constexpr unsigned event_queue_capacity = 4;
   template <class Spec>
   using StartPolicy = irq::SingleThreadStartPolicy<Spec>;

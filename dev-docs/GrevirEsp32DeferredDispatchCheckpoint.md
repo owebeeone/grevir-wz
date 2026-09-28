@@ -10,8 +10,9 @@ binding, and startup order remain authoritative. A specialization of
 binding list. Its default route is `MainLoop`/`Elide`. Startup prepares the
 queue before enabling the timer source; a failed startup stops the queue.
 The generated callback posts through `post_from_isr`, and `loop()` dispatches
-up to four records per pass. The board declares four records and a stable
-policy identity in the generated plan. `Stream` uses the same ESP32 queue
+up to four records per pass. The board declares four records; the generated
+plan derives a stable policy identity from the lock and context identities.
+`Stream` uses the same ESP32 queue
 policy when selected; the example retains the default `Elide` route.
 
 The shared queue chooses `EventLock::TaskGuard` for setup, loop publication,
@@ -23,17 +24,28 @@ notification, or yielding operation occurs inside a critical section. Mock
 and AVR retain their previous locking behavior through two aliases to their
 existing guard.
 
-The ESP32 main-loop context binds to the task calling application startup,
+The ESP32 main-loop context is specific to an application and binds to the task
+calling application startup,
 which is Arduino's `loopTask` when startup is called from `setup()`. A call to
 `dispatch` from a different task returns zero without consuming records.
 Publication from other tasks is permitted. This first slice polls from
 `loop()` without a notification or sleeping dispatcher; latency is therefore
 bounded by application loop cadence, not by the timer alone. The current
 ESP32 timer entry is cache-dependent and not claimed IRAM safe.
+All selected deferred plans require an explicit context policy; mock and AVR
+use an unrestricted one. Preparing an active or currently dispatching queue
+fails without rebinding or discarding its records. The startup runner reports
+`event_context_failed` if it did not acquire the queue.
 
-Validation targets are shared host queue tests (including cross-thread
-publication and foreign-dispatch rejection), mock generator round trip,
-AVR staged compile/link regression, and classic ESP32 staged compile/link.
+Validation: the macOS native CTest suite passed all 192 cases, including
+cross-thread publication, foreign-dispatch rejection, active reprepare
+rejection, and stopped-queue ownership transfer. The generated mock example
+passed its CMake round trip. On Raspberry Pi, a temporary copy of the current
+sources passed the staged Uno and classic ESP32 Arduino compile/link builds;
+the existing remote Grevir checkout was not changed. A deliberately modified
+ESP32 board with its context alias removed failed in the target probe with
+`GREVIR_EVENT_CONTEXT_UNAVAILABLE`.
+
 Target compilation proves toolchain integration but not cross-core timing or
 physical interrupt behavior. No claim is made for S2/S3 or other ESP32
 families, named FreeRTOS contexts, software-originated events, or hardware

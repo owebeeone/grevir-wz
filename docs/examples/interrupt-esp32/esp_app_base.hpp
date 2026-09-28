@@ -17,12 +17,14 @@ template <class>
 struct MotorModule : ardo::ModuleBase<ardo::Parameters<>> {};
 using Motor = grevir::RequestedModule<setl::TypeArgs<TimerRequest>, MotorModule>;
 
-inline unsigned ticks = 0;
+// Elide counts delivered callbacks, not every hardware timer period.
+inline unsigned delivered_callbacks = 0;
 inline bool started = false;
 
 struct Board {
   using EventLock = grevir::arduino_esp32::EventLock;
-  using MainLoopContext = grevir::arduino_esp32::MainLoopContext;
+  template <class Spec>
+  using MainLoopContext = grevir::arduino_esp32::MainLoopContext<Spec>;
   inline static constexpr unsigned event_queue_capacity = 4;
   template <class Spec>
   using StartPolicy = grevir::arduino_esp32::TimerStartPolicy<Spec>;

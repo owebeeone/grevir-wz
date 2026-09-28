@@ -7,6 +7,7 @@
 #include <grevir/test/host_start_policy.hpp>
 #include <grevir/test/interrupt_controller.hpp>
 #include <grevir/test/event_lock.hpp>
+#include <grevir/event/context_policy.hpp>
 
 namespace example {
 namespace irq = grevir::interrupt;
@@ -23,6 +24,8 @@ inline unsigned ticks = 0;
 
 struct Board {
   using EventLock = grevir::test::EventLock;
+  template <class Spec>
+  using MainLoopContext = grevir::event::UnrestrictedMainLoopContext<Spec>;
   inline static constexpr unsigned event_queue_capacity = 4;
   template <class Spec>
   using StartPolicy = grevir::test::HostStartPolicy<Spec>;

@@ -78,8 +78,11 @@ flag. The hardware entry also uses this queue. A `Stream` record carries no
 payload; a device needing bytes or frames retains them in its owned buffer.
 Choose either this route or the default `Elide` route for each event.
 
-The board supplies `event_queue_capacity` and an `EventLock` with task and ISR
-guards that serialize producers with the loop consumer. On a single-core target
+The board supplies `event_queue_capacity`, an `EventLock` with task and ISR
+guards, and a `MainLoopContext<Application>` policy. The generated plan includes
+both the lock and context policy identities. Mock and AVR boards explicitly use
+`UnrestrictedMainLoopContext<Application>`; the ESP32 board binds a task owner.
+On a single-core target
 the guards may use the same interrupt-state operation; on ESP32 they enter one
 cross-core spinlock through the appropriate FreeRTOS context API. An accepted
 event stays queued until
@@ -92,6 +95,8 @@ loop code may call `event::post<Application, Event>()`, and an ISR may call
 `event::post_from_isr<Application, Event>()`; each returns `queued`,
 `coalesced`, `full`, or `not_ready`. The queue is prepared during application
 startup before interrupt sources are enabled and stopped if startup fails.
+Preparing an already active or currently dispatching queue fails without
+changing its owner or records; startup reports `event_context_failed`.
 Capacity is the number of records the board selects, not a preallocated maximum;
 this queue permits selections from 1 through 2048. The selected value is
 checked at compile time before it is converted to an index or plan field.
@@ -139,6 +144,9 @@ The ESP32 example binds `MainLoop` to the Arduino task running `setup()` and
 additional task and does not sleep or notify the loop task. Software-only event
 catalogues are also pending; the current handler probe treats each visible
 catalogue handler as a hardware interrupt demand.
+The ESP32 example's `delivered_callbacks` value counts handler invocations,
+not every hardware period: Elide may coalesce firings and a full queue may
+drop one.
 
 The board inventory declares legal configurations, physical sources,
 selectors, entry and acknowledgement policies. It also declares reservations

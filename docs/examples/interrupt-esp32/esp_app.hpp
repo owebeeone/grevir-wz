@@ -4,6 +4,6 @@
 #if !defined(GREVIR_TEST_NO_HANDLER)
 template <>
 inline void grevir::on_event<esp_app::PeriodElapsed>() noexcept {
-  ++esp_app::ticks;
+  ++esp_app::delivered_callbacks;
 }
 #endif
