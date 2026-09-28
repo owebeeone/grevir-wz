@@ -168,9 +168,10 @@ reasoning, or host compilation as a substitute for target evidence.
 A facility used only to compute a build-time plan must still be declared by
 headers available to the target compiler when that compiler parses the source.
 Keep target-reachable compile-time algorithms within the selected toolchain's
-language and library surface. Where a library facility is absent, use a bounded
-equivalent or a tested compatibility implementation; keep its capacity derived
-from the model rather than an arbitrary magic limit.
+language and library surface. Where a library facility is absent, use a tested
+compatibility implementation that meets its advertised contract, or an explicitly
+bounded equivalent whose bound is enforced by its own interface and derived from
+the model rather than an arbitrary magic limit.
 
 Example: AVR PWM candidate generation used `std::vector` only during constant
 evaluation, but the selected AVR C++23 compiler has no libstdc++ `<vector>`.
@@ -182,6 +183,26 @@ Review check: compile a representative public target header and each selected
 feature with the named target compiler. Check its headers and required constant
 evaluation, then distinguish successful compilation from runtime and silicon
 validation.
+
+## 10. Do not let the first caller define a shared abstraction's horizon
+
+A shared name or interface admits uses beyond its first integration. Before
+promoting an implementation to that scope, establish the range it promises:
+input size, value range, execution context, target, concurrency, failure behavior
+and composition where relevant. A property of today's caller is not a limit on
+future callers. If an implementation is suitable only within a narrow envelope,
+keep it local or state and enforce that envelope at its interface; otherwise
+meet the shared contract. This is the horizon-blindness failure mode.
+
+Example: insertion sort was practical for a few compile-time PWM candidates,
+but placing it behind a generic `std::sort` fallback exposed later callers to
+quadratic work. The PWM candidate count did not constrain the generic sort API.
+
+Review check: identify every assumption that makes the implementation
+acceptable and where the interface guarantees it. Consider a plausible second
+caller with different scale, target or execution context. If that caller is
+permitted but breaks the assumption, narrow the interface or change the
+implementation.
 
 Related policies: [Cross-MCU](review-policies/CrossMcu.md),
 [AVR](review-policies/Avr.md), and [ESP32](review-policies/Esp32.md).
