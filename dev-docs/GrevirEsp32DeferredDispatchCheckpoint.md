@@ -1,6 +1,10 @@
 # Classic ESP32 deferred-dispatch checkpoint
 
-Status: implementation draft awaiting review. Scope is the classic ESP32 Dev
+Status: implemented and compile/link validated; review STOP at root
+`17f0f05f7e99bb831d5f052e85a9fbbcbfb2c70a`. Code Review 3 found an open
+P2 policy-serialization contract defect after the second remediation. State
+Review 3 and Surface Review 3 reported GO. Acceptance requires an operator
+decision under the review-loop two-remediation cap. Scope is the classic ESP32 Dev
 Module with Arduino-ESP32 3.3.11 and the existing Timer Group 0 / Timer 0
 interrupt example. Silicon validation remains deferred.
 
