@@ -163,5 +163,25 @@ Review check: report separately what each check establishes and what remains
 unverified. Do not use target compilation as a substitute for architectural
 reasoning, or host compilation as a substitute for target evidence.
 
+## 9. Do not confuse constant evaluation with target-library availability
+
+A facility used only to compute a build-time plan must still be declared by
+headers available to the target compiler when that compiler parses the source.
+Keep target-reachable compile-time algorithms within the selected toolchain's
+language and library surface. Where a library facility is absent, use a bounded
+equivalent or a tested compatibility implementation; keep its capacity derived
+from the model rather than an arbitrary magic limit.
+
+Example: AVR PWM candidate generation used `std::vector` only during constant
+evaluation, but the selected AVR C++23 compiler has no libstdc++ `<vector>`.
+Its fallback `array`, `tuple` and algorithm operations also need the specific
+constexpr behavior that candidate generation invokes. A host build cannot
+establish either property.
+
+Review check: compile a representative public target header and each selected
+feature with the named target compiler. Check its headers and required constant
+evaluation, then distinguish successful compilation from runtime and silicon
+validation.
+
 Related policies: [Cross-MCU](review-policies/CrossMcu.md),
 [AVR](review-policies/Avr.md), and [ESP32](review-policies/Esp32.md).
