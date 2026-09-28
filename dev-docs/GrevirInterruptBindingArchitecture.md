@@ -89,12 +89,15 @@ this API as settled.
 
 The firmware entry point uses the final runner, for example
 `grevir::Application<GrevirApplication>::start()`. Its `StartResult` contains
-two independent fields: a settled setup outcome (`success`, peripheral
-configuration failure, target registration failure, or cleanup failure with
-the originating failure retained) and a per-call disposition (`initiated`,
-`waited`, or `replayed`). A repeated call never replaces the setup outcome with
-a generic repeated-start error. The application chooses its failure policy;
-the runner never silently continues with an uninstalled requested interrupt.
+a setup outcome and a per-call disposition. A completed call reports `success`,
+peripheral configuration failure, target registration failure, or cleanup
+failure with the originating failure retained; its disposition is `initiated`,
+`waited`, or `replayed`. The ESP32 start policy instead reports `in_progress`
+as both outcome and disposition when another call is still running. That
+result is neither success nor a settled failure: the caller must retry later
+and must not start dependent work yet. A repeated call after completion replays
+the original setup outcome. The application chooses its failure policy; the runner never
+silently continues with an uninstalled requested interrupt.
 
 ## Event catalog, demand and allocation
 

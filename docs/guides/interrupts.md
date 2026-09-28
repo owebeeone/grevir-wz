@@ -175,6 +175,12 @@ canonical plan and generated binding files in a private stage, compiles the
 strict sketch, and publishes firmware with
 `grevir_irq_firmware_ready.json` only after linking succeeds.
 
+On ESP32, a concurrent or recursive `start()` call returns
+`SetupOutcome::in_progress` immediately. The caller must retry later; only
+`success` permits dependent work or event dispatch. Once startup settles,
+later calls replay the same success or failure. The ESP32 example retries from
+`loop()` while startup is in progress.
+
 For the Uno on the Raspberry Pi with Debian AVR GCC 14.2 and Arduino AVR
 1.8.8, ensure `arduino-cli` is on `PATH` (for a per-user install, run
 `export PATH="$HOME/.local/bin:$PATH"` first):
