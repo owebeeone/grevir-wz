@@ -45,6 +45,12 @@ sources passed the staged Uno and classic ESP32 Arduino compile/link builds;
 the existing remote Grevir checkout was not changed. A deliberately modified
 ESP32 board with its context alias removed failed in the target probe with
 `GREVIR_EVENT_CONTEXT_UNAVAILABLE`.
+The policy identity now length-prefixes its lock and context components. Two
+component pairs that previously collapsed to the same policy produced distinct
+generated plans and fingerprints, and compiling one generated binding against
+the other live policy failed with `GREVIR_IRQ_STALE_EVENT_CONTEXT_POLICY`.
+After that correction, the native suite again passed all 192 cases, the clean
+mock generator round trip passed, and both staged Pi Arduino builds passed.
 
 Target compilation proves toolchain integration but not cross-core timing or
 physical interrupt behavior. No claim is made for S2/S3 or other ESP32
