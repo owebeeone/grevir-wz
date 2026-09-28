@@ -1,6 +1,11 @@
 # Deferred context identity length contract
 
-Status: draft for review. This records the operator's decision after the
+Status: **accepted at root `a2e0badd2aa4e3d7592ee50d27fc6913602fe547`
+and Core `f389c902d9a73e9a0579dce0dc08e34cf5af2f7b` after
+[Code](GrevirDeferredContextIdentityLimit-ReviewCode.md),
+[State](GrevirDeferredContextIdentityLimit-ReviewState.md), and
+[Surface](GrevirDeferredContextIdentityLimit-ReviewSurface.md) reviews reported
+GO; this accepts the 255-byte identity contract only**. This records the operator's decision after the
 [ESP32 deferred-dispatch review stop](GrevirEsp32DeferredDispatchCheckpoint-ReviewOutcome.md).
 
 The generated interrupt probe encodes its deferred context policy identity as

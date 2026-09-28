@@ -1,6 +1,15 @@
 # Classic ESP32 deferred-dispatch checkpoint
 
-Status: follow-up revision awaiting review. The prior review STOP at root
+Status: **accepted for the documented classic ESP32 compile/link and deferred
+dispatch scope** at root `a2e0badd2aa4e3d7592ee50d27fc6913602fe547`,
+Core `f389c902d9a73e9a0579dce0dc08e34cf5af2f7b`, Arduino ESP32
+`6b5a1776d2c2eba1fa0e00729c5f9e3ac5a79e5f`, AVR
+`322e8b9fc520d7ba60b46104b14f86e2eaf79c9c`, and Test Support
+`b13fea29e82d813f2ae2f6719b0adb2fb6a8cb45` after the
+[identity-limit Code](GrevirDeferredContextIdentityLimit-ReviewCode.md),
+[State](GrevirDeferredContextIdentityLimit-ReviewState.md), and
+[Surface](GrevirDeferredContextIdentityLimit-ReviewSurface.md) reviews reported
+GO. The prior review STOP at root
 `17f0f05f7e99bb831d5f052e85a9fbbcbfb2c70a` found a policy-serialization
 contract defect. The operator chose the explicit 255-byte encoded-identity
 limit recorded in [the follow-up contract](GrevirDeferredContextIdentityLimit.md).
