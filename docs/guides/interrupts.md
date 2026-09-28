@@ -82,6 +82,8 @@ The board supplies `event_queue_capacity`, an `EventLock` with task and ISR
 guards, and a `MainLoopContext<Application>` policy. The generated plan includes
 both the lock and context policy identities. Mock and AVR boards explicitly use
 `UnrestrictedMainLoopContext<Application>`; the ESP32 board binds a task owner.
+The complete generated identity for these two policies must fit in 255 bytes;
+longer identities fail compilation with `GREVIR_EVENT_POLICY_ID_TOO_LONG`.
 On a single-core target
 the guards may use the same interrupt-state operation; on ESP32 they enter one
 cross-core spinlock through the appropriate FreeRTOS context API. An accepted

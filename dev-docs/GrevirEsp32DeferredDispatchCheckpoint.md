@@ -1,10 +1,10 @@
 # Classic ESP32 deferred-dispatch checkpoint
 
-Status: implemented and compile/link validated; review STOP at root
-`17f0f05f7e99bb831d5f052e85a9fbbcbfb2c70a`. Code Review 3 found an open
-P2 policy-serialization contract defect after the second remediation. State
-Review 3 and Surface Review 3 reported GO. Acceptance requires an operator
-decision under the review-loop two-remediation cap. Scope is the classic ESP32 Dev
+Status: follow-up revision awaiting review. The prior review STOP at root
+`17f0f05f7e99bb831d5f052e85a9fbbcbfb2c70a` found a policy-serialization
+contract defect. The operator chose the explicit 255-byte encoded-identity
+limit recorded in [the follow-up contract](GrevirDeferredContextIdentityLimit.md).
+Scope is the classic ESP32 Dev
 Module with Arduino-ESP32 3.3.11 and the existing Timer Group 0 / Timer 0
 interrupt example. Silicon validation remains deferred.
 
@@ -55,6 +55,13 @@ generated plans and fingerprints, and compiling one generated binding against
 the other live policy failed with `GREVIR_IRQ_STALE_EVENT_CONTEXT_POLICY`.
 After that correction, the native suite again passed all 192 cases, the clean
 mock generator round trip passed, and both staged Pi Arduino builds passed.
+The follow-up revision passed a 255-byte mock probe/generation/strict link and
+dispatch; 256- and 257-byte identities were rejected by the named C++ diagnostic
+on Apple Clang and MSVC. The collision pair still generated distinct plans,
+and compiling the first binding against the second policy failed the stale
+check. Native CTest passed 192/192; staged Uno and classic ESP32 Arduino
+compile/link passed on Raspberry Pi. The unrelated root archive
+`grevir-source-docs.aiar.sh.txt` was left untouched at the operator's request.
 
 Target compilation proves toolchain integration but not cross-core timing or
 physical interrupt behavior. No claim is made for S2/S3 or other ESP32
